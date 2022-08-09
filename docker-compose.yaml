@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  arweave_processor:
+    build:
+      context: jobs/arweave_processor
+      dockerfile: local.dockerfile
+      
+  near_processor:
+    build:
+      context: jobs/near_processor
+      dockerfile: local.dockerfile
