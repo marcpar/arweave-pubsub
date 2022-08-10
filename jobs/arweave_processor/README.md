@@ -5,7 +5,9 @@ Service responsible for uploading media to the permaweb.
 ## Environment Configuration
 | Key | Description |
 | :-- | :---------- |
-| `QUEUE_URL` | url of the queue to listen for messages |
+| `AZURE_ACCOUNT_NAME` | azure account name |
+| `AZURE_ACCOUNT_KEY` | azure secret key |
+| `TOPIC` | name of the topic |
 | `WALLET_JSON` | wallet to use, jwk in json string |
 | `MIN_CONFIRMATIONS` | default number of confirmations before considering the arweave transaction to be successful |
 | `DEFAULT_CALLBACK_URL` | default callback url that will receive the emitted events |

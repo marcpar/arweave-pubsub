@@ -16,9 +16,12 @@
     "dev": "ts-node --esm src/index.ts",
     "dev:watch": "nodemon -w src/**/* -e ts,js,json --exec 'yarn run dev'",
     "build": "yarn clean && tsc",
-    "clean": "rm -rf ./dist"
+    "clean": "rm -rf ./dist",
+    "dispatch:storage-queue": "ts-node --esm src/bin/storage_queue_dispatch.ts"
   },
   "dependencies": {
-    "arweave": "^1.11.4"
+    "@azure/storage-queue": "^12.10.0",
+    "arweave": "^1.11.4",
+    "dotenv": "^16.0.1"
   }
 }
