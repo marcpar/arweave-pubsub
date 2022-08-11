@@ -4,7 +4,8 @@ interface Queue {
 
 interface Job {
     payload: Payload
-    complete: () => Promise<void>
+    complete: () => Promise<void>,
+    updateState: (state: State) => Promise<void>,
 }
 
 type Payload = {
@@ -13,6 +14,11 @@ type Payload = {
     Metadata?: object;
     MinConfirmations?: number,
     CallbackURL?: string,
+    State?: State
+}
+
+type State = {
+    TxID?: string,
 }
 
 export {

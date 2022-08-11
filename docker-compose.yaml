@@ -5,8 +5,15 @@ services:
     build:
       context: jobs/arweave_processor
       dockerfile: local.dockerfile
+    entrypoint: yarn
+    command: run dev
+    working_dir: /home/app
+    volumes:
+      - ./jobs/arweave_processor:/home/app
+
+    
       
-  near_processor:
-    build:
-      context: jobs/near_processor
-      dockerfile: local.dockerfile
+  #near_processor:
+  #  build:
+  #    context: jobs/near_processor
+  #    dockerfile: local.dockerfile

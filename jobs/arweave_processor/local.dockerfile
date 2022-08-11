@@ -1,1 +1,1 @@
-FROM scratch
+FROM node:16.6

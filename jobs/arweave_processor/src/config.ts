@@ -8,9 +8,9 @@ type Config = {
     Topic: string,
     Wallet: JWKInterface,
     MinimumConfirmations: number,
-    DefaultCallbackURL: string
+    DefaultCallbackURL: string,
+    MaxJobs: number,
 }
-
 
 let config: Config;
 env.config();
@@ -21,8 +21,9 @@ function LoadConfig() {
         AzureAccountKey: process.env.AZURE_ACCOUNT_KEY as string,
         Topic: process.env.TOPIC as string,
         Wallet: JSON.parse(process.env.WALLET_JSON as string) as JWKInterface,
-        MinimumConfirmations: process.env.MIN_CONFIRMATIONS ? parseInt(process.env.MIN_CONFIRMATIONS) : 20,
-        DefaultCallbackURL: process.env.DEFAULT_CALLBACK_URL as string
+        MinimumConfirmations: process.env.MIN_CONFIRMATIONS ? parseInt(process.env.MIN_CONFIRMATIONS) : 15,
+        DefaultCallbackURL: process.env.DEFAULT_CALLBACK_URL as string,
+        MaxJobs: process.env.MAX_JOBS ? parseInt(process.env.MAX_JOBS as string) : 0
     }
 }
 
