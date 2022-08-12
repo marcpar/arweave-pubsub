@@ -6,13 +6,11 @@ services:
       context: jobs/arweave_processor
       dockerfile: local.dockerfile
     entrypoint: yarn
-    command: run dev
+    command: dev:watch
     working_dir: /home/app
     volumes:
       - ./jobs/arweave_processor:/home/app
 
-    
-      
   #near_processor:
   #  build:
   #    context: jobs/near_processor

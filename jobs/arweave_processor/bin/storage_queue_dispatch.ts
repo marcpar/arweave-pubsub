@@ -1,4 +1,4 @@
-import { GetConfig, LoadConfig } from "../config.js";
+import { GetConfig, LoadConfig } from "../src/config.js";
 import {
     QueueServiceClient,
     StorageSharedKeyCredential
@@ -6,6 +6,7 @@ import {
 import {
     randomUUID
 } from 'crypto';
+import { Logger } from "../src/lib/logger.js";
 
 
 LoadConfig();
@@ -23,6 +24,6 @@ let config = GetConfig();
         {"JobId": randomUUID(),"MediaURL":mediaURL,"Metadata":{"AthleteId":"106181","FirstName":"Artjoms","LastName":"Gajevskis","Country":"LAT","Status":"","StartNumber":"5","Position":3,"TotalTime":"00:28:32","Timings":[{"Key":"Swim","Value":"00:04:58"},{"Key":"T1","Value":"00:01:00"},{"Key":"Bike","Value":"00:14:29"},{"Key":"T2","Value":"00:00:29"},{"Key":"Run","Value":"00:07:36"}]}}
     ));
     
-    console.log(response.messageId);
+    Logger().info(response.messageId);
 })();
 

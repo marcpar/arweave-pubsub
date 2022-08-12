@@ -1,6 +1,7 @@
 import Arweave from "arweave";
 import { JWKInterface } from "arweave/node/lib/wallet.js";
 import { fileTypeFromBuffer } from "file-type";
+import { Logger } from "../lib/logger.js";
 import { Sleep } from "../lib/util.js";
 
 let _minConfirmations: number;
@@ -21,7 +22,7 @@ function SetArweaveWallet(wallet: JWKInterface) {
     _wallet = wallet;
 }
 
-async function UploadMediaToPermaweb(media: Buffer, jobID?: string): Promise<string> {
+async function UploadMediaToPermaweb(media: Buffer, jobID: string): Promise<string> {
 
     let tx = await _client.createTransaction({
         data: media
@@ -40,12 +41,13 @@ async function UploadMediaToPermaweb(media: Buffer, jobID?: string): Promise<str
     let uploader = await _client.transactions.getUploader(tx);
     while (!uploader.isComplete) {
         await uploader.uploadChunk();
+        Logger().debug(`Job: ${jobID}, Status; uploading ${uploader.pctComplete}%`)
     }
 
     return tx.id;
 }
 
-async function ConfirmUpload(txID: string, minConfirmations?: number) {
+async function ConfirmUpload(txID: string, minConfirmations?: number): Promise<number> {
     if (minConfirmations === undefined || minConfirmations === null) {
         minConfirmations = _minConfirmations;
     }
@@ -60,15 +62,15 @@ async function ConfirmUpload(txID: string, minConfirmations?: number) {
         if (status.confirmed) {
             if (currentConfirmations !== status.confirmed.number_of_confirmations) {
                 currentConfirmations = status.confirmed.number_of_confirmations;
-                console.log(`tx ${txID}: confirmed ${currentConfirmations} out of ${minConfirmations} confirmations`);
+                Logger().info(`tx ${txID}: confirmed ${currentConfirmations} out of ${minConfirmations} confirmations`);
             }
 
             if (currentConfirmations >= minConfirmations) {
-                console.log(`tx ${txID} has been confirmed with ${status.confirmed.number_of_confirmations} confirmations`);
-                break;
+                Logger().info(`tx ${txID} has been confirmed with ${status.confirmed.number_of_confirmations} confirmations`);
+                return currentConfirmations;
             }
         } else {
-            console.log(`TX: ${txID}, Status: ${status.status}`);
+            Logger().debug(`TX: ${txID}, Status: ${status.status}`);
         }
 
         await Sleep(5000);

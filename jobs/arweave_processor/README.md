@@ -12,6 +12,7 @@ Service responsible for uploading media to the permaweb.
 | `MIN_CONFIRMATIONS` | default number of confirmations before considering the arweave transaction to be successful |
 | `DEFAULT_CALLBACK_URL` | default callback url that will receive the emitted events |
 | `MAX_JOBS` | maximum number of jobs to be processed at the same time, setting to 0 will have no limit |
+| `LOG_LEVEL` | [winston log level](https://www.npmjs.com/package/winston#logging-levels)|
 
 ## Job Spec
 

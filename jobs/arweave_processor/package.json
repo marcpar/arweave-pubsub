@@ -14,18 +14,19 @@
   },
   "scripts": {
     "dev": "ts-node --esm src/index.ts",
-    "dev:watch": "nodemon -w src/**/* -e ts,js,json --exec 'yarn run dev'",
-    "build": "yarn clean && tsc",
+    "dev:watch": "nodemon -w src -e ts,js,json --exec 'yarn run dev'",
+    "build": "yarn clean && tsc -p src",
     "clean": "rm -rf ./dist",
-    "dispatch:storage-queue": "ts-node --esm src/bin/storage_queue_dispatch.ts",
-    "peek:storage-queue": "ts-node --esm src/bin/storage_queue_peek.ts",
-    "clear:storage-queue": "ts-node --esm src/bin/storage_queue_clear.ts"
+    "dispatch:storage-queue": "ts-node --esm bin/storage_queue_dispatch.ts",
+    "peek:storage-queue": "ts-node --esm bin/storage_queue_peek.ts",
+    "clear:storage-queue": "ts-node --esm bin/storage_queue_clear.ts"
   },
   "dependencies": {
     "@azure/storage-queue": "^12.10.0",
     "arweave": "^1.11.4",
     "axios": "^0.27.2",
     "dotenv": "^16.0.1",
-    "file-type": "^17.1.6"
+    "file-type": "^17.1.6",
+    "winston": "^3.8.1"
   }
 }

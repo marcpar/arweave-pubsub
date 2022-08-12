@@ -1,11 +1,9 @@
-import { GetConfig, LoadConfig } from "../config.js";
+import { GetConfig, LoadConfig } from "../src/config.js";
 import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
-import {
-    randomUUID
-} from 'crypto';
+import { Logger } from "../src/lib/logger.js";
 
 
 LoadConfig();
@@ -22,7 +20,7 @@ let config = GetConfig();
     });
     
     for (const item of response.peekedMessageItems) {
-        console.log(JSON.stringify(item));
+        Logger().info(JSON.stringify(item));
     }
 })();
 

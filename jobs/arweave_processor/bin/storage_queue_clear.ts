@@ -1,8 +1,9 @@
-import { GetConfig, LoadConfig } from "../config.js";
+import { GetConfig, LoadConfig } from "../src/config.js";
 import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
+import { Logger } from "../src/lib/logger.js";
 
 LoadConfig();
 
@@ -14,7 +15,7 @@ let config = GetConfig();
 
     await qClient.createIfNotExists();
     let response = await qClient.clearMessages();
-    console.log(response);
+    Logger().info(response);
     
     
 })();

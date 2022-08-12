@@ -1,4 +1,5 @@
 import { DequeuedMessageItem, QueueServiceClient, StorageSharedKeyCredential } from "@azure/storage-queue";
+import { Logger } from "../lib/logger.js";
 import { Sleep } from "../lib/util.js";
 import { Job, Payload, Queue } from "./common.js";
 
@@ -21,15 +22,15 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                 await qClient.createIfNotExists();
                 let currentMessage: DequeuedMessageItem;
                 do {
-                    console.log(`fetching message`);
+                    Logger().debug('fetching messages from storage queue');
                     let msgResponse = await qClient.receiveMessages({});
 
                     currentMessage = msgResponse.receivedMessageItems.pop() as DequeuedMessageItem;
                     if (currentMessage) {
-                        console.log(`message received: ${currentMessage.messageId} : ${currentMessage.popReceipt}`)
+                        Logger().info(`message received: ${currentMessage.messageId} : ${currentMessage.popReceipt}`)
 
                         let renewLockInterval = setInterval(async () => {
-                            console.log(`renewing lock for message: ${currentMessage.messageId}`)
+                            Logger().debug(`renewing lock for message: ${currentMessage.messageId}`)
                             let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, undefined, 30);
                             currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
                         }, STORAGE_QUEUE_RENEW_LOCK_INTERVAL);
@@ -42,7 +43,7 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                                 clearInterval(renewLockInterval);
                                 await qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
                             },
-                            async updateState(newState) {
+                            async setState(newState) {
                                 payload.State = newState;
                                 let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, JSON.stringify(payload), 30);
                                 currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
@@ -51,7 +52,7 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
 
                         break;
                     }
-                    console.log(`none received, sleeping for ${STORAGE_QUEUE_POLL_INTERVAL}ms`);
+                    Logger().debug(`none received, sleeping for ${STORAGE_QUEUE_POLL_INTERVAL}ms`);
                     await Sleep(STORAGE_QUEUE_POLL_INTERVAL);
                 } while (currentMessage === undefined);
             });

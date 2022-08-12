@@ -5,7 +5,7 @@ interface Queue {
 interface Job {
     payload: Payload
     complete: () => Promise<void>,
-    updateState: (state: State) => Promise<void>,
+    setState: (state: State) => Promise<void>,
 }
 
 type Payload = {

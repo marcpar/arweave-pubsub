@@ -2,7 +2,8 @@ import { Job, Payload, Queue } from '../queue/common.js';
 import axios from 'axios';
 import { Sleep } from '../lib/util.js';
 import { ConfirmUpload, UploadMediaToPermaweb } from './arweave.js';
-
+import { Logger } from '../lib/logger.js';
+import { Emit } from './event.js';
 
 let _queue: Queue;
 
@@ -33,7 +34,7 @@ async function Start() {
 
 async function loop() {
     if (_maxProcessingJobs > 0 && _processing >= _maxProcessingJobs) {
-        console.log(`throttling processing ${_processing} jobs`);
+        Logger().debug(`throttling processing ${_processing} jobs`);
         await Sleep(5000);
         return;
     }
@@ -45,8 +46,16 @@ async function loop() {
         try {
             await processJob(job);
         } catch (e) {
-            // @TODO notify failure
-            console.error(e);
+            let err = e as Error;
+            Emit({
+                JobId: job.payload.JobId,
+                Event: "failure",
+                Message: `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`,
+                Details: {
+                    Error: e,
+                }
+            }, job.payload.CallbackURL)
+            Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`);
         }
 
         await job.complete();
@@ -64,25 +73,41 @@ async function processJob(job: Job) {
     }
 
     if (!txID) {
-        let response = await axios.default.get<Buffer>(payload.MediaURL,  {
+
+        Emit({
+            JobId: job.payload.JobId,
+            Event: "started",
+            Message: `Job ${job.payload.JobId} has been started`
+        }, job.payload.CallbackURL);
+
+        let response = await axios.default.get<Buffer>(payload.MediaURL, {
             responseType: "arraybuffer"
         });
-    
+
         if (response.status !== 200) {
             throw new Error(`Failure while trying to download media returned status: ${response.status}\n${response.data}`)
         }
 
         txID = await UploadMediaToPermaweb(response.data, payload.JobId);
 
-        await job.updateState({
+        await job.setState({
             TxID: txID
         });
     }
-    
-    await ConfirmUpload(txID, payload.MinConfirmations);
 
-    // @TODO notify on success
-    console.log(`job ${payload.JobId} successfully processed: ${txID}`);
+    let confirmations = await ConfirmUpload(txID, payload.MinConfirmations);
+
+    Logger().info(`Job ${payload.JobId} has been successfully processed: ${txID}`);
+    Emit({
+        JobId: payload.JobId,
+        Event: "success",
+        Message: `Job ${payload.JobId} has been successfully processed: ${txID}`,
+        Details: {
+            TransactionID: txID,
+            Confirmations: confirmations
+        
+        }
+    })
 }
 
 export {
