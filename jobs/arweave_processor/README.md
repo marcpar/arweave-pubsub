@@ -32,8 +32,7 @@ d-b13b8b1de043.png",
         "Country": "LAT",
         ... REDACTED
     },
-    "MinConfirmations": 15,
-    "CallbackURL": "https://nftdw.com/arweave/callback"
+    "MinConfirmations": 15
 }
 ```
 
@@ -43,7 +42,6 @@ d-b13b8b1de043.png",
 | `MediaURL` | `string` | **Required**. Url of the media to be uploaded to the permaweb |
 | `Metadata` | `object` | **Optional**. nft metadata, should be deserialiazable into a json string |
 | `MinConfirmations` | `number` | **Optional**. the number of confirmations from the network to consider the transaction as successful, defaults to **15** |
-| `CallbackURL` | `string` | **Optional**. endpoint that will receive the events emitted by the processor, defaults to a given configuration |
 
 ## Events
 

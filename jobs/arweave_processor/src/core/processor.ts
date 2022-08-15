@@ -38,30 +38,29 @@ async function loop() {
         await Sleep(5000);
         return;
     }
-
     let job = await _queue.getNextJob();
-
     _processing++;
     (async () => {
-        try {
-            await processJob(job);
-        } catch (e) {
-            let err = e as Error;
-            Emit({
-                JobId: job.payload.JobId,
-                Event: "failure",
-                Message: `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`,
-                Details: {
-                    Error: e,
-                }
-            }, job.payload.CallbackURL)
-            Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`);
-        }
-
+        await processJob(job);
+    })().then(async () => {
         await job.complete();
+    }).catch(async (e) => {
+        await job.requeue();
+        let err = e as Error;
+        Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`);
+        Emit({
+            JobId: job.payload.JobId,
+            Event: "failure",
+            Message: `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`,
+            Details: {
+                Error: err,
+            }
+        }).catch(e => {
+            Logger().error(`Failed to send failure message to callback: ${e}`);
+        });
+    }).finally(() => {
         _processing--;
-    })();
-
+    });
 }
 
 async function processJob(job: Job) {
@@ -74,11 +73,11 @@ async function processJob(job: Job) {
 
     if (!txID) {
 
-        Emit({
+        await Emit({
             JobId: job.payload.JobId,
             Event: "started",
             Message: `Job ${job.payload.JobId} has been started`
-        }, job.payload.CallbackURL);
+        });
 
         let response = await axios.default.get<Buffer>(payload.MediaURL, {
             responseType: "arraybuffer"
@@ -98,14 +97,13 @@ async function processJob(job: Job) {
     let confirmations = await ConfirmUpload(txID, payload.MinConfirmations);
 
     Logger().info(`Job ${payload.JobId} has been successfully processed: ${txID}`);
-    Emit({
+    await Emit({
         JobId: payload.JobId,
         Event: "success",
         Message: `Job ${payload.JobId} has been successfully processed: ${txID}`,
         Details: {
             TransactionID: txID,
             Confirmations: confirmations
-        
         }
     })
 }

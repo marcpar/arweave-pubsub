@@ -47,6 +47,9 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                                 payload.State = newState;
                                 let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, JSON.stringify(payload), 30);
                                 currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
+                            },
+                            async requeue() {
+                                clearInterval(renewLockInterval);
                             }
                         });
 

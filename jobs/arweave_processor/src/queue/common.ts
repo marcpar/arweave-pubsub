@@ -6,14 +6,13 @@ interface Job {
     payload: Payload
     complete: () => Promise<void>,
     setState: (state: State) => Promise<void>,
+    requeue: () => Promise<void>
 }
 
 type Payload = {
     JobId: string,
     MediaURL: string,
-    Metadata?: object;
     MinConfirmations?: number,
-    CallbackURL?: string,
     State?: State
 }
 
