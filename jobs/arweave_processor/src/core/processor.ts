@@ -65,10 +65,12 @@ async function loop() {
 
 async function processJob(job: Job) {
     let txID: string | undefined = undefined;
+    let manifestTxID: string | undefined = undefined;
     let payload = job.payload;
 
-    if (payload.State && payload.State.TxID) {
+    if (payload.State && payload.State.TxID && payload.State.PathManifestTxID) {
         txID = payload.State.TxID;
+        manifestTxID = payload.State.PathManifestTxID;
     }
 
     if (!txID) {
@@ -87,10 +89,13 @@ async function processJob(job: Job) {
             throw new Error(`Failure while trying to download media returned status: ${response.status}\n${response.data}`)
         }
 
-        txID = await UploadMediaToPermaweb(response.data, payload.JobId);
+        let result = await UploadMediaToPermaweb(response.data, payload.Metadata,payload.JobId);
+        txID = result.BundleTxID;
+        manifestTxID = result.PathManifestTxID;
 
         await job.setState({
-            TxID: txID
+            TxID: txID,
+            PathManifestTxID: manifestTxID
         });
     }
 
@@ -102,7 +107,7 @@ async function processJob(job: Job) {
         Event: "success",
         Message: `Job ${payload.JobId} has been successfully processed: ${txID}`,
         Details: {
-            TransactionID: txID,
+            TransactionID: manifestTxID,
             Confirmations: confirmations
         }
     })

@@ -12,12 +12,14 @@ interface Job {
 type Payload = {
     JobId: string,
     MediaURL: string,
+    Metadata: any,
     MinConfirmations?: number,
     State?: State
 }
 
 type State = {
     TxID?: string,
+    PathManifestTxID?: string,
 }
 
 export {

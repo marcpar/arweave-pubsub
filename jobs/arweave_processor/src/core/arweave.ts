@@ -3,6 +3,33 @@ import { JWKInterface } from "arweave/node/lib/wallet.js";
 import { fileTypeFromBuffer } from "file-type";
 import { Logger } from "../lib/logger.js";
 import { Sleep } from "../lib/util.js";
+import arbundles, {
+    createData,
+    bundleAndSignData,
+} from "arbundles";
+import { ArweaveSigner } from "arbundles/src/signing/index.js";
+import { logger } from "@azure/storage-queue";
+
+
+type PathManifest = {
+    manifest: 'arweave/paths',
+    version: '0.1.0',
+    index: {
+        path: string
+    },
+    paths: Paths
+}
+
+type Paths = {
+    [path: string]: {
+        id: string
+    }
+}
+
+type UploadResult = {
+    BundleTxID: string,
+    PathManifestTxID: string,
+}
 
 let _minConfirmations: number;
 
@@ -22,17 +49,64 @@ function SetArweaveWallet(wallet: JWKInterface) {
     _wallet = wallet;
 }
 
-async function UploadMediaToPermaweb(media: Buffer, jobID: string): Promise<string> {
+async function UploadMediaToPermaweb(media: Buffer, metadata: any, jobID: string): Promise<UploadResult> {
+    let signer = new ArweaveSigner(_wallet);
 
-    let tx = await _client.createTransaction({
-        data: media
-    }, _wallet);
-
-    let filetype = await fileTypeFromBuffer(media);
-    if (filetype) {
-        tx.addTag("Content-Type", filetype.mime);
+    let mediaFileType = await fileTypeFromBuffer(media);
+    if (!mediaFileType) {
+        throw new Error(`Job ${jobID}, failed to get mime of media`);
     }
+
+    let mediaData = createData(media, signer, {
+        tags: [{
+            name: 'Content-Type',
+            value: mediaFileType.mime
+        }]
+    });
+    await mediaData.sign(signer);
+
+    let metadataData = createData(JSON.stringify(metadata), signer, {
+        tags: [{
+            name: 'Content-Type',
+            value: 'application/json'
+        }]
+    });
     
+    await metadataData.sign(signer);
+    
+    let mediaPath = `nft.${mediaFileType.ext}`
+
+    let paths = {} as Paths;
+    paths[mediaPath] = {
+        id: mediaData.id
+    };
+    paths['metadata.json'] = {
+        id: metadataData.id
+    }
+    let pathManifest = JSON.stringify({
+        manifest: 'arweave/paths',
+        version: '0.1.0',
+        index: {
+            path: mediaPath
+        },
+        paths: paths
+    } as PathManifest);
+
+    
+    let pathManifestData = createData(pathManifest, signer, {
+        tags: [{
+            name: 'Content-Type',
+            value: 'application/x.arweave-manifest+json'
+        }]
+    });
+    await pathManifestData.sign(signer);
+
+    Logger().debug(`path manifest ${pathManifestData.id}:\n${pathManifest}`)
+
+    let bundle = await bundleAndSignData([mediaData, metadataData, pathManifestData], signer);
+
+    let tx = await bundle.toTransaction({}, _client, _wallet);
+
     tx.addTag("App-Name", "NFTDesignWorks");
     if (jobID) tx.addTag("JobID", jobID);
 
@@ -43,8 +117,11 @@ async function UploadMediaToPermaweb(media: Buffer, jobID: string): Promise<stri
         await uploader.uploadChunk();
         Logger().debug(`Job: ${jobID}, Status; uploading ${uploader.pctComplete}%`)
     }
-
-    return tx.id;
+    
+    return {
+        BundleTxID: tx.id,
+        PathManifestTxID: pathManifestData.id
+    };
 }
 
 async function ConfirmUpload(txID: string, minConfirmations?: number): Promise<number> {

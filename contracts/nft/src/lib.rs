@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use near_contract_standards::{
     impl_non_fungible_token_approval, impl_non_fungible_token_core,
     impl_non_fungible_token_enumeration,
@@ -54,6 +56,29 @@ impl Contract {
             ),
             metadata: LazyOption::new(StorageKey::ContractMetadata, Some(&metadata)),
         }
+    }
+
+    #[private]
+    #[payable]
+    pub fn mint(&mut self, id: String, media_id: String, metadata_id: String, owner_id: String, title: String, metadata: Option<String>) {
+        self.nft.internal_mint(
+            TokenId::from_str(id.as_str()).unwrap(),
+            AccountId::from_str(owner_id.as_str()).unwrap(),
+            Some(TokenMetadata {
+                title: Some(title),
+                description: None,
+                media: Some(media_id),
+                media_hash: None,
+                copies: None,
+                issued_at: None,
+                expires_at: None,
+                starts_at: None,
+                updated_at: None,
+                extra: metadata,
+                reference: Some(metadata_id),
+                reference_hash: None,
+            }),
+        );
     }
 }
 
