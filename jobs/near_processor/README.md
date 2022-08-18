@@ -21,8 +21,8 @@ The service will listen for messages on a pubsub queue, the message should be a 
 ```json
 {
     "JobId": "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
-    "ArweaveTxID": "ZkUxju5Y5Goy-OXw2O-mj8T_T4JSUHb7sDUhUMLNlgg",
-    "TokenID": "<UNIQUE ID OF THE TOKEN>",
+    "ArweaveTxId": "ZkUxju5Y5Goy-OXw2O-mj8T_T4JSUHb7sDUhUMLNlgg",
+    "TokenId": "<UNIQUE ID OF THE TOKEN>",
     "Title": "Samuel Dickinson - 2022 World Triathlon Sprint & Relay Championships Montreal",
     "Description": "<TOKEN DESCRIPTION>",
     "Copies": 1,
