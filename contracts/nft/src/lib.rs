@@ -13,7 +13,9 @@ use near_contract_standards::{
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::LazyOption,
-    env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
+    env,
+    json_types::Base64VecU8,
+    near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
 };
 
 #[near_bindgen]
@@ -60,25 +62,40 @@ impl Contract {
 
     #[private]
     #[payable]
-    pub fn mint(&mut self, id: String, media_id: String, metadata_id: String, owner_id: String, title: String, metadata: Option<String>) {
+    pub fn mint(
+        &mut self,
+        token_id: String,
+        media_id: String,
+        metadata_id: String,
+        title: Option<String>,
+        description: Option<String>,
+        media_hash: Option<Base64VecU8>,
+        copies: Option<u64>,
+        issued_at: Option<String>,
+        expires_at: Option<String>,
+        starts_at: Option<String>,
+        updated_at: Option<String>,
+        extra: Option<String>,
+        reference_hash: Option<Base64VecU8>,
+    ) -> Token {
         self.nft.internal_mint(
-            TokenId::from_str(id.as_str()).unwrap(),
-            AccountId::from_str(owner_id.as_str()).unwrap(),
+            TokenId::from_str(token_id.as_str()).unwrap(),
+            env::signer_account_id(),
             Some(TokenMetadata {
-                title: Some(title),
-                description: None,
+                title,
+                description,
                 media: Some(media_id),
-                media_hash: None,
-                copies: None,
-                issued_at: None,
-                expires_at: None,
-                starts_at: None,
-                updated_at: None,
-                extra: metadata,
+                media_hash,
+                copies,
+                issued_at,
+                expires_at,
+                starts_at,
+                updated_at,
+                extra,
                 reference: Some(metadata_id),
-                reference_hash: None,
+                reference_hash,
             }),
-        );
+        )
     }
 }
 

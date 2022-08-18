@@ -1,1 +1,28 @@
-FROM scratch
+FROM node:16.6.2 as build
+
+WORKDIR /workdir
+COPY . /workdir
+
+RUN yarn install && yarn build
+
+FROM node:16.6.2-alpine3.14 as runtime
+
+WORKDIR /home/near-processor
+
+COPY --from=build /workdir/dist /home/near-processor/dist
+COPY --from=build /workdir/package.json /home/near-processor/package.json
+COPY --from=build /workdir/yarn.lock /home/near-processor/yarn.lock
+
+ENV NODE_ENV production
+
+RUN yarn install && \
+    chown -R node:node /home/near-processor && \
+    find /home/near-processor -type f -exec chmod 400 {} \; && \
+    find /home/near-processor -type d -exec chmod 500 {} \;
+
+LABEL Maintainer="Marc Par <marc.par10@gmail.com>"
+LABEL Repository="https://github.com/marcpar/near-nft-processor"
+USER node
+
+ENTRYPOINT ["sh", "-c"]
+CMD ["node dist/index.js"]

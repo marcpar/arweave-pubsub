@@ -14,7 +14,7 @@ contract-dev-deploy: build-contract
 	near dev-deploy
 
 test-mint:
-	near call $(accountID) mint '{"id": "1", "media_id": "XIi9Di1EdbFOiLobI-yVaLwWIUha8G66p38THJxPl6o", "metadata_id": "XIi9Di1EdbFOiLobI-yVaLwWIUha8G66p38THJxPl6o/metadata.json", "owner_id": "marcpar10.testnet", "title": "testmint", "metadata": "{}"}' --accountId $(accountID) --amount 0.007
+	near call $(accountID) mint '{"token_id": "3", "media_id": "XIi9Di1EdbFOiLobI-yVaLwWIUha8G66p38THJxPl6o", "metadata_id": "XIi9Di1EdbFOiLobI-yVaLwWIUha8G66p38THJxPl6o/metadata.json", "title": "Token", "metadata": "{}"}' --accountId $(accountID) --amount 1
 
 init:
 	near call $(accountID) default --accountId $(accountID)
