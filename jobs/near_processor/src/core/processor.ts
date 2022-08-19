@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Sleep } from '../lib/util.js';
 import { Logger } from '../lib/logger.js';
 import { Emit } from './event.js';
+import { Mint } from './near.js';
 
 let _queue: Queue;
 
@@ -46,7 +47,7 @@ async function loop() {
     }).catch(async (e) => {
         await job.requeue();
         let err = e as Error;
-        Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`);
+        Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}\n${JSON.stringify(err)}`);
         Emit({
             JobId: job.payload.JobId,
             Event: "failure",
@@ -63,15 +64,14 @@ async function loop() {
 }
 
 async function processJob(job: Job) {
-
     let payload = job.payload;
-
-
+    let result = await Mint(payload);
     Logger().info(`Job ${payload.JobId} has been successfully processed`);
     await Emit({
         JobId: payload.JobId,
         Event: "success",
-        Message: `Job ${payload.JobId} has been successfully processed`
+        Message: `Job ${payload.JobId} has been successfully processed`,
+        Details: result
     })
 }
 

@@ -79,6 +79,7 @@ impl Contract {
         reference_hash: Option<Base64VecU8>,
     ) -> Token {
         self.nft.internal_mint(
+            
             TokenId::from_str(token_id.as_str()).unwrap(),
             env::signer_account_id(),
             Some(TokenMetadata {

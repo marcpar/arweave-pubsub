@@ -13,8 +13,9 @@ type Config = {
     NearAccountPrivateKey: string,
     NearMinterContractName: string,
     NearEnv: "testnet" | "mainnet",
+    NearDeposit: string,
     DefaultCallbackURL: string,
-    MaxJobs: number,
+    MaxJobs: number
 }
 
 let config: Config;
@@ -50,6 +51,10 @@ function LoadConfig() {
         Logger().error("NEAR_ENV should be mainnet or testnet");
         process.exit(1);
     }
+    if (!process.env.NEAR_DEPOSIT) {
+        Logger().error("NEAR_DEPOSIT is a required environment variable");
+        process.exit(1);
+    }
     
     try {
         config = {
@@ -61,7 +66,8 @@ function LoadConfig() {
             NearMinterContractName: process.env.NEAR_ACCOUNT_CONTRACT_NAME ?? process.env.NEAR_ACCOUNT_NAME,
             NearEnv: process.env.NEAR_ENV,
             DefaultCallbackURL: process.env.DEFAULT_CALLBACK_URL,
-            MaxJobs: process.env.MAX_JOBS ? parseInt(process.env.MAX_JOBS) : 0
+            MaxJobs: process.env.MAX_JOBS ? parseInt(process.env.MAX_JOBS) : 0,
+            NearDeposit: process.env.NEAR_DEPOSIT
         }
     } catch (e) {
         let err = e as Error;

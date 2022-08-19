@@ -10,8 +10,7 @@ interface Job {
 
 type Payload = {
     JobId: string,
-    ArweaveTxId: string,
-    TokenId: string,
+    ArweaveTxnId: string,
     Title?: string,
     Description?: string,
     Copies?: number,
@@ -19,7 +18,6 @@ type Payload = {
     ExpiresAt?: string,
     StartsAt?: string,
     UpdatedAt?: string,
-    Metadata: string
 }
 
 export {

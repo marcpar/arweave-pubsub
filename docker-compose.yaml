@@ -11,7 +11,12 @@ services:
     volumes:
       - ./jobs/arweave_processor:/home/app
 
-  #near_processor:
-  #  build:
-  #    context: jobs/near_processor
-  #    dockerfile: local.dockerfile
+  near_processor:
+    build:
+      context: jobs/near_processor
+      dockerfile: local.dockerfile
+    entrypoint: yarn
+    command: dev:watch
+    working_dir: /home/app
+    volumes:
+      - ./jobs/near_processor:/home/app

@@ -17,6 +17,7 @@
     "clean": "rm -rf ./dist",
     "dispatch:storage-queue": "ts-node --esm bin/storage_queue_dispatch.ts",
     "peek:storage-queue": "ts-node --esm bin/storage_queue_peek.ts",
+    "list:storage-queue": "ts-node --esm bin/storage_queue_list.ts",
     "clear:storage-queue": "ts-node --esm bin/storage_queue_clear.ts"
   },
   "dependencies": {
