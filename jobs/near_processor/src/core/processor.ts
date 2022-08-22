@@ -65,6 +65,11 @@ async function loop() {
 
 async function processJob(job: Job) {
     let payload = job.payload;
+    await Emit({
+        JobId: payload.JobId,
+        Event: 'started',
+        Message: `Job ${payload.JobId} has been received and started`,
+    });
     let result = await Mint(payload);
     Logger().info(`Job ${payload.JobId} has been successfully processed`);
     await Emit({
@@ -72,7 +77,7 @@ async function processJob(job: Job) {
         Event: "success",
         Message: `Job ${payload.JobId} has been successfully processed`,
         Details: result
-    })
+    });
 }
 
 export {

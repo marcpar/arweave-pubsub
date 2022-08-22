@@ -12,7 +12,7 @@ import { Payload } from '../queue/common.js';
 import { FinalExecutionStatus } from 'near-api-js/lib/providers'
 import axios from 'axios';
 import { Logger } from '../lib/logger.js';
-import { writeFileSync } from 'fs';
+import isValidUTF8 from 'utf-8-validate';
 
 
 let _near: Near;
@@ -111,9 +111,14 @@ async function Mint(payload: Payload): Promise<MintResult> {
         responseType: 'arraybuffer',
     })).data;
 
+
     let media_hash = createHash('sha256').update(media).digest().toString('base64');
-    let ref_hash = createHash('sha256').update(metadata).digest().toString('base64');
-    
+    let ref_hash: string | undefined;
+    if (isValidUTF8(metadata)) {
+        ref_hash = createHash('sha256').update(metadata).digest().toString('base64');
+    }
+
+
     let result = await _account.functionCall({
         contractId: _contractID,
         args: {
@@ -122,7 +127,7 @@ async function Mint(payload: Payload): Promise<MintResult> {
             media_hash: media_hash,
             metadata_id: `${payload.ArweaveTxnId}/metadata.json`,
             reference_hash: ref_hash,
-            extra: Buffer.from(metadata).toString('utf-8'),
+            extra: ref_hash ? Buffer.from(metadata).toString('utf-8') : null,
             copies: payload.Copies,
             description: payload.Description,
             expires_at: payload.ExpiresAt,

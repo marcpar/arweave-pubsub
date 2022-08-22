@@ -22,8 +22,8 @@ interface _Event extends Event {
 async function Emit(event: Event): Promise<void> {
     let _event = event as _Event;
     _event.Time = new Date().getTime();
-    let response = await _client.post(_callbackURL, _event);
     Logger().debug(JSON.stringify(_event));
+    let response = await _client.post(_callbackURL, _event);
     Logger().debug(`callback response fror ${JSON.stringify(event)}: ${response.status}\n${JSON.stringify(response.data)}`);
     if (![true, "true", 200, "200"].includes(response.data)) {
         throw new Error(`Callback endpoint unexpected response ${response.data}, should be true or 200`);
