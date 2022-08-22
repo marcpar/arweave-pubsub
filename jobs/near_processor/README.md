@@ -75,8 +75,13 @@ Emmited to notify the callback url that the job has successfully finished.
 {
     "JobId": "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
     "Event": "success",
-    "Time": 1659965535,
-    "Message": "Successfully minted",
+    "Message": "Job ff975cbd-32f4-4f09-9b9a-01964dd6eb90 has been successfully processed",
+    "Details": {
+        "Token": <TOKEN_METADATA>,
+        "ExplorerURL": "https://explorer.testnet.near.org/transactions/E9237ZHVQ8ANEtRfzEAkuVkSjxyCZYc9cxeTCfsREoQ9",
+        "TransactionId": "E9237ZHVQ8ANEtRfzEAkuVkSjxyCZYc9cxeTCfsREoQ9"
+    },
+    "Time": 1661128110153
 }
 ```
 
