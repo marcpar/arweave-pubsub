@@ -65,6 +65,7 @@ async function loop() {
 
 async function processJob(job: Job) {
     let payload = job.payload;
+    Logger().info(`Job ${payload.JobId} received`);
     await Emit({
         JobId: payload.JobId,
         Event: 'started',

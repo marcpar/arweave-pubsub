@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  arweave_processor:
+    build:
+      context: jobs/arweave_processor
+      dockerfile: dockerfile
+    env_file:
+      - arweave_processor.env
+    restart: unless-stopped
+
+  near_processor:
+    build:
+      context: jobs/near_processor
+      dockerfile: dockerfile
+    env_file:
+      - near_processor.env
+    restart: unless-stopped
+  

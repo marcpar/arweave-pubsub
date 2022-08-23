@@ -12,3 +12,30 @@ Near NFT Minter using Arweave and Near Protocol
 
 ## Contracts
 - [NFT Contract](./contracts/nft/README.md)
+
+## Production
+### Requirements
+- [docker/docker-compose](https://docs.docker.com/get-docker/)
+
+### Build the images
+
+Build the production images with docker-compose
+```bash
+    docker-compose -f docker-compose-production.yaml build 
+```
+
+### Configuration
+Before running, a dotenv file is required to configure each service.
+Kindly check the documentation for available keys to configure.
+
+- [arweave_processor.env](./jobs/arweave_processor/README.md#environment-configuration)
+- [near_processor.env](./jobs/near_processor/README.md#environment-configuration)
+
+### Run
+Once arweave_processor.env and near_processor.env is configured on the working directory, run the service using docker-compose.
+```bash
+    docker-compose -f docker-compose-production.yaml up -d
+    # OR run each service with additional replica
+    docker-compose -f docker-compose-production.yaml up -d --scale arweave_processor=<REPLICA_COUNT> --scale near_processor=<REPLICA_COUNT>
+```
+ 
