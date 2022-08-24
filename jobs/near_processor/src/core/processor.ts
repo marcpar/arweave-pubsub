@@ -73,11 +73,13 @@ async function processJob(job: Job) {
     });
     let result = await Mint(payload);
     Logger().info(`Job ${payload.JobId} has been successfully processed`);
-    await Emit({
+    Emit({
         JobId: payload.JobId,
         Event: "success",
         Message: `Job ${payload.JobId} has been successfully processed`,
         Details: result
+    }).catch((e) => {
+        Logger().warn(`JobId: ${payload.JobId}: Failed to send callback: ${JSON.stringify(e)}`);
     });
 }
 
