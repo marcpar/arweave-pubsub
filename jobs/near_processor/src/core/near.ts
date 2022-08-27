@@ -71,7 +71,6 @@ type Token = {
 }
 
 type MintResult = {
-    Token: Token,
     ExplorerURL: string,
     TransactionId: string,
 }
@@ -150,7 +149,6 @@ async function Mint(payload: Payload): Promise<MintResult> {
     }
 
     return {
-        Token: token,
         ExplorerURL: `${_explorerBaseURL}/transactions/${result.transaction_outcome.id}`,
         TransactionId: result.transaction_outcome.id
     }
