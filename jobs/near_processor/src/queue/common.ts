@@ -11,6 +11,7 @@ interface Job {
 type Payload = {
     JobId: string,
     ArweaveTxnId: string,
+    OwnerAddress?: string,
     Title?: string,
     Description?: string,
     Copies?: number,

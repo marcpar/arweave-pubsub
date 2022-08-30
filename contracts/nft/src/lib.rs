@@ -65,6 +65,7 @@ impl Contract {
     pub fn mint(
         &mut self,
         token_id: String,
+        owner_address: Option<String>,
         media_id: String,
         metadata_id: String,
         title: Option<String>,
@@ -79,9 +80,11 @@ impl Contract {
         reference_hash: Option<Base64VecU8>,
     ) -> Token {
         self.nft.internal_mint(
-            
             TokenId::from_str(token_id.as_str()).unwrap(),
-            env::signer_account_id(),
+            match owner_address {
+                Some(address) => address.parse().unwrap(),
+                None => env::signer_account_id(),
+            },
             Some(TokenMetadata {
                 title,
                 description,

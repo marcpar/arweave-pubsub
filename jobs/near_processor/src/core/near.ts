@@ -122,6 +122,7 @@ async function Mint(payload: Payload): Promise<MintResult> {
         contractId: _contractID,
         args: {
             token_id: randomUUID(),
+            owner_address: payload.OwnerAddress,
             media_id: payload.ArweaveTxnId,
             media_hash: media_hash,
             metadata_id: `${payload.ArweaveTxnId}/metadata.json`,
