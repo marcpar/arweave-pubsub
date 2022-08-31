@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "/"
+		},
+		{
+			"path": "./contracts/nft",
+			"name": "contracts/nft"
+		},
+		{
+			"path": "./contracts/vault",
+			"name": "contracts/vault"
+		},
+		{
+			"path": "./jobs/arweave_processor",
+			"name": "jobs/arweave_processor"
+		},
+		{
+			"path": "./jobs/near_processor",
+			"name": "jobs/near_processor"
+		},
+		{
+			"path": "./frontend/vault",
+			"name": "frontend/vault"
+		}
+	],
+	"settings": {}
+}
