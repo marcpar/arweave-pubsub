@@ -13,6 +13,7 @@ import { FinalExecutionStatus } from 'near-api-js/lib/providers'
 import axios from 'axios';
 import { Logger } from '../lib/logger.js';
 import isValidUTF8 from 'utf-8-validate';
+import { fileTypeFromBuffer } from 'file-type';
 
 
 let _near: Near;
@@ -110,20 +111,19 @@ async function Mint(payload: Payload): Promise<MintResult> {
         responseType: 'arraybuffer',
     })).data;
 
-
     let media_hash = createHash('sha256').update(media).digest().toString('base64');
+    let media_ext = (await fileTypeFromBuffer(media))?.ext ?? "jpeg";
     let ref_hash: string | undefined;
     if (isValidUTF8(metadata)) {
         ref_hash = createHash('sha256').update(metadata).digest().toString('base64');
     }
-
 
     let result = await _account.functionCall({
         contractId: _contractID,
         args: {
             token_id: randomUUID(),
             owner_address: payload.OwnerAddress,
-            media_id: payload.ArweaveTxnId,
+            media_id: `${payload.ArweaveTxnId}/nft.${media_ext}`,
             media_hash: media_hash,
             metadata_id: `${payload.ArweaveTxnId}/metadata.json`,
             reference_hash: ref_hash,

@@ -23,7 +23,7 @@ let config = GetConfig();
     let job = {
         JobId: "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
         OwnerAddress: "asheltie.testnet",
-        ArweaveTxnId: "ZkUxju5Y5Goy-OXw2O-mj8T_T4JSUHb7sDUhUMLNlgg",
+        ArweaveTxnId: "Pz90XAFThnQfCXljXt2wEABwFV4wLDwoyDJbeUyogaU",
         Title: "Samuel Dickinson - 2022 World Triathlon Sprint & Relay Championships Montreal",
         Description: "<TOKEN DESCRIPTION>",
         Copies: 1,

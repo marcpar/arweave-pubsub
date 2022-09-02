@@ -18,7 +18,8 @@ let config = GetConfig();
     let qClient = qsClient.getQueueClient(config.Topic);
 
     //let mediaURL = 'https://assets.entrepreneur.com/content/3x2/2000/1647397792-nft-art2.jpg';
-    let mediaURL = 'https://nftdesignworks.blob.core.windows.net/mintedimages/4cd7f389-35ef-484f-a092-43a70b12206b.png';
+    //let mediaURL = 'https://nftdesignworks.blob.core.windows.net/mintedimages/4cd7f389-35ef-484f-a092-43a70b12206b.png';
+    let mediaURL = 'https://file-examples.com/storage/fe6a5406fa63112369b75a2/2017/04/file_example_MP4_480_1_5MG.mp4'
     await qClient.createIfNotExists();
     //let uuid = randomUUID();
     let uuid ='02bc722d-f790-4d1c-aab6-a3394921c638';
