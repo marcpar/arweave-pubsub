@@ -69,7 +69,8 @@ impl Contract {
                 &Claimable {
                     token_id: token.token_id,
                     nft_account_id: nft_account,
-                    public_key: PublicKey::from_str(&on_transfer_message.public_key.as_str()).unwrap(),
+                    public_key: PublicKey::from_str(&on_transfer_message.public_key.as_str())
+                        .unwrap(),
                 },
             );
         }
@@ -77,7 +78,8 @@ impl Contract {
     }
 
     pub fn get_claimable(&self, nft_account: String, token_id: String) -> Option<Claimable> {
-        self.claimables.get(&format!("{}:{}", nft_account.as_str(), token_id.as_str()))
+        self.claimables
+            .get(&format!("{}:{}", nft_account.as_str(), token_id.as_str()))
     }
 }
 
@@ -85,10 +87,11 @@ const WHITE_LISTED_NFT: [&'static str; 1] = ["nft.nftdw-001.testnet"];
 
 #[near_bindgen]
 impl NonFungibleTokenReceiver for Contract {
+    #[payable]
     fn nft_on_transfer(
         &mut self,
-        _sender_id: AccountId,
-        _previous_owner_id: AccountId,
+        sender_id: AccountId,
+        previous_owner_id: AccountId,
         token_id: TokenId,
         msg: String,
     ) -> PromiseOrValue<bool> {
@@ -110,7 +113,10 @@ impl NonFungibleTokenReceiver for Contract {
         PromiseOrValue::Promise(
             external_nft::ext(nft.clone())
                 .nft_token(token_id)
-                .then(Self::ext(env::current_account_id()).nft_token_callback(payload, nft)),
+                .then(
+                    Self::ext(env::current_account_id())
+                        .nft_token_callback(payload, nft),
+                ),
         )
     }
 }

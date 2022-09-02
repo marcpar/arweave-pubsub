@@ -6,15 +6,14 @@ import { Logger } from './lib/logger.js';
 import { SetDefaultCallBack } from './core/event.js';
 import {
     Init,
-    GetToken,
-    Mint,
-    GetNFTMeta
 } from './core/near.js';
 import { InMemoryKeyStore } from 'near-api-js/lib/key_stores/in_memory_key_store.js';
 import { exit } from 'process';
+import { KeyPairEd25519 } from 'near-api-js/lib/utils/index.js';
 
 LoadConfig();
 let config = GetConfig();
+
 (async () => {
     // ---- CONFIGURATION ---- //
     SetQueue(CreateAzureStorageQueue(config.AzureAccountName, config.AzureAccountKey, config.Topic));
