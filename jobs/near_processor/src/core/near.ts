@@ -78,14 +78,14 @@ class Minter extends Account {
         if (payload.OwnerAddress === undefined || payload.OwnerAddress === null) {
             let keypair = KeyPairEd25519.fromRandom();
             writeFileSync(`dist/keys/${token_id}.json`, JSON.stringify({
-                private_key: keypair.secretKey,
+                private_key: keypair.toString(),
                 public_key: keypair.publicKey.toString()
             }));
 
             claimDetails = {
                 NFTContract: this.accountId,
                 TokenId: token_id,
-                PublicKey: keypair.publicKey.toString(),
+                PrivateKey: keypair.toString(),
                 VaultContract: vault_address
             };
 
@@ -99,7 +99,7 @@ class Minter extends Account {
                         message: `lock nft ${this.accountId}:${token_id} on vault`
                     })
                 },
-                60000000000000,
+                40000000000000,
                 "1"
             ));
         }
@@ -155,7 +155,7 @@ type MintResult = {
 type ClaimDetails = {
     VaultContract: string,
     NFTContract: string,
-    PublicKey: string,
+    PrivateKey: string,
     TokenId: string,
 }
 
