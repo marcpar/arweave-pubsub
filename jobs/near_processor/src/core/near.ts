@@ -1,11 +1,8 @@
 import {
-    connect, ConnectConfig, Near, Contract, KeyPair, Account, DEFAULT_FUNCTION_CALL_GAS
+    connect, ConnectConfig, Near, KeyPair, Account, DEFAULT_FUNCTION_CALL_GAS
 } from 'near-api-js';
 import {
     parseNearAmount,
-    formatNearAmount,
-    NEAR_NOMINATION,
-
 } from 'near-api-js/lib/utils/format.js'
 import {
     randomUUID,
@@ -28,7 +25,8 @@ let _accountKey: string;
 let _contractID: string;
 let _explorerBaseURL: string;
 let _deposit: string;
-let _minter: Minter
+let _minter: Minter;
+let _vaultBaseUrl: String;
 
 class Minter extends Account {
 
@@ -119,10 +117,14 @@ class Minter extends Account {
             throw new Error(`Failed called to mint: ${status.Failure}`)
         }
 
+        let claimUrl = new URL(`${_vaultBaseUrl}/claim/${_contractID}/${token_id}`);
+
+        claimUrl.searchParams.append("token", Buffer.from(JSON.stringify(claimDetails), 'utf-8').toString('base64'));
+
         return {
             ExplorerURL: `${_explorerBaseURL}/transactions/${result.transaction_outcome.id}`,
             TransactionId: result.transaction_outcome.id,
-            ClaimDetails: claimDetails
+            ClaimUrl: claimUrl.toString()
         };
     }
 }
@@ -149,7 +151,7 @@ type Token = {
 type MintResult = {
     ExplorerURL: string,
     TransactionId: string,
-    ClaimDetails?: ClaimDetails
+    ClaimUrl?: string
 }
 
 type ClaimDetails = {
@@ -159,12 +161,13 @@ type ClaimDetails = {
     TokenId: string,
 }
 
-async function Init(config: ConnectConfig, deposit: string, accountID: string, accountKey: string, contractID: string = accountID) {
+async function Init(config: ConnectConfig, deposit: string, accountID: string, accountKey: string, contractID: string = accountID, vaultBaseURL: string) {
     _accountID = accountID;
     _accountKey = accountKey;
     _contractID = contractID;
     _explorerBaseURL = `https://explorer.${config.networkId}.near.org`;
     _deposit = deposit;
+    _vaultBaseUrl = vaultBaseURL;
 
     await config.keyStore?.setKey(config.networkId, accountID, KeyPair.fromString(accountKey))
 
@@ -175,60 +178,10 @@ async function Init(config: ConnectConfig, deposit: string, accountID: string, a
 
 async function Mint(payload: Payload): Promise<MintResult> {
     return await _minter.MintNFT(payload);
-    /*
-    let media = (await axios.default.get<Buffer>(`https://arweave.net/${payload.ArweaveTxnId}`, {
-        responseType: 'arraybuffer',
-    })).data;
-    let metadata = (await axios.default.get<Buffer>(`https://arweave.net/${payload.ArweaveTxnId}/metadata.json`, {
-        responseType: 'arraybuffer',
-    })).data;
-
-
-    let media_hash = createHash('sha256').update(media).digest().toString('base64');
-    let ref_hash: string | undefined;
-    if (isValidUTF8(metadata)) {
-        ref_hash = createHash('sha256').update(metadata).digest().toString('base64');
-    }
-
-
-    let result = await _account.functionCall({
-        contractId: _contractID,
-        args: {
-            token_id: randomUUID(),
-            owner_address: payload.OwnerAddress,
-            media_id: payload.ArweaveTxnId,
-            media_hash: media_hash,
-            metadata_id: `${payload.ArweaveTxnId}/metadata.json`,
-            reference_hash: ref_hash,
-            extra: ref_hash ? Buffer.from(metadata).toString('utf-8') : null,
-            copies: payload.Copies,
-            description: payload.Description,
-            expires_at: payload.ExpiresAt,
-            issued_at: payload.IssuedAt,
-            starts_at: payload.StartsAt,
-            title: payload.Title,
-            updated_at: payload.UpdatedAt
-        },
-        methodName: 'mint',
-        attachedDeposit: parseNearAmount(_deposit)
-    });
-
-    Logger().debug(`Mint transaction result: ${JSON.stringify(result)}`);
-    let status = result.status as FinalExecutionStatus;
-    let token = {} as Token;
-    if (status.SuccessValue) {
-        token = JSON.parse(Buffer.from(status.SuccessValue, 'base64').toString('utf-8'));
-    } else {
-        throw new Error(`Failed called to mint: ${status.Failure}`)
-    }
-
-    return {
-        ExplorerURL: `${_explorerBaseURL}/transactions/${result.transaction_outcome.id}`,
-        TransactionId: result.transaction_outcome.id
-    }*/
 }
 
 export {
     Init,
-    Mint
+    Mint,
+    ClaimDetails
 }

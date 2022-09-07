@@ -15,6 +15,7 @@ type Config = {
     NearEnv: "testnet" | "mainnet",
     NearDeposit: string,
     DefaultCallbackURL: string,
+    VaultBaseURL: string,
     MaxJobs: number
 }
 
@@ -55,7 +56,11 @@ function LoadConfig() {
         Logger().error("NEAR_DEPOSIT is a required environment variable");
         process.exit(1);
     }
-    
+    if (!process.env.VAULT_BASE_URL) {
+        Logger().error("VAULT_BASE_URL is a required environment variable");
+        process.exit(1);
+    }
+
     try {
         config = {
             AzureAccountName: process.env.AZURE_ACCOUNT_NAME,
@@ -67,7 +72,8 @@ function LoadConfig() {
             NearEnv: process.env.NEAR_ENV,
             DefaultCallbackURL: process.env.DEFAULT_CALLBACK_URL,
             MaxJobs: process.env.MAX_JOBS ? parseInt(process.env.MAX_JOBS) : 0,
-            NearDeposit: process.env.NEAR_DEPOSIT
+            NearDeposit: process.env.NEAR_DEPOSIT,
+            VaultBaseURL: new URL(process.env.VAULT_BASE_URL).toString()
         }
     } catch (e) {
         let err = e as Error;

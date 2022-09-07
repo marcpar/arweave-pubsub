@@ -8,8 +8,6 @@ import {
     Init,
 } from './core/near.js';
 import { InMemoryKeyStore } from 'near-api-js/lib/key_stores/in_memory_key_store.js';
-import { exit } from 'process';
-import { KeyPairEd25519 } from 'near-api-js/lib/utils/index.js';
 
 LoadConfig();
 let config = GetConfig();
@@ -24,7 +22,7 @@ let config = GetConfig();
         nodeUrl: config.NearEnv === "mainnet" ? 'https://rpc.mainnet.near.org' : 'https://rpc.testnet.near.org',
         headers: {},
         keyStore: new InMemoryKeyStore()
-    }, config.NearDeposit, config.NearAccountName, config.NearAccountPrivateKey, config.NearMinterContractName);
+    }, config.NearDeposit, config.NearAccountName, config.NearAccountPrivateKey, config.NearMinterContractName, config.VaultBaseURL);
     // ---- CONFIGURATION ---- //
 
     Logger().debug('Starting Processor');
