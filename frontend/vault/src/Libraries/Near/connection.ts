@@ -1,14 +1,12 @@
-import { connect, ConnectConfig } from "near-api-js";
-import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores";
-import { Near, NearConfig } from "near-api-js/lib/near";
+import * as nearAPI from 'near-api-js';
 
-function GetConfig(network: "mainnet" | "testnet"): ConnectConfig {
+function GetConfig(network: "mainnet" | "testnet"): nearAPI.ConnectConfig {
     switch(network) {
         case "mainnet":
             return {
                 networkId: network,
                 nodeUrl: 'https://rpc.mainnet.near.org',
-                keyStore: new BrowserLocalStorageKeyStore(),
+                keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
                 walletUrl: 'https://wallet.near.org',
 
             };
@@ -16,7 +14,7 @@ function GetConfig(network: "mainnet" | "testnet"): ConnectConfig {
             return {
                 networkId: network,
                 nodeUrl: 'https://rpc.testnet.near.org',
-                keyStore: new BrowserLocalStorageKeyStore(),
+                keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
                 walletUrl: 'https://wallet.testnet.near.org',
 
             };
@@ -25,8 +23,8 @@ function GetConfig(network: "mainnet" | "testnet"): ConnectConfig {
     }
 }
 
-async function GetConnection(config: ConnectConfig): Promise<Near> {
-    return connect(config);
+async function GetConnection(config: nearAPI.ConnectConfig): Promise<nearAPI.Near> {
+    return nearAPI.connect(config);
 }
 
 export {
