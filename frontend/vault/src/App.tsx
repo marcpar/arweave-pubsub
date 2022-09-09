@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import NotFound from './Routes/NotFound';
 import ClaimNFT from './Routes/ClaimNFT';
 import VaultLayout from './Components/Layout/VaultLayout';
+import "./App.css";
 
 function App() {
   return (

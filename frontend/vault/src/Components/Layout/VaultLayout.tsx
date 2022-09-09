@@ -1,4 +1,3 @@
-import { PropsWithChildren } from "react";
 import { Outlet } from "react-router-dom";
 import { GetConfig, GetConnection } from "../../Libraries/Near/connection";
 import TopBar from "../TopBar/TopBar";
@@ -6,40 +5,25 @@ import styles from "./Vault.module.css";
 import * as nearAPI from 'near-api-js';
 import { WalletConnection } from "near-api-js";
 
+import { Component, PropsWithChildren, ReactNode } from "react";
+import AppBadge from "../AppBadge/AppBadge";
+import UserWidget from "../UserWidget/UserWidget";
+
 type VaultLayoutProps = {
     title: string
 }
 
 export default function VaultLayout(props: PropsWithChildren<VaultLayoutProps>) {
-    let _ = styles.div;
-    GetConnection(GetConfig("testnet")).then(async (conn) => {
-        console.log(conn);
-        let wallet = new WalletConnection(conn, '');
-        if (!wallet.isSignedIn()) {
-            await wallet.requestSignIn({});
-            return;
-        }
-        alert(wallet.getAccountId());
-    });
 
-    
     return (
         <div>
-            <div>
-                <TopBar>
-                    <div>
-
-                    </div>
-                    <div>
-                        {}
-                    </div>
-
-                </TopBar>
+            <div className={styles.top_bar}>
+                <TopBar left={<AppBadge name="NFT Vault" />} right={<UserWidget/>} />
             </div>
-            <div>
-                <Outlet/>
+            <div className={styles.content}>
+                <Outlet />
             </div>
-            {props.children}
         </div>
+        
     );
 }

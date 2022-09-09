@@ -1,11 +1,15 @@
-import { PropsWithChildren } from "react";
 import styles from "./TopBar.module.css"
+import { ReactNode, PropsWithChildren } from "react";
 
-
-export default function TopBar(props: PropsWithChildren) {
+type TopbarProps = {
+    left?: ReactNode,
+    right?: ReactNode
+}
+export default function TopBar(props: TopbarProps) {
     return (
         <div className={styles.top_bar}>
-            {props.children}
+            <div className={styles.left}>{props.left}</div>
+            <div className={styles.right}>{props.right}</div>
         </div>
     );
 }
