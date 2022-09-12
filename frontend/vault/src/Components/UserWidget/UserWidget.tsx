@@ -1,28 +1,27 @@
 import styles from "./UserWidget.module.css"
-import { useState } from "react";
 import { HiOutlineLogout, HiUser } from "react-icons/hi"
+import { useIsLoggedInHook, Login, Logout, GetWallet } from "../../Providers/Wallet";
+import { useState } from "react";
 
 
+
+function loginHandler() {
+    Login();
+}
+
+async function logOutHandler() {
+    Logout();
+}
 
 export default function UserWidget() {
-    const [IsLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    const [AccountId, setAccountId] = useState<string>("")    
-    
-    function loginHandler() {
-        setIsLoggedIn(true);
-    }
-    
-    function logOutHandler() {
-        setIsLoggedIn(false);
-    }
+    let IsLoggedIn = useIsLoggedInHook();
 
     if (IsLoggedIn) {
         return (
             <div className={styles.user_name}>
-                
                 <div>
                     <span className={styles.icon}><HiUser/></span>
-                    <span className={styles.name}>UserLoggedIn</span>
+                    <span className={styles.name}>{GetWallet().account().accountId}</span>
                 </div>
                 <button onClick={logOutHandler}><HiOutlineLogout/></button>
             </div>

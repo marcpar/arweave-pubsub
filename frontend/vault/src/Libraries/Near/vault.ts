@@ -12,7 +12,8 @@ type Claimable = {
     nft_account_id: string,
     public_key: Buffer,
 }
-
+const contractId = process.env.REACT_APP_VAULT_CONTRACT ?? "";
+console.log(contractId);
 interface VaultContract extends nearAPI.Contract {
     is_claimable: (args: {
         claim_token: string
@@ -27,7 +28,7 @@ interface VaultContract extends nearAPI.Contract {
 }
 
 function GetVaultContract(account: nearAPI.Account): VaultContract {
-    return new nearAPI.Contract(account, '', {
+    return new nearAPI.Contract(account, contractId, {
         viewMethods: ['is_claimable, get_claimable'],
         changeMethods: ['claim']
     }) as VaultContract;
