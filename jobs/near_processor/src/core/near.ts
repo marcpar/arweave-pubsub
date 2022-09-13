@@ -117,15 +117,19 @@ class Minter extends Account {
             throw new Error(`Failed called to mint: ${status.Failure}`)
         }
 
-        let claimUrl = new URL(`${_vaultBaseUrl}/claim/${_contractID}/${token_id}`);
-
-        claimUrl.searchParams.append("token", Buffer.from(JSON.stringify(claimDetails), 'utf-8').toString('base64'));
-
-        return {
+        let mintResult = {
             ExplorerURL: `${_explorerBaseURL}/transactions/${result.transaction_outcome.id}`,
             TransactionId: result.transaction_outcome.id,
-            ClaimUrl: claimUrl.toString()
-        };
+        } as MintResult;
+
+        if (claimDetails) {
+            let claimUrl = new URL(`${_vaultBaseUrl}claim/${_contractID}/${token_id}`);
+            claimUrl.searchParams.append("token", Buffer.from(JSON.stringify(claimDetails), 'utf-8').toString('base64'));
+            mintResult.ClaimURL = claimUrl.toString();
+        }
+        
+        
+        return mintResult;
     }
 }
 
@@ -151,7 +155,7 @@ type Token = {
 type MintResult = {
     ExplorerURL: string,
     TransactionId: string,
-    ClaimUrl?: string
+    ClaimURL?: string
 }
 
 type ClaimDetails = {

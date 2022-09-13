@@ -79,30 +79,17 @@ Emmited to notify the callback url that the job has successfully finished.
     "Event": "success",
     "Message": "Job ff975cbd-32f4-4f09-9b9a-01964dd6eb90 has been successfully processed",
     "Details": {
-        "Token": {
-            "token_id": "88eb3a00-3588-465e-89de-29e094fea7ff",
-            "owner_id": "nft.nftdw-001.testnet",
-            "metadata": {
-                "title": "Samuel Dickinson - 2022 World Triathlon Sprint & Relay Championships Montreal",
-                "description": "<TOKEN DESCRIPTION>",
-                "media": "ZkUxju5Y5Goy-OXw2O-mj8T_T4JSUHb7sDUhUMLNlgg",
-                "media_hash": "IC71AwHciMXvW4WV8soqndptMjYE3WYy4/hdlRhUAqY=",
-                "copies": 1,
-                "issued_at": "1660818999614",
-                "expires_at": null,
-                "starts_at": "1660818999614",
-                "updated_at": "1660818999614",
-                "extra": "{\"AthleteId\":\"88205\",\"FirstName\":\"Samuel\",\"LastName\":\"Dickinson\",\"Country\":\"ENG\",\"Status\":\"\",\"StartNumber\":\"10\",\"Position\":19,\"TotalTime\":\"00:53:40\",\"Timings\":[{\"Key\":\"Swim\",\"Value\":\"00:08:46\"},{\"Key\":\"T1\",\"Value\":\"00:00:59\"},{\"Key\":\"Bike\",\"Value\":\"00:26:04\"},{\"Key\":\"T2\",\"Value\":\"00:00:19\"},{\"Key\":\"Run\",\"Value\":\"00:17:32\"}]}",
-                "reference": "ZkUxju5Y5Goy-OXw2O-mj8T_T4JSUHb7sDUhUMLNlgg/metadata.json",
-                "reference_hash": "PmkI+VJyQwHn9kXhoYy4MXlREkNmKba6txrUek5kBg0="
-            },
-            "approved_account_ids": {}
-        },
+        "ClaimURL": "https://vault.nftdw-001.com/claim/nft.nftdw-001.testnet/2d7c23e9-134c-445e-8882-d5be78c0ce56?token=eyJORlRDb250cmFjdCI6Im5mdC5uZnRkdy0wMDEudGVzdG5ldCIsIlRva2VuSWQiOiIyZDdjMjNlOS0xMzRjLTQ0NWUtODg4Mi1kNWJlNzhjMGNlNTYiLCJQcml2YXRlS2V5IjoiZWQyNTUxOTozZHdpamhHcGNnRXYxN3VWZW14aEtEZkNHS3pLSDk4aERWNjVzVEg3ZVA1aXgza3htc3JLSzU3dE1NTXF2OWlybU1KTEoyM3JWcFYxZFROQ1c0aENkNzlmIiwiVmF1bHRDb250cmFjdCI6InZhdWx0Lm5mdGR3LTAwMS50ZXN0bmV0In0%3D",
         "ExplorerURL": "https://explorer.testnet.near.org/transactions/E9237ZHVQ8ANEtRfzEAkuVkSjxyCZYc9cxeTCfsREoQ9",
         "TransactionId": "E9237ZHVQ8ANEtRfzEAkuVkSjxyCZYc9cxeTCfsREoQ9"
     },
     "Time": 1661128110153
 }
 ```
+| Field | Description |
+| :---- | :---------- |
+| `Details.ClaimURL` | a url that claims the minted nft if OwnerAddress is not set on job payload, this should be sent securely to the supposed owner of the nft as anyone that has access to this data has the ability to claim the nft |
+| `Details.ExplorerURL` | a url that redirects to the transaction |
+| `TransactionId` | id of the transaction |
 
 ## Process Flow

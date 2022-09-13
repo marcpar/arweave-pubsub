@@ -22,7 +22,7 @@ let config = GetConfig();
     //let uuid ='02bc722d-f790-4d1c-aab6-a3394921c638';
     let job = {
         JobId: "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
-        //OwnerAddress: "asheltie.testnet",
+        //OwnerAddress: "test-claimer.testnet",
         ArweaveTxnId: "bhc5oP0C68Fz2bwJm2DGEc5uYN8J95tezDXBKE4yRz0",
         Title: "Samuel Dickinson - 2022 World Triathlon Sprint & Relay Championships Montreal",
         Description: "<TOKEN DESCRIPTION>",
