@@ -1,6 +1,5 @@
 import * as nearAPI from "near-api-js";
-import { WalletConnection } from "near-api-js";
-import { GetConfig, GetConfigInMemory, GetConnection } from "./connection";
+import { GetConfig, GetConnection } from "./connection";
 
 
 let _network = process.env.REACT_APP_NEAR_NETWORK ?? "testnet";
@@ -23,18 +22,29 @@ type NFTToken = {
     }
 }
 
+type NFTContractMetadata = {
+    spec: string,
+    name: string,
+    symbol: string,
+    icon: string | null,
+    base_uri: string | null,
+    reference: string | null,
+    reference_hash: string | null
+}
+
 interface NFTContract extends nearAPI.Contract {
     nft_token: (args: {
         token_id: string
-    }) => Promise<NFTToken | null>;
+    }) => Promise<NFTToken | null>,
+    nft_metadata: () => Promise<NFTContractMetadata>,
 }
 
 async function GetNFTContract(nft: string): Promise<NFTContract> {
-    let near = await GetConnection(GetConfigInMemory(_network as any));
+    let near = await GetConnection(GetConfig(_network as any));
     let account = new nearAPI.Account(near.connection, nft);
 
     return new nearAPI.Contract(account, nft, {
-        viewMethods: ['nft_token'],
+        viewMethods: ['nft_token', 'nft_metadata'],
         changeMethods: []
     }) as NFTContract;
 }
@@ -44,6 +54,7 @@ export {
 };
 
 export type {
-    NFTToken
+    NFTToken,
+    NFTContractMetadata
 };
 

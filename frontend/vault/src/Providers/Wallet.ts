@@ -53,12 +53,11 @@ function useIsLoggedInHook(): boolean {
         return () => {
             _isLoggedInSetters.delete(id);
         }
-    });
+    }, []);
     return isLoggedIn;
 }
 
 function notifyIsLoggedInSetters(isLoggedIn: boolean) {
-    console.log(_isLoggedInSetters.size);
     _isLoggedInSetters.forEach((setter) => {
         setter(isLoggedIn);
     })

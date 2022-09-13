@@ -50,7 +50,7 @@ async function GetConnection(config: nearAPI.ConnectConfig): Promise<nearAPI.Nea
     if (_near) {
         return _near;
     }
-    return _near = await nearAPI.connect(config);    
+    return _near = await nearAPI.connect(config);  
 }
 
 export {
