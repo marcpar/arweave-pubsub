@@ -16,7 +16,6 @@ import isValidUTF8 from 'utf-8-validate';
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { fileTypeFromBuffer } from 'file-type';
 import { KeyPairEd25519 } from 'near-api-js/lib/utils/key_pair.js';
-import { writeFileSync } from 'fs';
 
 let _near: Near;
 let _account: Account;
@@ -75,10 +74,6 @@ class Minter extends Account {
         let claimDetails: ClaimDetails | undefined;
         if (payload.OwnerAddress === undefined || payload.OwnerAddress === null) {
             let keypair = KeyPairEd25519.fromRandom();
-            writeFileSync(`dist/keys/${token_id}.json`, JSON.stringify({
-                private_key: keypair.toString(),
-                public_key: keypair.publicKey.toString()
-            }));
 
             claimDetails = {
                 NFTContract: this.accountId,

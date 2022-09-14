@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  arweave_processor:
+    build:
+      context: jobs/arweave_processor
+      dockerfile: dockerfile
+    env_file:
+      - arweave_processor.local.env
+
+  arweave_util:
+    build:
+      context:  jobs/arweave_processor
+      dockerfile: util.dockerfile
+    env_file:
+      - arweave_processor.local.env
+
+  near_processor:
+    build:
+      context: jobs/near_processor
+      dockerfile: dockerfile
+    env_file:
+      - near_processor.local.env
+  
+  near_util:
+    build:
+      context: jobs/near_processor
+      dockerfile: util.dockerfile
+    env_file:
+      - near_processor.local.env
+
+  vault:
+    build:
+      context: frontend/vault
+      dockerfile: testnet.dockerfile
+    ports:
+      - 3000:3000
+
+  

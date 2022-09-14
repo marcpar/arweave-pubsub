@@ -3,9 +3,6 @@ import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
-import {
-    randomUUID
-} from 'crypto';
 import { Logger } from "../src/lib/logger.js";
 
 
@@ -23,9 +20,9 @@ let config = GetConfig();
     let job = {
         JobId: "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
         //OwnerAddress: "test-claimer.testnet",
-        ArweaveTxnId: "bhc5oP0C68Fz2bwJm2DGEc5uYN8J95tezDXBKE4yRz0",
-        Title: "Samuel Dickinson - 2022 World Triathlon Sprint & Relay Championships Montreal",
-        Description: "<TOKEN DESCRIPTION>",
+        ArweaveTxnId: "_u08kzmxCPhIo96xRr4rrBLuuYX66yXfI0OBHVQdAIA",
+        Title: "Tilda Månsson - 2022 World Triathlon Cup Bergen",
+        Description: "Tilda Månsson - 2022 World Triathlon Cup Bergen",
         Copies: 1,
         IssuedAt: "1660818999614",
         ExpiresAt: null,

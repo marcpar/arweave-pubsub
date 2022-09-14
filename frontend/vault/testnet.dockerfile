@@ -3,6 +3,9 @@ FROM node:16.16.0 as builder
 WORKDIR /workdir
 COPY . /workdir
 
+ENV REACT_APP_NEAR_NETWORK=testnet
+ENV REACT_APP_VAULT_CONTRACT=vault.nftdw-001.testnet
+
 RUN npm install && \
     npm run build
 
@@ -16,6 +19,6 @@ COPY --from=builder /workdir/build /home/app
 RUN npm install -g serve
 
 ENTRYPOINT ["sh", "-c"]
-CMD ["npx serve -s /home/app"]
+CMD ["npx serve -s /home/app -l 3000"]
 
 

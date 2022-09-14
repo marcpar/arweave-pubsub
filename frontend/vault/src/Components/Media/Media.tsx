@@ -13,7 +13,7 @@ export default function Media(props: MediaProps) {
             );
         case "mp4" || "webp":
             return (
-                <video src={props.src} autoPlay={true}  controls={true} loop={true} className={styles.video}/>
+                <video src={props.src} autoPlay muted controls={false} loop className={styles.video}/>
             );
         case undefined:
             return (

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ClaimChallenge, ClaimDetails, GetVaultContract, GetVaultContractAnonAsync } from '../Libraries/Near/vault';
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
+import Tilt from "react-parallax-tilt";
 
 function parseToken(token: string): ClaimDetails {
     let claimDetails!: ClaimDetails
@@ -107,16 +108,22 @@ export default function ClaimNFT() {
     }
 
     return (
-        <div className={style.card}>
-            <div className={style.card_header}>
-                <span>{nftToken.metadata.title}</span>
-            </div>
-            <div className={style.card_body}>
-                <Media src={`${nftMeta.base_uri}/${nftToken.metadata.media}`} />
-            </div>
-            <div className={style.card_footer}>
-                <button onClick={claim} disabled={!(isLoggedIn && isClaimable)}>Claim</button>
-            </div>
+        <div className={style.main_container}>
+            <Tilt tiltReverse={true} tiltMaxAngleX={5} tiltMaxAngleY={5} glareReverse={true} >
+                <div className={style.card}>
+                    <div className={style.card_header}>
+                        <div className={style.nft_name}>{nftMeta.name}</div>
+                        <div className={style.nft_title}>{nftToken.metadata.title}</div>
+                    </div>
+                    <div className={style.card_body}>
+                        <Media src={`${nftMeta.base_uri}/${nftToken.metadata.media}`} />
+                    </div>
+                    <div className={style.card_footer}>
+                        <span>{nftToken.token_id}</span>
+                    </div>
+                </div>
+            </Tilt>
+            <button className={style.button} onClick={claim} disabled={!(isLoggedIn && isClaimable)}>Claim</button>
         </div>
     );
 }

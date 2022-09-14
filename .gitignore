@@ -1,2 +1,4 @@
 arweave_processor.env
 near_processor.env
+arweave_processor.local.env
+near_processor.local.env
