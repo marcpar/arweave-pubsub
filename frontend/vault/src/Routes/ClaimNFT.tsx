@@ -7,6 +7,7 @@ import { ClaimChallenge, ClaimDetails, GetVaultContract, GetVaultContractAnonAsy
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
+import { GridLoader } from "react-spinners";
 
 function parseToken(token: string): ClaimDetails {
     let claimDetails!: ClaimDetails
@@ -48,13 +49,17 @@ async function claimHandler(claim_token: string, callback: string) {
     })
 }
 
+type NFTDetails = {
+    nftMeta: NFTContractMetadata | null ,
+    nftToken: NFTToken | null 
+}
+
 export default function ClaimNFT() {
     const { nft, token_id } = useParams();
     let [searchParams] = useSearchParams();
     let token = searchParams.get('token') ?? '';
     let isLoggedIn = useIsLoggedInHook();
-    const [nftToken, setnftToken] = useState<NFTToken | undefined | null>(undefined);
-    const [nftMeta, setnftMeta] = useState<NFTContractMetadata | undefined | null>(undefined);
+    const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
 
     function claim() {
@@ -63,7 +68,7 @@ export default function ClaimNFT() {
     }
 
     useEffect(() => {
-        if (nftMeta === undefined || nftToken === undefined) {
+        if (nftDetails === undefined) {
             GetVaultContractAnonAsync().then(async (contract) => {
                 console.log(contract.get_claimable)
                 let claimable = await contract.get_claimable({
@@ -71,16 +76,18 @@ export default function ClaimNFT() {
                     token_id: token_id as string
                 });
                 if (claimable === null) {
-                    setnftMeta(null);
-                    setnftToken(null);
+                    setnftDetails(null);
                     return;
                 }
 
                 let nftContract = await GetNFTContract(claimable.nft_account_id)
-                setnftMeta(await nftContract.nft_metadata());
-                setnftToken(await nftContract.nft_token({
-                    token_id: claimable.token_id
-                }));
+
+                setnftDetails({
+                    nftMeta: await nftContract.nft_metadata(),
+                    nftToken: await nftContract.nft_token({
+                        token_id: claimable.token_id
+                    })
+                });
 
                 let vaultAnon = await GetVaultContractAnonAsync();
 
@@ -94,32 +101,36 @@ export default function ClaimNFT() {
             })
         }
     });
-
-    if (nftMeta === undefined || nftToken === undefined) {
+    
+    if (nftDetails === undefined) {
         return (
-            <div>Loading</div>
+            <div className={style.loader_container}>
+                <GridLoader color={"rgb(0, 98, 190)"}/>
+            </div>
         );
     }
 
-    if (nftMeta === null || nftToken === null) {
+    if (nftDetails === null || nftDetails.nftMeta === null || nftDetails.nftToken === null) {
         return (
             <div>Claimable does not exist</div>
         )
     }
+
+    
 
     return (
         <div className={style.main_container}>
             <Tilt tiltReverse={true} tiltMaxAngleX={5} tiltMaxAngleY={5} glareReverse={true} >
                 <div className={style.card}>
                     <div className={style.card_header}>
-                        <div className={style.nft_name}>{nftMeta.name}</div>
-                        <div className={style.nft_title}>{nftToken.metadata.title}</div>
+                        <div className={style.nft_name}>{nftDetails.nftMeta.name}</div>
+                        <div className={style.nft_title}>{nftDetails.nftToken.metadata.title}</div>
                     </div>
                     <div className={style.card_body}>
-                        <Media src={`${nftMeta.base_uri}/${nftToken.metadata.media}`} />
+                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} />
                     </div>
                     <div className={style.card_footer}>
-                        <span>{nftToken.token_id}</span>
+                        <span>{nftDetails.nftToken.token_id}</span>
                     </div>
                 </div>
             </Tilt>

@@ -69,3 +69,8 @@
 .button[disabled] {
     background-color: rgb(105, 105, 105);
 }
+
+.loader_container {
+    text-align: center;
+    margin-top: 300px;
+}
