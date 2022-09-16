@@ -15,7 +15,7 @@ use near_sdk::{
     collections::LazyOption,
     env,
     json_types::Base64VecU8,
-    near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
+    near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue, require,
 };
 
 #[near_bindgen]
@@ -101,6 +101,35 @@ impl Contract {
             }),
         )
     }
+
+    pub fn burn(&mut self, token_id: TokenId) -> bool {
+        let owner_id = self.nft.owner_by_id.get(&token_id.to_string()).unwrap();
+
+        require!(
+            owner_id == env::predecessor_account_id(),
+            "token can only be burned by the owner"
+        );
+
+        let mut burned = false;
+
+        if self
+            .nft
+            .token_metadata_by_id
+            .as_mut()
+            .unwrap()
+            .remove(&token_id.to_string())
+            .is_some()
+        {
+            burned = true;
+        }
+
+        if self.nft.owner_by_id.remove(&token_id.to_string()).is_some() {
+            burned = true;
+        }
+
+        return burned;
+    }
+
 }
 
 impl_non_fungible_token_core!(Contract, nft);
