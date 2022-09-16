@@ -6,15 +6,12 @@ import { Logger } from './lib/logger.js';
 import { SetDefaultCallBack } from './core/event.js';
 import {
     Init,
-    GetToken,
-    Mint,
-    GetNFTMeta
 } from './core/near.js';
 import { InMemoryKeyStore } from 'near-api-js/lib/key_stores/in_memory_key_store.js';
-import { exit } from 'process';
 
 LoadConfig();
 let config = GetConfig();
+
 (async () => {
     // ---- CONFIGURATION ---- //
     SetQueue(CreateAzureStorageQueue(config.AzureAccountName, config.AzureAccountKey, config.Topic));
@@ -25,7 +22,7 @@ let config = GetConfig();
         nodeUrl: config.NearEnv === "mainnet" ? 'https://rpc.mainnet.near.org' : 'https://rpc.testnet.near.org',
         headers: {},
         keyStore: new InMemoryKeyStore()
-    }, config.NearDeposit, config.NearAccountName, config.NearAccountPrivateKey, config.NearMinterContractName);
+    }, config.NearDeposit, config.NearAccountName, config.NearAccountPrivateKey, config.NearMinterContractName, config.VaultBaseURL);
     // ---- CONFIGURATION ---- //
 
     Logger().debug('Starting Processor');

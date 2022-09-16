@@ -19,7 +19,8 @@
     "dispatch:storage-queue": "ts-node --esm bin/storage_queue_dispatch.ts",
     "peek:storage-queue": "ts-node --esm bin/storage_queue_peek.ts",
     "list:storage-queue": "ts-node --esm bin/storage_queue_list.ts",
-    "clear:storage-queue": "ts-node --esm bin/storage_queue_clear.ts"
+    "clear:storage-queue": "ts-node --esm bin/storage_queue_clear.ts",
+    "callback-server": "ts-node --esm bin/callback_server.ts"
   },
   "dependencies": {
     "@azure/storage-queue": "^12.10.0",

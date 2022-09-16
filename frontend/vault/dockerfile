@@ -1,0 +1,21 @@
+FROM node:16.16.0 as builder
+
+WORKDIR /workdir
+COPY . /workdir
+
+RUN npm install && \
+    npm run build
+
+FROM node:16.16.0-alpine3.16
+
+ENV NODE_ENV=production
+
+WORKDIR /home/app
+COPY --from=builder /workdir/build /home/app
+
+RUN npm install -g serve
+
+ENTRYPOINT ["sh", "-c"]
+CMD ["npx serve -s /home/app"]
+
+
