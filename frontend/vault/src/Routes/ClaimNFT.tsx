@@ -120,7 +120,7 @@ export default function ClaimNFT() {
 
     return (
         <div className={style.main_container}>
-            <Tilt tiltReverse={true} tiltMaxAngleX={5} tiltMaxAngleY={5} glareReverse={true} >
+            <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
                 <div className={style.card}>
                     <div className={style.card_header}>
                         <div className={style.nft_name}>{nftDetails.nftMeta.name}</div>
