@@ -21,8 +21,15 @@ let config = GetConfig();
         networkId: config.NearEnv,
         nodeUrl: config.NearEnv === "mainnet" ? 'https://rpc.mainnet.near.org' : 'https://rpc.testnet.near.org',
         headers: {},
-        keyStore: new InMemoryKeyStore()
-    }, config.NearDeposit, config.NearAccountName, config.NearAccountPrivateKey, config.NearMinterContractName, config.VaultBaseURL);
+        keyStore: new InMemoryKeyStore(),
+    }, {
+        accountID: config.NearAccountName,
+        accountKey: config.NearAccountPrivateKey,
+        contractID: config.NearMinterContractName,
+        deposit: config.NearDeposit,
+        vaultBaseURL: config.VaultBaseURL,
+        vaultContractAddress: config.VaultContractAddress
+    });
     // ---- CONFIGURATION ---- //
 
     Logger().debug('Starting Processor');

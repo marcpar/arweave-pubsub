@@ -25,7 +25,8 @@ let _contractID: string;
 let _explorerBaseURL: string;
 let _deposit: string;
 let _minter: Minter;
-let _vaultBaseUrl: String;
+let _vaultBaseUrl: string;
+let _vaultContractAddress: string;
 
 class Minter extends Account {
 
@@ -70,7 +71,7 @@ class Minter extends Account {
                 parseNearAmount(_deposit)
             ),
         ];
-        let vault_address = 'vault.nftdw-001.testnet';
+
         let claimDetails: ClaimDetails | undefined;
         if (payload.OwnerAddress === undefined || payload.OwnerAddress === null) {
             let keypair = KeyPairEd25519.fromRandom();
@@ -79,13 +80,13 @@ class Minter extends Account {
                 NFTContract: this.accountId,
                 TokenId: token_id,
                 PrivateKey: keypair.toString(),
-                VaultContract: vault_address
+                VaultContract: _vaultContractAddress
             };
 
             actions.push(functionCall(
                 'nft_transfer_call',
                 {
-                    receiver_id: vault_address,
+                    receiver_id: _vaultContractAddress,
                     token_id: token_id,
                     msg: JSON.stringify({
                         public_key: keypair.publicKey.toString(),
@@ -160,18 +161,28 @@ type ClaimDetails = {
     TokenId: string,
 }
 
-async function Init(config: ConnectConfig, deposit: string, accountID: string, accountKey: string, contractID: string = accountID, vaultBaseURL: string) {
-    _accountID = accountID;
-    _accountKey = accountKey;
-    _contractID = contractID;
-    _explorerBaseURL = `https://explorer.${config.networkId}.near.org`;
-    _deposit = deposit;
-    _vaultBaseUrl = vaultBaseURL;
+type InitConfig = {
+    deposit: string,
+    accountID: string,
+    accountKey: string, 
+    contractID: string,
+    vaultBaseURL: string,
+    vaultContractAddress: string
+}
 
-    await config.keyStore?.setKey(config.networkId, accountID, KeyPair.fromString(accountKey))
+async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
+    _accountID = initConfig.accountID;
+    _accountKey = initConfig.accountKey;
+    _contractID = initConfig.contractID;
+    _explorerBaseURL = `https://explorer.${connectConfig.networkId}.near.org`;
+    _deposit = initConfig.deposit;
+    _vaultBaseUrl = initConfig.vaultBaseURL;
+    _vaultContractAddress = initConfig.vaultContractAddress;
 
-    _near = await connect(config);
-    _account = await _near.account(accountID);
+    await connectConfig.keyStore?.setKey(connectConfig.networkId, _accountID, KeyPair.fromString(_accountKey))
+
+    _near = await connect(connectConfig);
+    _account = await _near.account(_accountID);
     _minter = new Minter(_near.connection, _accountID);
 }
 

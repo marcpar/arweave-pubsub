@@ -16,6 +16,7 @@ type Config = {
     NearDeposit: string,
     DefaultCallbackURL: string,
     VaultBaseURL: string,
+    VaultContractAddress: string,
     MaxJobs: number
 }
 
@@ -60,6 +61,10 @@ function LoadConfig() {
         Logger().error("VAULT_BASE_URL is a required environment variable");
         process.exit(1);
     }
+    if (!process.env.VAULT_CONTRACT_ADDRESS) {
+        Logger().error("VAULT_CONTRACT_ADDRESS is a required environment variable");
+        process.exit(1);
+    }
 
     try {
         config = {
@@ -73,7 +78,8 @@ function LoadConfig() {
             DefaultCallbackURL: process.env.DEFAULT_CALLBACK_URL,
             MaxJobs: process.env.MAX_JOBS ? parseInt(process.env.MAX_JOBS) : 0,
             NearDeposit: process.env.NEAR_DEPOSIT,
-            VaultBaseURL: new URL(process.env.VAULT_BASE_URL).toString()
+            VaultBaseURL: new URL(process.env.VAULT_BASE_URL).toString(),
+            VaultContractAddress: process.env.VAULT_CONTRACT_ADDRESS
         }
     } catch (e) {
         let err = e as Error;

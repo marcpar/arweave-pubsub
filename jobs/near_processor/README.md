@@ -11,7 +11,9 @@ Service responsible for minting the nft
 | `NEAR_ACCOUNT_NAME` | **REQUIRED**. near account that will sign the transactions |
 | `NEAR_ACCOUNT_PRIVATE_KEY` | **REQUIRED**. NEAR_ACCOUNT_NAME private key |
 | `NEAR_ACCOUNT_CONTRACT_NAME` | name of the minter contract, defaults to `NEAR_ACCOUNT_NAME` if not provided |
-| `NEAR_DEPOSIT` | **REQUIRED***. amount of near to deposit in each transaction call, excess tokens are refunded automatically |
+| `NEAR_DEPOSIT` | **REQUIRED**. amount of near to deposit in each transaction call, excess tokens are refunded automatically |
+| `VAULT_CONTRACT_ADDRESS` | **REQUIRED**. address of the vault contract |
+| `VAULT_BASE_URL` | **REQUIRED**. base url of the vault frontend |
 | `DEFAULT_CALLBACK_URL` | **REQUIRED**. default callback url that will receive the emitted events |
 | `MAX_JOBS` | maximum number of jobs to be processed at the same time, setting to 0 will have no limit |
 | `LOG_LEVEL` | [winston log level](https://www.npmjs.com/package/winston#logging-levels)|
