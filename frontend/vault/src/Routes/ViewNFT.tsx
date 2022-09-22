@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 import Media from '../Components/Media/Media';
 import Tilt from "react-parallax-tilt";
 import { GridLoader } from "react-spinners";
-import { JSONTree } from "react-json-tree";
 import JSONPretty from "react-json-pretty";
 import {Collapse} from "react-collapse";
 import "react-json-pretty/themes/adventure_time.css";
+import { useNavigate } from "react-router-dom";
 
 
 type NFTDetails = {
@@ -18,9 +18,9 @@ type NFTDetails = {
 
 export default function ViewNFT() {
     const { nft, token_id } = useParams();
-
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
     const [isMetaCollapsed, setIsMetaCollapsed] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (nftDetails === undefined) {
@@ -31,9 +31,10 @@ export default function ViewNFT() {
                         token_id: token_id as string
                     })
                 });
+            }).catch(() => {
+                setnftDetails(null);
             });
         }
-        
     });
     
     if (nftDetails === undefined) {
@@ -45,9 +46,8 @@ export default function ViewNFT() {
     }
 
     if (nftDetails === null || nftDetails.nftMeta === null || nftDetails.nftToken === null) {
-        return (
-            <div>Claimable does not exist</div>
-        )
+        navigate('/notfound');
+        return(<div>not found</div>);
     }
 
     return (

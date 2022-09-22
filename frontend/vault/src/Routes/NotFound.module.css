@@ -1,0 +1,10 @@
+.message {
+    margin: auto;
+    text-align: center;
+    font-size: 100px;
+    color: rgb(95, 95, 95);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

@@ -1,9 +1,9 @@
 import { useLocation} from "react-router-dom";
-
+import styles from "./NotFound.module.css";
 
 export default function NotFound() {
     let location = useLocation();
     return (
-        <div><h1>Route {location.pathname} does not exists</h1></div>
+        <div className={styles.message}>404</div>
     );
 }

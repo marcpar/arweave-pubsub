@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes} from 'react-router-dom';
 import NotFound from './Routes/NotFound';
 import ClaimNFT from './Routes/ClaimNFT';
 import ViewNFT from './Routes/ViewNFT';
@@ -13,8 +13,8 @@ function App() {
           <Route path='/'  element={<VaultLayout title='this is the vault'/>}>
             <Route path='claim/:nft/:token_id' element={<ClaimNFT/>}/>
             <Route path='view/:nft/:token_id' element={<ViewNFT/>}/>
+            <Route path='*' element={<NotFound/>}/>
           </Route>
-          <Route path='*' element={<NotFound/>}/>
         </Routes>
       </BrowserRouter>
     </div>
