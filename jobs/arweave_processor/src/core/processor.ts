@@ -47,11 +47,12 @@ async function loop() {
     }).catch(async (e) => {
         await job.requeue();
         let err = e as Error;
-        Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`);
+        let err_message = `Requeing job ${job.payload.JobId}, failed due to error: ${err.message}\n${err.stack ?? ''}`;
+        Logger().error(err_message);
         Emit({
             JobId: job.payload.JobId,
             Event: "failure",
-            Message: `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`,
+            Message: err_message,
             Details: {
                 Error: err,
             }
@@ -96,6 +97,12 @@ async function processJob(job: Job) {
         await job.setState({
             TxID: txID,
             PathManifestTxID: manifestTxID
+        });
+    } else {
+        await Emit({
+            JobId: job.payload.JobId,
+            Event: "started",
+            Message: `Job ${job.payload.JobId} has been restarted`
         });
     }
 

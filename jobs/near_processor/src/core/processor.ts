@@ -47,11 +47,12 @@ async function loop() {
     }).catch(async (e) => {
         await job.requeue();
         let err = e as Error;
-        Logger().error(`Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}\n${JSON.stringify(err)}`);
+        let err_message = `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}\n${JSON.stringify(err)}`
+        Logger().error(err_message);
         Emit({
             JobId: job.payload.JobId,
             Event: "failure",
-            Message: `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}`,
+            Message: err_message,
             Details: {
                 Error: err,
             }
