@@ -20,7 +20,7 @@ type ClaimChallenge = {
     timestamp_millis: number
 }
 
-const contractId = process.env.REACT_APP_VAULT_CONTRACT ?? "";
+const contractId = process.env.REACT_APP_VAULT_CONTRACT ?? "vault.world-triathlon.testnet";
 
 const _networkId = process.env.REACT_APP_NEAR_NETWORK ?? "testnet";
 

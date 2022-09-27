@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 
 mod external;
 
-const WHITE_LISTED_NFT: [&'static str; 1] = ["nft.nftdw-001.testnet"];
+const WHITE_LISTED_NFT: [&'static str; 2] = ["nft.nftdw-001.testnet", "nft.world-triathlon.testnet"];
 const MILLIS_PER_MINUTE: u64 = 60_000;
 
 #[near_bindgen]

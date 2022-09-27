@@ -4,7 +4,7 @@ WORKDIR /workdir
 COPY . /workdir
 
 ENV REACT_APP_NEAR_NETWORK=testnet
-ENV REACT_APP_VAULT_CONTRACT=vault.nftdw-001.testnet
+ENV REACT_APP_VAULT_CONTRACT=vault.world-triathlon.testnet
 
 RUN npm install && \
     npm run build
