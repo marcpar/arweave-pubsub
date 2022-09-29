@@ -36,11 +36,13 @@ services:
     volumes:
       - clickhouse-data:/var/lib/clickhouse
       - ./conf/clickhouse/:/etc/clickhouse-server
+      - ./conf/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   fluent-bit:
-    image: cr.fluentbit.io/fluent/fluent-bit:1.9.8
+    image: cr.fluentbit.io/fluent/fluent-bit:1.9.8-debug
     volumes:
       - ./conf/fluent-bit:/fluent-bit/etc/
+      - /var/lib/docker:/var/lib/docker
 
 volumes:
   grafana-data:

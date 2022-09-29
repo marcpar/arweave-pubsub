@@ -29,6 +29,7 @@
           -->
         <size>1000M</size>
         <count>10</count>
+
         <!-- <console>1</console> --> <!-- Default behavior is autodetection (log to console if not daemon mode and is tty) -->
 
         <!-- Per level overrides (legacy):
@@ -131,6 +132,7 @@
          See also 'tcp_port_secure' for secure connections.
     -->
     <tcp_port>9000</tcp_port>
+    
 
     <!-- Compatibility with MySQL protocol.
          ClickHouse will pretend to be MySQL for applications connecting to this port.
