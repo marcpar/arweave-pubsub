@@ -35,7 +35,7 @@ services:
     image: clickhouse/clickhouse-server:22.9.2
     volumes:
       - clickhouse-data:/var/lib/clickhouse
-      - ./conf/clickhouse/:/etc/clickhouse-server
+      - ./conf/clickhouse/clickhouse-server:/etc/clickhouse-server
       - ./conf/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   fluent-bit:

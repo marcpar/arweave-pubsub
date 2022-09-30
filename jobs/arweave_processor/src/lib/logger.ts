@@ -5,20 +5,35 @@ function GetLogger(): Logger {
     return _logger ?? InitLogger();
 }
 
-function InitLogger(): Logger {
-    console.log = () => { throw new Error('console.log is disabled') };
+const CustomFormat = format((info, opts) => {
+    if (!info.log_type) {
+        info.log_type = 'default';
+    }
+    if (opts.service_name) {
+        info.service_name = opts.service_name;
+    }
+    info.time = Math.round(new Date().getTime() / 1000);
 
+    return info;
+});
+
+function InitLogger(): Logger {
     _logger = createLogger({
         level: process.env.LOG_LEVEL ?? 'info',
-        transports: [
-            new transports.Console({
-                format: format.simple()
+        format: format.combine(
+            CustomFormat({
+                service_name: 'arweave_processor'
             }),
+            format.json()
+        ),
+        transports: [
+            new transports.Console(),
         ]
     });
+    let consoleLog = console.log;
+    console.log = (...data: any[]) => { _logger.warn("console.log called"); consoleLog(data) };
     return _logger;
 }
-
 
 export {
     GetLogger as Logger,

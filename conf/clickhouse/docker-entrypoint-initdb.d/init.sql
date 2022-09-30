@@ -15,3 +15,13 @@ CREATE TABLE IF NOT EXISTS t_docker_logs(
     `stream` String
 ) ENGINE = MergeTree()
 ORDER BY (time, log_path);
+
+CREATE TABLE IF NOT EXISTS t_near_processor_logs(
+    `time` DateTime,
+    `message` String,
+    `level` String,
+    `log_type` String,
+    `job_id` String,
+    `service_name` String
+) ENGINE = MergeTree()
+ORDER BY (time, service_name)

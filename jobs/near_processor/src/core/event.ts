@@ -24,7 +24,7 @@ async function Emit(event: Event): Promise<void> {
     _event.Time = new Date().getTime();
     Logger().debug(JSON.stringify(_event));
     let response = await _client.post(_callbackURL, _event);
-    Logger().debug(`callback response fror ${JSON.stringify(event)}: ${response.status}\n${JSON.stringify(response.data)}`);
+    Logger().debug(`callback response for ${JSON.stringify(event)}: ${response.status}\n${JSON.stringify(response.data)}`);
     if (![true, "true", 200, "200"].includes(response.data)) {
         throw new Error(`Callback endpoint unexpected response ${response.data}, should be true or 200`);
     }

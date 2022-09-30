@@ -100,7 +100,7 @@ async function UploadMediaToPermaweb(media: Buffer, metadata: any, jobID: string
         }]
     });
     await pathManifestData.sign(signer);
-
+    
     Logger().debug(`path manifest ${pathManifestData.id}:\n${pathManifest}`)
 
     let bundle = await bundleAndSignData([mediaData, metadataData, pathManifestData], signer);

@@ -48,7 +48,10 @@ async function loop() {
         await job.requeue();
         let err = e as Error;
         let err_message = `Requeing job ${job.payload.JobId}, failed due to error: ${err.message}\n${err.stack ?? ''}`;
-        Logger().error(err_message);
+        Logger().error(err_message, {
+            log_type: 'job_failed',
+            job_id: job.payload.JobId
+        });
         Emit({
             JobId: job.payload.JobId,
             Event: "failure",
@@ -81,6 +84,10 @@ async function processJob(job: Job) {
             Event: "started",
             Message: `Job ${job.payload.JobId} has been started`
         });
+        Logger().info(`Job ${job.payload.JobId} has been started`, {
+            log_type: 'job_started',
+            job_id: job.payload.JobId
+        });
 
         let response = await axios.default.get<Buffer>(payload.MediaURL, {
             responseType: "arraybuffer"
@@ -104,11 +111,18 @@ async function processJob(job: Job) {
             Event: "started",
             Message: `Job ${job.payload.JobId} has been restarted`
         });
+        Logger().info(`Job ${job.payload.JobId} has been restarted`, {
+            log_type: 'job_restarted',
+            job_id: job.payload.JobId
+        });
     }
 
     let confirmations = await ConfirmUpload(txID, payload.MinConfirmations);
 
-    Logger().info(`Job ${payload.JobId} has been successfully processed: ${txID}`);
+    Logger().info(`Job ${payload.JobId} has been successfully processed: ${txID}`, {
+        log_type: 'job_completed',
+        job_id: job.payload.JobId
+    });
     await Emit({
         JobId: payload.JobId,
         Event: "success",

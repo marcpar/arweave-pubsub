@@ -48,7 +48,10 @@ async function loop() {
         await job.requeue();
         let err = e as Error;
         let err_message = `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}\n${JSON.stringify(err)}`
-        Logger().error(err_message);
+        Logger().error(err_message, {
+            log_type: 'job_failed',
+            job_id: job.payload.JobId,
+        });
         Emit({
             JobId: job.payload.JobId,
             Event: "failure",
@@ -66,14 +69,20 @@ async function loop() {
 
 async function processJob(job: Job) {
     let payload = job.payload;
-    Logger().info(`Job ${payload.JobId} received`);
+    Logger().info(`Job ${payload.JobId} received`, {
+        log_type: 'job_started',
+        job_id: job.payload.JobId
+    });
     await Emit({
         JobId: payload.JobId,
         Event: 'started',
         Message: `Job ${payload.JobId} has been received and started`,
     });
     let result = await Mint(payload);
-    Logger().info(`Job ${payload.JobId} has been successfully processed`);
+    Logger().info(`Job ${payload.JobId} has been successfully processed`, {
+        log_type: 'job_completed',
+        job_id: payload.JobId
+    });
     Emit({
         JobId: payload.JobId,
         Event: "success",
