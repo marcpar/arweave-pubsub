@@ -115,7 +115,18 @@ export default function ClaimNFT() {
             <div>Claimable does not exist</div>
         )
     }
-
+    let fullname: string | undefined = ""
+    try {
+        let extra = JSON.parse(nftDetails.nftToken.metadata?.extra as string);
+        let valuePairs = extra.ValuePairs as Array<{Key: string, Value: string}>;
+        let recipientName = valuePairs.find((el) => {
+            return el.Key === "RecipientName";
+        });
+        fullname = recipientName?.Value as string;
+    } catch(_) {
+        fullname = "";
+    }
+    
     
 
     return (
@@ -130,7 +141,7 @@ export default function ClaimNFT() {
                         <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} />
                     </div>
                     <div className={style.card_footer}>
-                        <span>{nftDetails.nftToken.token_id}</span>
+                        <span>{fullname ?? ""}</span>
                     </div>
                 </div>
             </Tilt>
