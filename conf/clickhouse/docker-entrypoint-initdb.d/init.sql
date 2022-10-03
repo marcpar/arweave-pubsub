@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS t_near_processor_logs(
     `level` String,
     `log_type` String,
     `job_id` String,
-    `service_name` String
+    `service_name` String,
+    `hostname` String
 ) ENGINE = MergeTree()
 ORDER BY (time, service_name)
