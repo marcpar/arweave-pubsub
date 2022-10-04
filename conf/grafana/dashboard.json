@@ -1,0 +1,809 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 10,
+        "title": "Service Monitoring",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "HvAj3aV4z"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "axisSoftMin": 0,
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 1
+        },
+        "id": 14,
+        "options": {
+          "legend": {
+            "calcs": [
+              "lastNotNull",
+              "sum"
+            ],
+            "displayMode": "list",
+            "placement": "right",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "9.1.6",
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "HvAj3aV4z"
+            },
+            "format": "time_series",
+            "group": [],
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "SELECT \n  $__unixEpochGroup(block_timestamp,'5m') as time,\n  receiver_account_id,\n  count(receiver_account_id)\nFROM transactions \nWHERE\n  $__unixEpochNanoFilter(block_timestamp)\tAND\n  receiver_account_id IN ('vault.world-triathlon.testnet', 'nft.world-triathlon.testnet', 'asheltie.testnet')\nGROUP BY\n  time, receiver_account_id",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Testnet Transaction Count",
+        "transformations": [
+          {
+            "id": "convertFieldType",
+            "options": {
+              "conversions": [
+                {
+                  "destinationType": "number",
+                  "targetField": "count"
+                }
+              ],
+              "fields": {}
+            }
+          }
+        ],
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "vertamedia-clickhouse-datasource",
+          "uid": "${clickhouse_datasource}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 1
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "sum"
+            ],
+            "displayMode": "table",
+            "placement": "right",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "database": "grafana",
+            "datasource": {
+              "type": "vertamedia-clickhouse-datasource",
+              "uid": "${clickhouse_datasource}"
+            },
+            "dateColDataType": "",
+            "dateLoading": false,
+            "dateTimeColDataType": "time",
+            "dateTimeType": "DATETIME",
+            "datetimeLoading": false,
+            "extrapolate": true,
+            "format": "time_series",
+            "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+            "interval": "1m",
+            "intervalFactor": 1,
+            "query": "SELECT\n    $timeSeries as t,\n    concat(service_name, '-', log_type) as label,\n    count()\nFROM $table\n\nWHERE $timeFilter AND\nlog_type in ($log_type) AND\nservice_name in ($service_name) AND\nlevel in ($level)\n\nGROUP BY t, label\n\nORDER BY t, label\n",
+            "rawQuery": "SELECT\n    (intDiv(toUInt32(time), 60) * 60) * 1000 as t,\n    concat(service_name, '-', log_type) as label,\n    count()\nFROM grafana.t_near_processor_logs\n\nWHERE time >= toDateTime(1664794301) AND time <= toDateTime(1664796101) AND\nlog_type in ('','default') AND\nservice_name in ('near_processor','arweave_processor') AND\nlevel in ('debug')\n\nGROUP BY t, label\n\nORDER BY t, label",
+            "refId": "A",
+            "round": "0s",
+            "skip_comments": true,
+            "table": "t_near_processor_logs",
+            "tableLoading": false
+          }
+        ],
+        "title": "Log Count Total",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "postgres",
+          "uid": "HvAj3aV4z"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "block_timestamp"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 177
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "signer_account_id"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 181
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "receiver_account_id"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 207
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "status"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 189
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "action_kind"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 172
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 9
+        },
+        "id": 15,
+        "options": {
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": []
+        },
+        "pluginVersion": "9.1.6",
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "HvAj3aV4z"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "SELECT \n  block_timestamp,\n  signer_account_id,\n  receiver_account_id,\n  status,\n  action_kind,\n  args\nFROM transactions \nLEFT JOIN transaction_actions ON transaction_actions.transaction_hash = transactions.transaction_hash\nWHERE\n  $__unixEpochNanoFilter(block_timestamp)\tAND\n  receiver_account_id IN ('vault.world-triathlon.testnet')\n",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Testnet Transaction Logs",
+        "transformations": [
+          {
+            "id": "convertFieldType",
+            "options": {
+              "conversions": [
+                {
+                  "destinationType": "number",
+                  "targetField": "count"
+                }
+              ],
+              "fields": {}
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "vertamedia-clickhouse-datasource",
+          "uid": "${clickhouse_datasource}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "time"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 153
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "level"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 64
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "log_type"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 67
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "service_name"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 140
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 24,
+          "x": 0,
+          "y": 18
+        },
+        "id": 12,
+        "options": {
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "time"
+            }
+          ]
+        },
+        "pluginVersion": "9.1.6",
+        "targets": [
+          {
+            "database": "grafana",
+            "datasource": {
+              "type": "vertamedia-clickhouse-datasource",
+              "uid": "${clickhouse_datasource}"
+            },
+            "dateColDataType": "",
+            "dateLoading": false,
+            "dateTimeColDataType": "time",
+            "dateTimeType": "DATETIME",
+            "datetimeLoading": false,
+            "extrapolate": true,
+            "format": "table",
+            "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+            "intervalFactor": 1,
+            "query": "SELECT\n    time,\n    level,\n    log_type,\n    service_name,\n    message\n    \nFROM $table\n\nWHERE $timeFilter AND\nlog_type in ($log_type) AND\nservice_name in ($service_name) AND\nlevel in ($level)\n\n",
+            "rawQuery": "SELECT\n    time,\n    level,\n    log_type,\n    service_name,\n    message\n    \nFROM grafana.t_near_processor_logs\n\nWHERE time >= toDateTime(1664794317) AND time <= toDateTime(1664796117) AND\nlog_type in ('','default') AND\nservice_name in ('near_processor','arweave_processor') AND\nlevel in ('debug')",
+            "refId": "A",
+            "round": "0s",
+            "skip_comments": true,
+            "table": "t_near_processor_logs",
+            "tableLoading": false
+          }
+        ],
+        "title": "Service Logs",
+        "type": "table"
+      },
+      {
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 29
+        },
+        "id": 6,
+        "title": "Container Monitoring",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "vertamedia-clickhouse-datasource",
+          "uid": "${clickhouse_datasource}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "time"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 162
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "stream"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 67
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 30
+        },
+        "id": 2,
+        "options": {
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "time"
+            }
+          ]
+        },
+        "pluginVersion": "9.1.6",
+        "targets": [
+          {
+            "database": "grafana",
+            "datasource": {
+              "type": "vertamedia-clickhouse-datasource",
+              "uid": "${clickhouse_datasource}"
+            },
+            "dateColDataType": "",
+            "dateLoading": false,
+            "dateTimeColDataType": "time",
+            "dateTimeType": "DATETIME",
+            "datetimeLoading": false,
+            "extrapolate": true,
+            "format": "table",
+            "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+            "intervalFactor": 1,
+            "query": "SELECT\n    time, stream, log, log_path\nFROM $table\n\nWHERE $timeFilter\n",
+            "rawQuery": "SELECT\n    time, stream, log, log_path\nFROM grafana.t_docker_logs\n\nWHERE time >= toDateTime(1664793004) AND time <= toDateTime(1664794804)",
+            "refId": "A",
+            "round": "0s",
+            "skip_comments": true,
+            "table": "t_docker_logs",
+            "tableLoading": false
+          }
+        ],
+        "title": "Container Logs",
+        "type": "table"
+      }
+    ],
+    "refresh": false,
+    "schemaVersion": 37,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "Altinity plugin for ClickHouse",
+            "value": "Altinity plugin for ClickHouse"
+          },
+          "hide": 0,
+          "includeAll": false,
+          "label": "Clickhouse Datasource",
+          "multi": false,
+          "name": "clickhouse_datasource",
+          "options": [],
+          "query": "vertamedia-clickhouse-datasource",
+          "queryValue": "",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "type": "datasource"
+        },
+        {
+          "current": {
+            "selected": true,
+            "text": [
+              "near_processor"
+            ],
+            "value": [
+              "near_processor"
+            ]
+          },
+          "datasource": {
+            "type": "vertamedia-clickhouse-datasource",
+            "uid": "${clickhouse_datasource}"
+          },
+          "definition": "SELECT service_name from grafana.t_near_processor_logs",
+          "hide": 0,
+          "includeAll": false,
+          "multi": true,
+          "name": "service_name",
+          "options": [],
+          "query": "SELECT service_name from grafana.t_near_processor_logs",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": true,
+            "text": [
+              "default"
+            ],
+            "value": [
+              "default"
+            ]
+          },
+          "datasource": {
+            "type": "vertamedia-clickhouse-datasource",
+            "uid": "${clickhouse_datasource}"
+          },
+          "definition": "SELECT log_type from grafana.t_near_processor_logs",
+          "hide": 0,
+          "includeAll": false,
+          "multi": true,
+          "name": "log_type",
+          "options": [],
+          "query": "SELECT log_type from grafana.t_near_processor_logs",
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "info",
+            "value": "info"
+          },
+          "datasource": {
+            "type": "vertamedia-clickhouse-datasource",
+            "uid": "${clickhouse_datasource}"
+          },
+          "definition": "SELECT level from grafana.t_near_processor_logs",
+          "hide": 0,
+          "includeAll": false,
+          "multi": true,
+          "name": "level",
+          "options": [],
+          "query": "SELECT level from grafana.t_near_processor_logs",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "New dashboard",
+    "uid": "Cj2UsN4Vz",
+    "version": 6,
+    "weekStart": ""
+  }
