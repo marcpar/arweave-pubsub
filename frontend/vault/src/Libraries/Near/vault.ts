@@ -17,7 +17,8 @@ type Claimable = {
 type ClaimChallenge = {
     token_id: string,
     nft_account_id: string,
-    timestamp_millis: number
+    timestamp_millis: number,
+    owner_id: string,
 }
 
 const contractId = process.env.REACT_APP_VAULT_CONTRACT ?? "vault.world-triathlon.testnet";

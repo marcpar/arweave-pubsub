@@ -23,7 +23,7 @@ function parseToken(token: string): ClaimDetails {
     return claimDetails;
 }
 
-function generateClaimChallenge(nft_account_id: string, token_id: string, claimDetails: ClaimDetails): string {
+function generateClaimChallenge(owner_id: string, nft_account_id: string, token_id: string, claimDetails: ClaimDetails): string {
     if (claimDetails.NFTContract !== nft_account_id || claimDetails.TokenId !== token_id) {
         throw new Error("nft mismatch");
     }
@@ -31,7 +31,8 @@ function generateClaimChallenge(nft_account_id: string, token_id: string, claimD
     let challenge = {
         nft_account_id: nft_account_id,
         token_id: token_id,
-        timestamp_millis: new Date().getTime()
+        timestamp_millis: new Date().getTime(),
+        owner_id: owner_id,
     } as ClaimChallenge;
     let challengeBuff = Buffer.from(JSON.stringify(challenge), 'utf-8');
     let sig = key.sign(challengeBuff);
@@ -63,7 +64,7 @@ export default function ClaimNFT() {
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
 
     function claim() {
-        let claimToken = generateClaimChallenge(nft as string, token_id as string, parseToken(token));
+        let claimToken = generateClaimChallenge(GetWallet().account().accountId, nft as string, token_id as string, parseToken(token));
         claimHandler(claimToken, `https://wallet.${process.env.REACT_APP_NEAR_NETWORK ?? "testnet"}.near.org/nft-detail/${nft}/${token_id}`);
     }
 
@@ -91,7 +92,7 @@ export default function ClaimNFT() {
 
                 let vaultAnon = await GetVaultContractAnonAsync();
 
-                let claimToken = generateClaimChallenge(nft as string, token_id as string, parseToken(token));
+                let claimToken = generateClaimChallenge(GetWallet().account().accountId, nft as string, token_id as string, parseToken(token));
                 claimable = await vaultAnon.is_claimable({
                     claim_token: claimToken
                 });

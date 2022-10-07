@@ -1,6 +1,6 @@
-use base64;
 use ed25519_dalek::{PublicKey, Signature, Verifier};
-use external::nft::external_nft::{self, ExternalNFTExt};
+use external::nft::external_nft;
+use internal::claim_challenge::ClaimChallenge;
 use near_contract_standards::{
     non_fungible_token::TokenId,
     non_fungible_token::{core::NonFungibleTokenReceiver, Token},
@@ -9,13 +9,16 @@ use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::LookupMap,
     env, log, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, PromiseError,
-    PromiseOrValue, Timestamp, ONE_YOCTO,
+    PromiseOrValue, ONE_YOCTO,
 };
 use serde::{Deserialize, Serialize};
 
 mod external;
+mod internal;
 
-const WHITE_LISTED_NFT: [&'static str; 2] = ["nft.nftdw-001.testnet", "nft.world-triathlon.testnet"];
+const WHITE_LISTED_NFT: [&'static str; 2] =
+    ["nft.nftdw-001.testnet", "nft.world-triathlon.testnet"];
+
 const MILLIS_PER_MINUTE: u64 = 60_000;
 
 #[near_bindgen]
@@ -36,14 +39,6 @@ pub struct Claimable {
     pub token_id: TokenId,
     pub nft_account_id: AccountId,
     pub public_key: Vec<u8>,
-}
-
-#[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
-struct ClaimChallenge {
-    pub token_id: TokenId,
-    pub nft_account_id: AccountId,
-    pub timestamp_millis: Timestamp,
 }
 
 #[near_bindgen]
@@ -75,75 +70,23 @@ impl Contract {
             .get(&format!("{}:{}", nft_account.as_str(), token_id.as_str()))
     }
 
-    pub fn get_timestamp_ms(&self) -> u64 {
-        env::block_timestamp_ms()
-    }
-
-    /**
-     *
-     * @var claim_token
-     *  <base64_claim_challenge>.<base64_signature>
-     */
+    /// View function to validate if generated claim_token is valid
+    ///
+    /// can be used from client side to validate if the user has the correct access key
     pub fn is_claimable(&self, claim_token: String) -> Option<Claimable> {
-        let claim_token_vec: Vec<&str> = claim_token.split(".").collect();
-        if claim_token_vec.len() != 2 {
-            log!("invalid claim token format, should be on the form <base64_claim_challenge>.<base64_signature>, received {}", claim_token);
-            return None;
-        }
-
-        let claim_challenge_bytes = base64::decode(claim_token_vec[0]).unwrap();
-        let claim_challenge_signature_bytes = base64::decode(claim_token_vec[1]).unwrap();
-
-        let claim_challenge: ClaimChallenge = serde_json::from_str(
-            String::from_utf8(claim_challenge_bytes.clone())
-                .unwrap()
-                .as_str(),
-        )
-        .unwrap();
-
-        log!(
-            "claim challenge json: {}",
-            serde_json::to_string(&claim_challenge).unwrap().as_str()
-        );
-
-        let current_timestamp_millis = env::block_timestamp_ms();
-        if claim_challenge.timestamp_millis > current_timestamp_millis {
-            if claim_challenge.timestamp_millis - current_timestamp_millis > 5 * MILLIS_PER_MINUTE {
-                log!("claim_challenge is too early");
-                return None;
-            }
-        } else {
-            if current_timestamp_millis - claim_challenge.timestamp_millis > 5 * MILLIS_PER_MINUTE {
-                log!("claim challenge is time is expired");
-                return None;
-            }
-        }
-
-        let claimable = self.claimables.get(&format!(
-            "{}:{}",
-            claim_challenge.nft_account_id, &claim_challenge.token_id
-        ));
-
-        if claimable.is_none() {
+        let claim_challenge_parse_result = ClaimChallenge::from_claim_challenge_string(claim_token);
+        if claim_challenge_parse_result.is_err() {
             log!(
-                "claimable {}:{} does not exists",
-                claim_challenge.nft_account_id,
-                claim_challenge.token_id
+                "failed to parse claim_token:\n{:?}",
+                claim_challenge_parse_result.err()
             );
             return None;
         }
-
-        let claimable = claimable.unwrap();
-
-        match PublicKey::from_bytes(claimable.public_key.as_slice())
-            .unwrap()
-            .verify(
-                &claim_challenge_bytes.as_slice(),
-                &Signature::from_bytes(claim_challenge_signature_bytes.as_slice()).unwrap(),
-            ) {
-            Ok(()) => Some(claimable),
-            Err(e) => {
-                log!("dsa verification failed with err: {}", e);
+        let claim_challenge = claim_challenge_parse_result.unwrap();
+        match self.validate_claim_challenge(&claim_challenge) {
+            Ok(claimable) => Some(claimable),
+            Err(error) => {
+                env::log_str(error.as_str());
                 None
             }
         }
@@ -151,19 +94,28 @@ impl Contract {
 
     #[payable]
     pub fn claim(&mut self, claim_token: String) -> PromiseOrValue<bool> {
-        match self.is_claimable(claim_token) {
-            Some(claimable) => PromiseOrValue::Promise(
+        let claim_challenge_parse_result = ClaimChallenge::from_claim_challenge_string(claim_token);
+        if claim_challenge_parse_result.is_err() {
+            env::panic_str(format!(
+                "failed to parse claim_token:\n{:?}",
+                claim_challenge_parse_result.err()
+            ).as_str());
+        }
+        let claim_challenge = claim_challenge_parse_result.unwrap();
+
+        match self.validate_claim_challenge(&claim_challenge) {
+            Ok(claimable) => PromiseOrValue::Promise(
                 external_nft::ext(claimable.nft_account_id.clone())
                     .with_attached_deposit(ONE_YOCTO)
                     .nft_transfer(
-                        env::signer_account_id(),
+                        claim_challenge.get_owner_id(),
                         claimable.token_id.clone(),
                         None,
                         None,
                     )
                     .then(Self::ext(env::current_account_id()).claim_callback(claimable)),
             ),
-            None => PromiseOrValue::Value(false),
+            Err(error) => env::panic_str(error.as_str()),
         }
     }
 
@@ -212,6 +164,54 @@ impl Contract {
             );
         }
         false
+    }
+
+    fn validate_claim_challenge(
+        &self,
+        claim_challenge: &ClaimChallenge,
+    ) -> Result<Claimable, String> {
+        let current_timestamp_millis = env::block_timestamp_ms();
+        if claim_challenge.get_timestamp_millis() > current_timestamp_millis {
+            if claim_challenge.get_timestamp_millis() - current_timestamp_millis
+                > 5 * MILLIS_PER_MINUTE
+            {
+                return Err("claim_challenge is too early".to_string());
+            }
+        } else {
+            if current_timestamp_millis - claim_challenge.get_timestamp_millis()
+                > 5 * MILLIS_PER_MINUTE
+            {
+                return Err("claim challenge is time is expired".to_string());
+            }
+        }
+
+        let claimable = self.claimables.get(&format!(
+            "{}:{}",
+            claim_challenge.get_nft_account_id(),
+            &claim_challenge.get_token_id()
+        ));
+
+        if claimable.is_none() {
+            return Err(format!(
+                "claimable {}:{} does not exists",
+                claim_challenge.get_nft_account_id(),
+                claim_challenge.get_token_id()
+            ));
+        }
+
+        let claimable = claimable.unwrap();
+
+        match PublicKey::from_bytes(claimable.public_key.as_slice())
+            .unwrap()
+            .verify(
+                claim_challenge
+                    .get_claim_challenge_details_bytes()
+                    .as_slice(),
+                &Signature::from_bytes(claim_challenge.get_signature().as_slice()).unwrap(),
+            ) {
+            Ok(()) => Ok(claimable),
+            Err(e) => Err(format!("dsa verification failed with err: {}", e)),
+        }
     }
 }
 
