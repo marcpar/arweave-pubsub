@@ -56,7 +56,8 @@ impl ClaimChallenge {
         }
 
         let claim_challenge_details_bytes = claim_challenge_utf8_result.unwrap();
-        let claim_challenge_utf8_json = String::from_utf8(claim_challenge_details_bytes.clone()).unwrap();
+        let claim_challenge_utf8_json =
+            String::from_utf8(claim_challenge_details_bytes.clone()).unwrap();
         let claim_challenge_details_result: Result<ClaimChallengeDetails, serde_json::Error> =
             serde_json::from_str(claim_challenge_utf8_json.as_str());
         if claim_challenge_details_result.is_err() {

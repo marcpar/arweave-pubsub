@@ -1,6 +1,6 @@
 use ed25519_dalek::{PublicKey, Signature, Verifier};
 use external::nft::external_nft;
-use internal::claim_challenge::ClaimChallenge;
+use internal::{claim_challenge::ClaimChallenge, claimable::Claimable};
 use near_contract_standards::{
     non_fungible_token::TokenId,
     non_fungible_token::{core::NonFungibleTokenReceiver, Token},
@@ -11,7 +11,10 @@ use near_sdk::{
     env, log, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, PromiseError,
     PromiseOrValue, ONE_YOCTO,
 };
-use serde::{Deserialize, Serialize};
+
+use crate::internal::{
+    nft_token_callback_message::NFTTokenCallbackMessage, on_transfer_message::OnTransferMessage,
+};
 
 mod external;
 mod internal;
@@ -21,7 +24,6 @@ const WHITE_LISTED_NFT: [&'static str; 2] =
 
 const MILLIS_PER_MINUTE: u64 = 60_000;
 
-#[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     ClaimablesKey,
@@ -34,30 +36,9 @@ struct Contract {
 }
 
 #[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
-pub struct Claimable {
-    pub token_id: TokenId,
-    pub nft_account_id: AccountId,
-    pub public_key: Vec<u8>,
-}
-
-#[near_bindgen]
-#[derive(Serialize, Deserialize)]
-pub struct OnTransferMessage {
-    pub public_key: String,
-    pub message: String,
-}
-
-#[near_bindgen]
-#[derive(Serialize, Deserialize)]
-pub struct NFTTokenCallbackMessage {
-    pub public_key: Vec<u8>,
-    pub nft_account_id: AccountId,
-    pub message: String,
-}
-
-#[near_bindgen]
 impl Contract {
+
+    /// initial with default fields
     #[init]
     pub fn default() -> Self {
         Self {
@@ -65,6 +46,7 @@ impl Contract {
         }
     }
 
+    /// get a claimable
     pub fn get_claimable(&self, nft_account: String, token_id: String) -> Option<Claimable> {
         self.claimables
             .get(&format!("{}:{}", nft_account.as_str(), token_id.as_str()))
@@ -92,14 +74,18 @@ impl Contract {
         }
     }
 
+    /// claim the nft
     #[payable]
     pub fn claim(&mut self, claim_token: String) -> PromiseOrValue<bool> {
         let claim_challenge_parse_result = ClaimChallenge::from_claim_challenge_string(claim_token);
         if claim_challenge_parse_result.is_err() {
-            env::panic_str(format!(
-                "failed to parse claim_token:\n{:?}",
-                claim_challenge_parse_result.err()
-            ).as_str());
+            env::panic_str(
+                format!(
+                    "failed to parse claim_token:\n{:?}",
+                    claim_challenge_parse_result.err()
+                )
+                .as_str(),
+            );
         }
         let claim_challenge = claim_challenge_parse_result.unwrap();
 
@@ -119,6 +105,7 @@ impl Contract {
         }
     }
 
+    /// claim callback
     #[private]
     pub fn claim_callback(
         &mut self,
@@ -225,7 +212,7 @@ impl NonFungibleTokenReceiver for Contract {
         token_id: TokenId,
         msg: String,
     ) -> PromiseOrValue<bool> {
-        let payload: OnTransferMessage = serde_json::from_str(&msg).unwrap();
+        let payload: OnTransferMessage = OnTransferMessage::from_string(msg.to_string()).unwrap();
         log!(
             "message: {}, public_key: {}",
             payload.message,
