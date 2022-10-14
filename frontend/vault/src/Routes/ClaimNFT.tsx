@@ -46,7 +46,7 @@ async function claimHandler(claim_token: string, callback: string) {
         callbackUrl: callback,
         args: {
             claim_token: claim_token
-        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS, deposit: "1"
+        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS, amount: "1"
     })
 }
 

@@ -7,9 +7,12 @@ use near_contract_standards::{
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::LookupMap,
-    env, log, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, PromiseError,
-    PromiseOrValue, ONE_YOCTO,
+    collections::{LookupMap, UnorderedSet},
+    env,
+    json_types::Base64VecU8,
+    log, near_bindgen, require,
+    utils::assert_one_yocto,
+    AccountId, BorshStorageKey, PanicOnDefault, PromiseError, PromiseOrValue, ONE_YOCTO,
 };
 
 use crate::internal::{
@@ -19,31 +22,47 @@ use crate::internal::{
 mod external;
 mod internal;
 
-const WHITE_LISTED_NFT: [&'static str; 2] =
-    ["nft.nftdw-001.testnet", "nft.world-triathlon.testnet"];
-
 const MILLIS_PER_MINUTE: u64 = 60_000;
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     ClaimablesKey,
+    AllowedNFTsKey,
 }
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 struct Contract {
     pub claimables: LookupMap<String, Claimable>,
+    pub allowed_nfts: UnorderedSet<AccountId>,
 }
 
 #[near_bindgen]
 impl Contract {
-
     /// initial with default fields
     #[init]
     pub fn default() -> Self {
         Self {
             claimables: LookupMap::new(StorageKey::ClaimablesKey),
+            allowed_nfts: UnorderedSet::new(StorageKey::AllowedNFTsKey),
         }
+    }
+
+    /// get allowed nft accounts to lock tokens on this vault
+    pub fn get_allowed_nfts(&self) -> Vec<AccountId> {
+        self.allowed_nfts.to_vec()
+    }
+
+    /// allow an nft contract to lock tokens on this vault
+    #[private]
+    pub fn allow_nft(&mut self, account_id: AccountId) -> bool {
+        self.allowed_nfts.insert(&account_id)
+    }
+
+    /// remove an nft contract on the allowed list
+    #[private]
+    pub fn remove_allowed_nft(&mut self, account_id: AccountId) -> bool {
+        self.allowed_nfts.remove(&account_id)
     }
 
     /// get a claimable
@@ -77,6 +96,7 @@ impl Contract {
     /// claim the nft
     #[payable]
     pub fn claim(&mut self, claim_token: String) -> PromiseOrValue<bool> {
+        assert_one_yocto();
         let claim_challenge_parse_result = ClaimChallenge::from_claim_challenge_string(claim_token);
         if claim_challenge_parse_result.is_err() {
             env::panic_str(
@@ -220,12 +240,14 @@ impl NonFungibleTokenReceiver for Contract {
         );
 
         let nft = env::predecessor_account_id();
-        if !WHITE_LISTED_NFT.contains(&nft.as_str()) {
-            panic!(
+
+        require!(
+            self.allowed_nfts.contains(&nft),
+            format!(
                 "{} is not allowed to lock tokens on this vault",
                 &nft.as_str()
             )
-        }
+        );
 
         PromiseOrValue::Promise(
             external_nft::ext(nft.clone()).nft_token(token_id).then(
