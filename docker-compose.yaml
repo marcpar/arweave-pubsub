@@ -11,6 +11,16 @@ services:
     volumes:
       - ./jobs/arweave_processor:/home/app
 
+  arweave_callback:
+    build:
+      context: jobs/arweave_processor
+      dockerfile: local.dockerfile
+    entrypoint: yarn
+    command: callback-server
+    working_dir: /home/app
+    volumes:
+      - ./jobs/arweave_processor:/home/app
+
   near_processor:
     build:
       context: jobs/near_processor
@@ -20,3 +30,25 @@ services:
     working_dir: /home/app
     volumes:
       - ./jobs/near_processor:/home/app
+
+  near_callback:
+    build:
+      context: jobs/near_processor
+      dockerfile: local.dockerfile
+    entrypoint: yarn
+    command: callback-server
+    working_dir: /home/app
+    volumes:
+      - ./jobs/near_processor:/home/app
+  
+  vault_front:
+    build:
+      context: frontend/vault
+      dockerfile: local.dockerfile
+    entrypoint: npm
+    command: ["run", "start"]
+    working_dir: /home/app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/vault:/home/app

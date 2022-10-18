@@ -50,6 +50,20 @@ async function claimHandler(claim_token: string, callback: string) {
     })
 }
 
+function createWalletHandler() {
+    let network = process.env.REACT_APP_NEAR_NETWORK;
+    switch (network) {
+        case "testnet":
+            window.location.href = 'https://wallet.testnet.near.org/create';
+            break;
+        case "mainnet":
+            window.location.href = 'https://wallet.near.org/create'
+            break;
+        default:
+            throw new Error(`unkown network ${network}`)
+    }
+}
+
 type NFTDetails = {
     nftMeta: NFTContractMetadata | null ,
     nftToken: NFTToken | null 
@@ -127,8 +141,6 @@ export default function ClaimNFT() {
     } catch(_) {
         fullname = "";
     }
-    
-    
 
     return (
         <div className={style.main_container}>
@@ -147,6 +159,10 @@ export default function ClaimNFT() {
                 </div>
             </Tilt>
             <button className={style.button} onClick={claim} disabled={!(isLoggedIn && isClaimable)}>Claim</button>
+            <div className={style.create_wallet_container}>
+                <div>Don't have a wallet yet?</div>
+                <button className={style.create_wallet_button} onClick={createWalletHandler}>Create Near Wallet</button>
+            </div>
         </div>
     );
 }
