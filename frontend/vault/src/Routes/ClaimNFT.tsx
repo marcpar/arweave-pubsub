@@ -51,7 +51,7 @@ async function claimHandler(claim_token: string, callback: string) {
 }
 
 function createWalletHandler() {
-    let network = process.env.REACT_APP_NEAR_NETWORK;
+    let network = process.env.REACT_APP_NEAR_NETWORK ?? "testnet";
     switch (network) {
         case "testnet":
             window.location.href = 'https://wallet.testnet.near.org/create';
