@@ -73,11 +73,17 @@ async function processJob(job: Job) {
         log_type: 'job_started',
         job_id: job.payload.JobId
     });
-    await Emit({
+    let emitResult = await Emit({
         JobId: payload.JobId,
         Event: 'started',
         Message: `Job ${payload.JobId} has been received and started`,
     });
+
+    if (emitResult === "not_found" || emitResult === "error") {
+        Logger().warn(`callback endpoint failed with emit result ${emitResult}, removing the job from queue`);
+        return;
+    }
+
     let result = await Mint(payload);
     Logger().info(`Job ${payload.JobId} has been successfully processed`, {
         log_type: 'job_completed',

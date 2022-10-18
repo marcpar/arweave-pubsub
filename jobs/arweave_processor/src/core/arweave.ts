@@ -3,7 +3,7 @@ import { JWKInterface } from "arweave/node/lib/wallet.js";
 import { fileTypeFromBuffer } from "file-type";
 import { Logger } from "../lib/logger.js";
 import { Sleep } from "../lib/util.js";
-import arbundles, {
+import {
     createData,
     bundleAndSignData,
 } from "arbundles";

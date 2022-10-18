@@ -79,11 +79,17 @@ async function processJob(job: Job) {
 
     if (!txID) {
 
-        await Emit({
+        let emitResult = await Emit({
             JobId: job.payload.JobId,
             Event: "started",
             Message: `Job ${job.payload.JobId} has been started`
         });
+
+        if (emitResult === "not_found" || emitResult === "error") {
+            Logger().warn(`callback endpoint failed with emit result ${emitResult}, removing the job from queue`);
+            return;
+        }
+
         Logger().info(`Job ${job.payload.JobId} has been started`, {
             log_type: 'job_started',
             job_id: job.payload.JobId
@@ -106,11 +112,17 @@ async function processJob(job: Job) {
             PathManifestTxID: manifestTxID
         });
     } else {
-        await Emit({
+        let emitResult = await Emit({
             JobId: job.payload.JobId,
             Event: "started",
             Message: `Job ${job.payload.JobId} has been restarted`
         });
+
+        if (emitResult === "not_found" || emitResult === "error") {
+            Logger().warn(`callback endpoint failed with emit result ${emitResult}, removing the job from queue`);
+            return;
+        }
+        
         Logger().info(`Job ${job.payload.JobId} has been restarted`, {
             log_type: 'job_restarted',
             job_id: job.payload.JobId

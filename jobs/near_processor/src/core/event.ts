@@ -19,15 +19,27 @@ interface _Event extends Event {
     Time: number
 }
 
-async function Emit(event: Event): Promise<void> {
+type EmitResult = "ok" | "not_found" | "error";
+
+async function Emit(event: Event): Promise<EmitResult> {
     let _event = event as _Event;
     _event.Time = new Date().getTime();
-    Logger().debug(JSON.stringify(_event));
     let response = await _client.post(_callbackURL, _event);
-    Logger().debug(`callback response for ${JSON.stringify(event)}: ${response.status}\n${JSON.stringify(response.data)}`);
+    Logger().debug(`callback reponse: ${response.status}\n${JSON.stringify(response.data)}`);
+
+    if ([400, "400"].includes(response.data)) {
+        return "error";
+    }
+
+    if ([404, "404"].includes(response.data)) {
+        return "not_found";
+    }
+
     if (![true, "true", 200, "200"].includes(response.data)) {
         throw new Error(`Callback endpoint unexpected response ${response.data}, should be true or 200`);
     }
+
+    return "ok";
 }
 
 export {
