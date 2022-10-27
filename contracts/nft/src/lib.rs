@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{alloc::Layout, str::FromStr};
 
 use near_contract_standards::{
     impl_non_fungible_token_approval, impl_non_fungible_token_core,
@@ -15,7 +15,7 @@ use near_sdk::{
     collections::LazyOption,
     env,
     json_types::Base64VecU8,
-    near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue, require,
+    near_bindgen, require, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
 };
 
 #[near_bindgen]
@@ -37,17 +37,34 @@ struct Contract {
 
 #[near_bindgen]
 impl Contract {
-
     #[init]
     pub fn default() -> Self {
+        Self::new(
+            "World Triathlon".to_string(),
+            "WT".to_string(),
+            Some("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH5QsIFRgqe3QJewAAAhZJREFUWMPt1b2LVVcUxuFnnXtmyEwUi4i9iKaKRot0CVhZRUTBQgULYQaFaCEIkWAIQv4ACxFLxYhFCsV0KRwbSREFCxGxSCAEhBj8ALnqnb1S3DPjHTk3MxqjhfcHm7PZ6z1rv3ut88GIESPed2Iqy3chaUZ/XgxfKwKhyHlNPxZLzvEiT41j77IC9cC8i4eYxPIW7RM8bmKTA/c8eI19lxHLyAUGruAQuQ9HFuoTLuB7fIs9TWAGB9FDDNms01xnm2uP/AqHX67A4zHdOz3jNxozK7B+IMHfyd3on/gJruM3rJlz2MJT4pdQKnyG8cbIR20t8NSH0fH8AbGffITz+KLlRLdCfJnKFvw4YHKQCn9ic7PxWaxCITqUedE8Y7qJDeShorpHHsdfLckL0W1KPz5k1BhrWhPNvG5inUGXbewNueOkyZ9DnhqiieaEl3CxGZdx3ytQD1mfCPnNAd1fgxNNGReYTdkpetcq9c7GT5KT+Amf/1cD8An5dYr90W/FxsHHPCiVehOm++ZyLt/aN1GBOXbhaig/pLgdenK+EFGwGvu0P4RLolokPoGjqbOO6vdcVP5mDLz8Tn+Mo/3+xhJSvho1zulnvjdrbE8om1p028k/iJvkOqxMZRfxKflvribIbSnqkB+0CWIqS4TZxG6cCVm91b/h6ahyOp/T/0Q+83/UeZEWzDGDrW/bwIgRI945/wC1LcF+TG5FFAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0xMS0wOFQyMToyNDo0MiswMDowMKSIPSMAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMTEtMDhUMjE6MjQ6NDIrMDA6MDDV1YWfAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFd6VFh0UmF3IHByb2ZpbGUgdHlwZSBpcHRjAAB4nOPyDAhxVigoyk/LzEnlUgADIwsuYwsTIxNLkxQDEyBEgDTDZAMjs1Qgy9jUyMTMxBzEB8uASKBKLgDqFxF08kI1lQAAAABJRU5ErkJggg==".to_string()), Some("https://arweave.net".to_string()),
+            None,
+            None
+        )
+    }
+
+    #[init]
+    pub fn new(
+        name: String,
+        symbol: String,
+        icon: Option<String>,
+        base_uri: Option<String>,
+        reference: Option<String>,
+        reference_hash: Option<Base64VecU8>,
+    ) -> Self {
         let metadata = NFTContractMetadata {
             spec: NFT_METADATA_SPEC.to_string(),
-            name: "World Triathlon".to_string(),
-            symbol: "WT".to_string(),
-            icon: Some("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH5QsIFRgqe3QJewAAAhZJREFUWMPt1b2LVVcUxuFnnXtmyEwUi4i9iKaKRot0CVhZRUTBQgULYQaFaCEIkWAIQv4ACxFLxYhFCsV0KRwbSREFCxGxSCAEhBj8ALnqnb1S3DPjHTk3MxqjhfcHm7PZ6z1rv3ut88GIESPed2Iqy3chaUZ/XgxfKwKhyHlNPxZLzvEiT41j77IC9cC8i4eYxPIW7RM8bmKTA/c8eI19lxHLyAUGruAQuQ9HFuoTLuB7fIs9TWAGB9FDDNms01xnm2uP/AqHX67A4zHdOz3jNxozK7B+IMHfyd3on/gJruM3rJlz2MJT4pdQKnyG8cbIR20t8NSH0fH8AbGffITz+KLlRLdCfJnKFvw4YHKQCn9ic7PxWaxCITqUedE8Y7qJDeShorpHHsdfLckL0W1KPz5k1BhrWhPNvG5inUGXbewNueOkyZ9DnhqiieaEl3CxGZdx3ytQD1mfCPnNAd1fgxNNGReYTdkpetcq9c7GT5KT+Amf/1cD8An5dYr90W/FxsHHPCiVehOm++ZyLt/aN1GBOXbhaig/pLgdenK+EFGwGvu0P4RLolokPoGjqbOO6vdcVP5mDLz8Tn+Mo/3+xhJSvho1zulnvjdrbE8om1p028k/iJvkOqxMZRfxKflvribIbSnqkB+0CWIqS4TZxG6cCVm91b/h6ahyOp/T/0Q+83/UeZEWzDGDrW/bwIgRI945/wC1LcF+TG5FFAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0xMS0wOFQyMToyNDo0MiswMDowMKSIPSMAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMTEtMDhUMjE6MjQ6NDIrMDA6MDDV1YWfAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFd6VFh0UmF3IHByb2ZpbGUgdHlwZSBpcHRjAAB4nOPyDAhxVigoyk/LzEnlUgADIwsuYwsTIxNLkxQDEyBEgDTDZAMjs1Qgy9jUyMTMxBzEB8uASKBKLgDqFxF08kI1lQAAAABJRU5ErkJggg==".to_string()),
-            base_uri: Some("https://arweave.net".to_string()),
-            reference: None,
-            reference_hash: None,
+            name,
+            symbol,
+            icon,
+            base_uri,
+            reference,
+            reference_hash,
         };
         Self {
             nft: NonFungibleToken::new(
