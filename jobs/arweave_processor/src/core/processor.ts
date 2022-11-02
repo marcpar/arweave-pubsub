@@ -38,7 +38,14 @@ async function loop() {
         await Sleep(5000);
         return;
     }
-    let job = await _queue.getNextJob();
+    let job!: Job;
+    try {
+        job = await _queue.getNextJob();
+    } catch (e) {
+        Logger().error(e);
+        return;
+    }
+
     _processing++;
     (async () => {
         await processJob(job);
@@ -103,7 +110,7 @@ async function processJob(job: Job) {
             throw new Error(`Failure while trying to download media returned status: ${response.status}\n${response.data}`)
         }
 
-        let result = await UploadMediaToPermaweb(response.data, payload.Metadata,payload.JobId);
+        let result = await UploadMediaToPermaweb(response.data, payload.Metadata, payload.JobId);
         txID = result.BundleTxID;
         manifestTxID = result.PathManifestTxID;
 
@@ -122,7 +129,7 @@ async function processJob(job: Job) {
             Logger().warn(`callback endpoint failed with emit result ${emitResult}, removing the job from queue`);
             return;
         }
-        
+
         Logger().info(`Job ${job.payload.JobId} has been restarted`, {
             log_type: 'job_restarted',
             job_id: job.payload.JobId

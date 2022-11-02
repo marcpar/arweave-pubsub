@@ -1,7 +1,8 @@
 import { DequeuedMessageItem, QueueServiceClient, StorageSharedKeyCredential } from "@azure/storage-queue";
+import { Emit } from "../core/event.js";
 import { Logger } from "../lib/logger.js";
 import { Sleep } from "../lib/util.js";
-import { Job, Payload, Queue } from "./common.js";
+import { Job, ParsePayloadFromJSONString, Payload, Queue } from "./common.js";
 
 
 const STORAGE_QUEUE_POLL_INTERVAL = 3000;
@@ -18,9 +19,10 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
     let queue: Queue = {
         async getNextJob(): Promise<Job> {
 
-            return new Promise<Job>(async (resolve) => {
+            return new Promise<Job>(async (resolve, reject) => {
                 await qClient.createIfNotExists();
                 let currentMessage: DequeuedMessageItem;
+
                 do {
                     Logger().debug('fetching messages from storage queue');
                     let msgResponse = await qClient.receiveMessages({});
@@ -35,7 +37,20 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                             currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
                         }, STORAGE_QUEUE_RENEW_LOCK_INTERVAL);
 
-                        let payload = JSON.parse(currentMessage.messageText) as Payload;
+                        let parseResult = ParsePayloadFromJSONString(currentMessage.messageText);
+                        if (parseResult.Error !== null && parseResult.Error !== undefined || parseResult.Payload === null) {
+                            clearInterval(renewLockInterval);
+                            Emit({
+                                Event: 'failure',
+                                JobId: parseResult.Payload?.JobId ?? "",
+                                Message: `Failed to parse payload: ${parseResult.Error}`,
+                            });
+                            qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
+                            reject(parseResult.Error);
+                            break;
+                        }
+
+                        let payload = parseResult.Payload;
 
                         resolve({
                             payload: payload,

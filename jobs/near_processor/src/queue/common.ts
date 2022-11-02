@@ -21,8 +21,35 @@ type Payload = {
     UpdatedAt?: string,
 }
 
+function ParsePayloadFromJSONString(payloadString: string): {
+    Payload: Payload | null,
+    Error: string | null
+} {
+    let payload = JSON.parse(payloadString) as Payload;
+
+    if (payload.JobId === undefined || payload.JobId === null) {
+        return {
+            Payload: payload,
+            Error: "JobId is a required parameter"
+        };
+    }
+
+    if (payload.ArweaveTxnId === undefined || payload.ArweaveTxnId === null) {
+        return {
+            Payload: payload,
+            Error: "ArweaveTxnId is a required parameter"
+        };
+    }
+
+    return {
+        Payload: payload,
+        Error: null
+    };
+}
+
 export {
     Queue,
     Job,
-    Payload
+    Payload,
+    ParsePayloadFromJSONString
 }

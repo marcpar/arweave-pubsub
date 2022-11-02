@@ -38,7 +38,14 @@ async function loop() {
         await Sleep(5000);
         return;
     }
-    let job = await _queue.getNextJob();
+    let job!: Job;
+    try {
+        job = await _queue.getNextJob();
+    } catch (e) {
+        Logger().error(e);
+        return;
+    }
+
     _processing++;
     (async () => {
         await processJob(job);
