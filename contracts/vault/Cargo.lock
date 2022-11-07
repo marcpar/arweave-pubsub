@@ -1134,7 +1134,6 @@ name = "vault"
 version = "0.1.0"
 dependencies = [
  "base64 0.13.0",
- "bs58",
  "ed25519-dalek",
  "near-contract-standards",
  "near-sdk",

@@ -8,11 +8,10 @@ use near_contract_standards::{
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::{LookupMap, UnorderedSet},
-    env,
-    json_types::Base64VecU8,
-    log, near_bindgen, require,
+    env, log, near_bindgen, require,
     utils::assert_one_yocto,
-    AccountId, BorshStorageKey, PanicOnDefault, PromiseError, PromiseOrValue, ONE_YOCTO,
+    AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseError, PromiseOrValue, ONE_YOCTO, PublicKey as NearPublicKey,
+    bs58, Balance, Gas,
 };
 
 use crate::internal::{
@@ -23,6 +22,7 @@ mod external;
 mod internal;
 
 const MILLIS_PER_MINUTE: u64 = 60_000;
+const ONE_MILLINEAR: Balance = 1_000_000_000_000_000_000_000;
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
 enum StorageKey {
@@ -125,6 +125,32 @@ impl Contract {
         }
     }
 
+    /// drop a claimable to specific user
+    ///
+    /// this method is called using an access key
+    #[private]
+    pub fn drop_to(&mut self, receiver_id: AccountId, claimable_id: String) -> Promise {
+        let claimable = self.claimables.get(&claimable_id);
+        if claimable.is_none() {
+            env::panic_str(format!("claimable does not exist: {}", claimable_id).as_str());
+        }
+        let claimable = claimable.unwrap();
+        let mut pk = claimable.public_key.clone();
+        pk.remove(0);
+        let claimable_pk = PublicKey::from_bytes(pk.as_slice()).unwrap();
+        
+        let mut signer_pk = env::signer_account_pk().as_bytes().to_vec();
+        signer_pk.remove(0);
+        if claimable_pk != PublicKey::from_bytes(signer_pk.as_slice()).unwrap() {
+            env::panic_str("claimable public key does not match signer_account_pk");
+        }
+
+        external_nft::ext(claimable.nft_account_id.clone())
+            .with_attached_deposit(ONE_YOCTO)
+            .nft_transfer(receiver_id, claimable.token_id.clone(), None, None)
+            .then(Self::ext(env::current_account_id()).claim_callback(claimable))
+    }
+
     /// claim callback
     #[private]
     pub fn claim_callback(
@@ -140,6 +166,10 @@ impl Contract {
             "{}:{}",
             &claimable.nft_account_id, &claimable.token_id
         ));
+
+        if env::current_account_id() == env::signer_account_id() {
+            Promise::new(env::current_account_id()).delete_key(env::signer_account_pk());
+        }
     }
 
     #[private]
@@ -153,11 +183,16 @@ impl Contract {
         }
         let token = call_result.unwrap();
         log!("{}", serde_json::to_string(&token).unwrap());
+        
+        let pk = msg.public_key.parse::<NearPublicKey>().unwrap();
+
+        log!("pk size: {}", pk.clone().into_bytes().len());
+        log!("{:?}", pk.clone().as_bytes());
 
         let claimable = Claimable {
             token_id: token.token_id.clone(),
             nft_account_id: msg.nft_account_id.clone(),
-            public_key: msg.public_key,
+            public_key: pk.clone().as_bytes().to_vec(),
         };
 
         if token.owner_id.as_str() == env::current_account_id().as_str() {
@@ -170,6 +205,10 @@ impl Contract {
                 &claimable,
             );
         }
+        
+        Promise::new(env::current_account_id()).add_access_key(pk, 100 * ONE_MILLINEAR, env::current_account_id(), "drop_to".to_string());
+
+        
         false
     }
 
@@ -252,15 +291,7 @@ impl NonFungibleTokenReceiver for Contract {
         PromiseOrValue::Promise(
             external_nft::ext(nft.clone()).nft_token(token_id).then(
                 Self::ext(env::current_account_id()).nft_token_callback(NFTTokenCallbackMessage {
-                    public_key: PublicKey::from_bytes(
-                        bs58::decode(payload.public_key.split(":").collect::<Vec<&str>>()[1])
-                            .into_vec()
-                            .unwrap()
-                            .as_slice(),
-                    )
-                    .unwrap()
-                    .as_bytes()
-                    .to_vec(),
+                    public_key: payload.public_key,
                     nft_account_id: nft,
                     message: payload.message,
                 }),
