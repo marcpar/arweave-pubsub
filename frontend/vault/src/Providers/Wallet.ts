@@ -16,6 +16,7 @@ async function Login(): Promise<void> {
         notifyIsLoggedInSetters(true);
         return;
     }
+    
     return _wallet.requestSignIn({});
 }
 

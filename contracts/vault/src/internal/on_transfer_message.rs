@@ -1,6 +1,10 @@
-use serde::{Serialize, Deserialize};
+use near_sdk::{
+    serde::{self, Deserialize, Serialize},
+    serde_json,
+};
 
 #[derive(Serialize, Deserialize)]
+#[serde(crate = "self::serde")]
 pub struct OnTransferMessage {
     pub public_key: String,
     pub message: String,

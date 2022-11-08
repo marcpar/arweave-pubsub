@@ -12,7 +12,3 @@ crate-type = ["cdylib", "rlib"]
 near-contract-standards = "4.0.0"
 near-sdk = "4.0.0"
 uint = { version = "0.9.3", default-features = false }
-serde = { version = "1.0.144", feature = ["derive"]}
-serde_json = "1.0.61"
-base64 = "0.13.0"
-ed25519-dalek = "1.0.1"

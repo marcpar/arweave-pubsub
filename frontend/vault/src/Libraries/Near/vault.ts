@@ -11,7 +11,7 @@ type ClaimDetails = {
 type Claimable = {
     token_id: string,
     nft_account_id: string,
-    public_key: Buffer,
+    public_key: String,
 }
 
 type ClaimChallenge = {

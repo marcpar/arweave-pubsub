@@ -1,6 +1,5 @@
-use ed25519_dalek::{PublicKey, Signature, Verifier};
 use external::nft::external_nft;
-use internal::{claim_challenge::ClaimChallenge, claimable::Claimable};
+use internal::claimable::Claimable;
 use near_contract_standards::{
     non_fungible_token::TokenId,
     non_fungible_token::{core::NonFungibleTokenReceiver, Token},
@@ -10,8 +9,8 @@ use near_sdk::{
     collections::{LookupMap, UnorderedSet},
     env, log, near_bindgen, require,
     utils::assert_one_yocto,
-    AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseError, PromiseOrValue, ONE_YOCTO, PublicKey as NearPublicKey,
-    bs58, Balance, Gas,
+    AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise, PromiseError,
+    PromiseOrValue, PublicKey, ONE_YOCTO,
 };
 
 use crate::internal::{
@@ -71,77 +70,18 @@ impl Contract {
             .get(&format!("{}:{}", nft_account.as_str(), token_id.as_str()))
     }
 
-    /// View function to validate if generated claim_token is valid
-    ///
-    /// can be used from client side to validate if the user has the correct access key
-    pub fn is_claimable(&self, claim_token: String) -> Option<Claimable> {
-        let claim_challenge_parse_result = ClaimChallenge::from_claim_challenge_string(claim_token);
-        if claim_challenge_parse_result.is_err() {
-            log!(
-                "failed to parse claim_token:\n{:?}",
-                claim_challenge_parse_result.err()
-            );
-            return None;
-        }
-        let claim_challenge = claim_challenge_parse_result.unwrap();
-        match self.validate_claim_challenge(&claim_challenge) {
-            Ok(claimable) => Some(claimable),
-            Err(error) => {
-                env::log_str(error.as_str());
-                None
-            }
-        }
-    }
-
-    /// claim the nft
-    #[payable]
-    pub fn claim(&mut self, claim_token: String) -> PromiseOrValue<bool> {
-        assert_one_yocto();
-        let claim_challenge_parse_result = ClaimChallenge::from_claim_challenge_string(claim_token);
-        if claim_challenge_parse_result.is_err() {
-            env::panic_str(
-                format!(
-                    "failed to parse claim_token:\n{:?}",
-                    claim_challenge_parse_result.err()
-                )
-                .as_str(),
-            );
-        }
-        let claim_challenge = claim_challenge_parse_result.unwrap();
-
-        match self.validate_claim_challenge(&claim_challenge) {
-            Ok(claimable) => PromiseOrValue::Promise(
-                external_nft::ext(claimable.nft_account_id.clone())
-                    .with_attached_deposit(ONE_YOCTO)
-                    .nft_transfer(
-                        claim_challenge.get_owner_id(),
-                        claimable.token_id.clone(),
-                        None,
-                        None,
-                    )
-                    .then(Self::ext(env::current_account_id()).claim_callback(claimable)),
-            ),
-            Err(error) => env::panic_str(error.as_str()),
-        }
-    }
-
     /// drop a claimable to specific user
     ///
     /// this method is called using an access key
     #[private]
-    pub fn drop_to(&mut self, receiver_id: AccountId, claimable_id: String) -> Promise {
+    pub fn claim(&mut self, receiver_id: AccountId, claimable_id: String) -> Promise {
         let claimable = self.claimables.get(&claimable_id);
         if claimable.is_none() {
             env::panic_str(format!("claimable does not exist: {}", claimable_id).as_str());
         }
         let claimable = claimable.unwrap();
-        let mut pk = claimable.public_key.clone();
-        pk.remove(0);
-        let claimable_pk = PublicKey::from_bytes(pk.as_slice()).unwrap();
-        
-        let mut signer_pk = env::signer_account_pk().as_bytes().to_vec();
-        signer_pk.remove(0);
-        if claimable_pk != PublicKey::from_bytes(signer_pk.as_slice()).unwrap() {
+
+        if claimable.public_key.parse::<PublicKey>().unwrap() != env::signer_account_pk() {
             env::panic_str("claimable public key does not match signer_account_pk");
         }
 
@@ -181,18 +121,13 @@ impl Contract {
         if call_result.is_err() {
             return true;
         }
-        let token = call_result.unwrap();
-        log!("{}", serde_json::to_string(&token).unwrap());
-        
-        let pk = msg.public_key.parse::<NearPublicKey>().unwrap();
 
-        log!("pk size: {}", pk.clone().into_bytes().len());
-        log!("{:?}", pk.clone().as_bytes());
+        let token = call_result.unwrap();
 
         let claimable = Claimable {
             token_id: token.token_id.clone(),
             nft_account_id: msg.nft_account_id.clone(),
-            public_key: pk.clone().as_bytes().to_vec(),
+            public_key: msg.public_key.clone(),
         };
 
         if token.owner_id.as_str() == env::current_account_id().as_str() {
@@ -205,59 +140,14 @@ impl Contract {
                 &claimable,
             );
         }
-        
-        Promise::new(env::current_account_id()).add_access_key(pk, 100 * ONE_MILLINEAR, env::current_account_id(), "drop_to".to_string());
 
-        
+        Promise::new(env::current_account_id()).add_access_key(
+            msg.public_key.parse().unwrap(),
+            100 * ONE_MILLINEAR,
+            env::current_account_id(),
+            "claim".to_string(),
+        );
         false
-    }
-
-    fn validate_claim_challenge(
-        &self,
-        claim_challenge: &ClaimChallenge,
-    ) -> Result<Claimable, String> {
-        let current_timestamp_millis = env::block_timestamp_ms();
-        if claim_challenge.get_timestamp_millis() > current_timestamp_millis {
-            if claim_challenge.get_timestamp_millis() - current_timestamp_millis
-                > 5 * MILLIS_PER_MINUTE
-            {
-                return Err("claim_challenge is too early".to_string());
-            }
-        } else {
-            if current_timestamp_millis - claim_challenge.get_timestamp_millis()
-                > 5 * MILLIS_PER_MINUTE
-            {
-                return Err("claim challenge is time is expired".to_string());
-            }
-        }
-
-        let claimable = self.claimables.get(&format!(
-            "{}:{}",
-            claim_challenge.get_nft_account_id(),
-            &claim_challenge.get_token_id()
-        ));
-
-        if claimable.is_none() {
-            return Err(format!(
-                "claimable {}:{} does not exists",
-                claim_challenge.get_nft_account_id(),
-                claim_challenge.get_token_id()
-            ));
-        }
-
-        let claimable = claimable.unwrap();
-
-        match PublicKey::from_bytes(claimable.public_key.as_slice())
-            .unwrap()
-            .verify(
-                claim_challenge
-                    .get_claim_challenge_details_bytes()
-                    .as_slice(),
-                &Signature::from_bytes(claim_challenge.get_signature().as_slice()).unwrap(),
-            ) {
-            Ok(()) => Ok(claimable),
-            Err(e) => Err(format!("dsa verification failed with err: {}", e)),
-        }
     }
 }
 
@@ -288,14 +178,16 @@ impl NonFungibleTokenReceiver for Contract {
             )
         );
 
-        PromiseOrValue::Promise(
-            external_nft::ext(nft.clone()).nft_token(token_id).then(
-                Self::ext(env::current_account_id()).nft_token_callback(NFTTokenCallbackMessage {
-                    public_key: payload.public_key,
-                    nft_account_id: nft,
-                    message: payload.message,
-                }),
-            ),
-        )
+        if let Some(err) = payload.public_key.parse::<PublicKey>().err() {
+            panic!("public_key should be a valid near parsable PublicKey: {:?}", err)
+        }
+
+        PromiseOrValue::Promise(external_nft::ext(nft.clone()).nft_token(token_id).then(
+            Self::ext(env::current_account_id()).nft_token_callback(NFTTokenCallbackMessage {
+                public_key: payload.public_key,
+                nft_account_id: nft,
+                message: payload.message,
+            }),
+        ))
     }
 }

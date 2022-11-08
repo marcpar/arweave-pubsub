@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GetWallet, useIsLoggedInHook } from '../Providers/Wallet';
 import style from "./ClaimNFT.module.css";
 import { GetNFTContract, NFTContractMetadata, NFTToken } from "../Libraries/Near/nft";
@@ -76,6 +76,7 @@ export default function ClaimNFT() {
     let isLoggedIn = useIsLoggedInHook();
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     function claim() {
         let claimToken = generateClaimChallenge(GetWallet().account().accountId, nft as string, token_id as string, parseToken(token));
@@ -85,11 +86,12 @@ export default function ClaimNFT() {
     useEffect(() => {
         if (nftDetails === undefined) {
             GetVaultContractAnonAsync().then(async (contract) => {
-                console.log(contract.get_claimable)
+                console.log(`${nft}:${token_id}`);
                 let claimable = await contract.get_claimable({
                     nft_account: nft as string,
                     token_id: token_id as string
                 });
+
                 if (claimable === null) {
                     setnftDetails(null);
                     return;
@@ -103,14 +105,11 @@ export default function ClaimNFT() {
                         token_id: claimable.token_id
                     })
                 });
+                
+                let claimDetails = parseToken(token);
+                let claimKeyPair = nearAPI.utils.KeyPair.fromString(claimDetails.PrivateKey);
 
-                let vaultAnon = await GetVaultContractAnonAsync();
-
-                let claimToken = generateClaimChallenge(GetWallet().account().accountId, nft as string, token_id as string, parseToken(token));
-                claimable = await vaultAnon.is_claimable({
-                    claim_token: claimToken
-                });
-                if (claimable !== null) {
+                if (claimable !== null && claimable.public_key === claimKeyPair.getPublicKey().toString()) {
                     setIsClaimable(true);
                 }
             })
@@ -126,6 +125,7 @@ export default function ClaimNFT() {
     }
 
     if (nftDetails === null || nftDetails.nftMeta === null || nftDetails.nftToken === null) {
+        navigate('/not-found');
         return (
             <div>Claimable does not exist</div>
         )
@@ -158,7 +158,7 @@ export default function ClaimNFT() {
                     </div>
                 </div>
             </Tilt>
-            <button className={style.button} onClick={claim} disabled={!(isLoggedIn && isClaimable)}>Claim</button>
+            <button className={style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
             <div className={style.create_wallet_container}>
                 <div>Don't have a wallet yet?</div>
                 <button className={style.create_wallet_button} onClick={createWalletHandler}>Create Near Wallet</button>

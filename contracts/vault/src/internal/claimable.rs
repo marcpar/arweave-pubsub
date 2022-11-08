@@ -1,12 +1,13 @@
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    AccountId,
+    serde::{self, Deserialize, Serialize},
+    AccountId, PublicKey,
 };
-use serde::{Deserialize, Serialize};
 
 /// A claimable nft
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "self::serde")]
 pub struct Claimable {
     /// id of the nft
     pub token_id: TokenId,
@@ -14,6 +15,7 @@ pub struct Claimable {
     pub nft_account_id: AccountId,
     /// public key that is used to verify the authenticity of the claim
     ///
-    /// ed25519 public key
-    pub public_key: Vec<u8>,
+    /// near public key
+    /// should be parsable into near_sdk::PublicKey
+    pub public_key: String,
 }
