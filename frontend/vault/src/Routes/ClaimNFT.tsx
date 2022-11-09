@@ -139,30 +139,27 @@ export default function ClaimNFT() {
         });
         fullname = recipientName?.Value as string;
     } catch(_) {
-        fullname = "";
+        fullname = "Participant";
     }
 
     return (
         <div className={style.main_container}>
+            <div className={style.greetings}>
+                <h3>{fullname}</h3>
+                <p>Congratulations for competing in the 2022 World Triathlon Age-Group Championships Abu Dhabi.</p>
+                <p>Your Competior Capsule is ready to be claimed.</p>
+            </div>
             <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
                 <div className={style.card}>
-                    <div className={style.card_header}>
-                        <div className={style.nft_name}>{nftDetails.nftMeta.name}</div>
-                        <div className={style.nft_title}>{nftDetails.nftToken.metadata.title}</div>
-                    </div>
-                    <div className={style.card_body}>
+                    <div className={style.card_media}>
                         <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} />
                     </div>
-                    <div className={style.card_footer}>
-                        <span>{fullname ?? ""}</span>
+                    <div className={style.button_container}>
+                        <button className={style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
                     </div>
                 </div>
             </Tilt>
-            <button className={style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
-            <div className={style.create_wallet_container}>
-                <div>Don't have a wallet yet?</div>
-                <button className={style.create_wallet_button} onClick={createWalletHandler}>Create Near Wallet</button>
-            </div>
+            
         </div>
     );
 }

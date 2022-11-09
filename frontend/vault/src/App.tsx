@@ -4,7 +4,7 @@ import ClaimNFT from './Routes/ClaimNFT';
 import ViewNFT from './Routes/ViewNFT';
 import VaultLayout from './Components/Layout/VaultLayout';
 import "./App.css";
-
+import GlobeImage from "./Assets/WT-3D-Globe.png"
 function App() {
   return (
     <div className="App">
@@ -17,6 +17,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <img className="globe-background" src={GlobeImage}/>  
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default function Media(props: MediaProps) {
         case "mp4" || "webp":
             return (
                 <div className={styles.media_container}>
-                    <video src={props.src} autoPlay muted controls={false} loop className={isLoading ? styles.hidden : styles.video} onPlay={() => {onLoadHandler()}}/>
+                    <video src={props.src} autoPlay muted controls={false} loop className={isLoading ? styles.hidden : styles.media} onPlay={() => {onLoadHandler()}}/>
                     <BounceLoader className={styles.loader} loading={isLoading} color={"rgb(0, 98, 190)"} />
                 </div>
             );
@@ -30,7 +30,7 @@ export default function Media(props: MediaProps) {
         default:
             return (
                 <div className={styles.media_container}>
-                    <img src={props.src} className={isLoading ? styles.hidden : styles.img} onLoad={() => {onLoadHandler()}} alt={"nft"} />
+                    <img src={props.src} className={isLoading ? styles.hidden : styles.media} onLoad={() => {onLoadHandler()}} alt={"nft"} />
                     <BounceLoader className={styles.loader} loading={isLoading} color={"rgb(0, 98, 190)"} />
                 </div>
 

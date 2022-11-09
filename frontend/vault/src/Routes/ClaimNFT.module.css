@@ -2,21 +2,20 @@
     width: fit-content;
     margin: auto;
     text-align: center;
+    padding: 20px;
+}
+
+.greetings {
+    color: #FFFFFF;
+    max-width: 400px;
+    margin: 50px auto;
+    text-align: left;
 }
 
 .card {
-    width: 400px;
-    overflow: hidden;
-    margin: auto;
-    margin-top: 8em;
-    background-color: rgb(243, 243, 243);
-    padding: 10px;
-    border-radius: 20px;
-    box-shadow: 3px 3px 10px rgba(27, 27, 27, 0.096);
 }
 .card:hover {
     cursor: pointer;
-    background-color: rgb(238, 238, 238);
 }
 
 .card_header {
@@ -47,16 +46,21 @@
     color: rgb(116, 116, 116);
 }
 
+.card > .button_container {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+}
+
 .button {
     margin: 15px;
     border: none;
-    padding: 10px 30px;
-    width: 60%;
+    padding: 5px 20px;
     font-weight: bold;
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.151);
-    background-color: rgb(0, 98, 190);
-    color: rgb(245, 245, 245);
-    border-radius: 3px;
+    background-color: rgb(155, 235, 183);
+    color: rgb(42, 73, 220);
+    border-radius: 25px;
     font-size: 18px;
 }
 
