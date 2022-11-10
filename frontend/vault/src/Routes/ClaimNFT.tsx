@@ -76,6 +76,7 @@ export default function ClaimNFT() {
     let isLoggedIn = useIsLoggedInHook();
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
+    const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
     function claim() {
@@ -152,10 +153,10 @@ export default function ClaimNFT() {
             <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
                 <div className={style.card}>
                     <div className={style.card_media}>
-                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} />
+                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />
                     </div>
                     <div className={style.button_container}>
-                        <button className={style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
+                        <button className={isMediaLoading ? style.hidden : style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
                     </div>
                 </div>
             </Tilt>

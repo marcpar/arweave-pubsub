@@ -1,19 +1,33 @@
 .main_container {
-    width: fit-content;
+    width: 100vw;
+    height: 100vh;
     margin: auto;
     text-align: center;
-    padding: 20px;
 }
 
 .greetings {
     color: #FFFFFF;
     max-width: 400px;
-    margin: 50px auto;
+    margin: auto;
+    margin-top: 20px;
     text-align: left;
+    padding: 10px;
 }
 
-.card {
+.greetings > h3 {
+    margin: 0;
 }
+
+.hidden {
+    display: none;
+}
+
+
+.card {
+    width: fit-content;
+    margin: auto;
+}
+
 .card:hover {
     cursor: pointer;
 }
@@ -48,7 +62,9 @@
 
 .card > .button_container {
     position: absolute;
-    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
     width: 100%;
 }
 
@@ -67,7 +83,7 @@
 .button:hover {
     cursor: pointer;
     box-shadow: none;
-    background-color: rgb(2, 86, 165);
+    background-color: rgb(96, 234, 144);
 }
 
 .button[disabled] {
@@ -106,3 +122,9 @@
 }
 
 
+@media only screen and (min-width: 1250px) {
+ .greetings {
+    float: left;
+    margin-left: 20px;
+ }
+}

@@ -1,9 +1,10 @@
 import styles from "./Media.module.css";
 import { CircleLoader, BounceLoader } from "react-spinners";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 type MediaProps = {
     src: string
+    isLoadingSetter?: Dispatch<SetStateAction<boolean>>
 }
 
 export default function Media(props: MediaProps) {
@@ -11,8 +12,10 @@ export default function Media(props: MediaProps) {
     let [isLoading, setIsLoading] = useState<boolean>(true);
 
     function onLoadHandler() {
-        console.log("onload");
         setIsLoading(false);
+        if (props.isLoadingSetter !== undefined && props.isLoadingSetter !== null) {
+            props.isLoadingSetter(false);
+        }
     }
 
     switch (ext) {
@@ -33,7 +36,6 @@ export default function Media(props: MediaProps) {
                     <img src={props.src} className={isLoading ? styles.hidden : styles.media} onLoad={() => {onLoadHandler()}} alt={"nft"} />
                     <BounceLoader className={styles.loader} loading={isLoading} color={"rgb(0, 98, 190)"} />
                 </div>
-
             );
     }
 

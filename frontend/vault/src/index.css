@@ -8,12 +8,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   background: rgb(154,234,183);
-  background: -moz-linear-gradient(300deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
-  background: -webkit-linear-gradient(300deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
-  background: linear-gradient(300deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+  background: -moz-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+  background: -webkit-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+  background: linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#9aeab7",endColorstr="#2e4fdb",GradientType=1);
-  
-  height: 100vh;
+  min-height: 100vh;
 }
 
 code {
@@ -23,10 +22,8 @@ code {
 
 .globe-background {
   position: fixed;
-  display: block;
-  bottom: -50%;
-  right: -50%;
+  bottom: -300px;
+  right: -300px;
   z-index: -100;
-  width: 800px;
-  
+  width: 600px;
 }
