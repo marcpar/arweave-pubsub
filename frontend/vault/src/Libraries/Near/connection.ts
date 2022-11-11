@@ -46,9 +46,12 @@ function GetConfigInMemory(network: "mainnet" | "testnet"): nearAPI.ConnectConfi
     }
 }
 
-async function GetConnection(config: nearAPI.ConnectConfig): Promise<nearAPI.Near> {
+async function GetConnection(config: nearAPI.ConnectConfig | undefined = undefined): Promise<nearAPI.Near> {
     if (_near) {
         return _near;
+    }
+    if (config === undefined) {
+        throw Error('near config is undefined');
     }
     return _near = await nearAPI.connect(config);  
 }

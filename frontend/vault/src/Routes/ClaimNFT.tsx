@@ -2,12 +2,16 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GetWallet, useIsLoggedInHook } from '../Providers/Wallet';
 import style from "./ClaimNFT.module.css";
 import { GetNFTContract, NFTContractMetadata, NFTToken } from "../Libraries/Near/nft";
-import { useEffect, useState } from "react";
-import { ClaimChallenge, ClaimDetails, GetVaultContract, GetVaultContractAnonAsync } from '../Libraries/Near/vault';
+import { Dispatch, SetStateAction, useEffect, useState, ChangeEvent } from "react";
+import { ClaimDetails, GetVaultContract, GetVaultContractAnonAsync } from '../Libraries/Near/vault';
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
 import { GridLoader } from "react-spinners";
+import Modal from "react-modal";
+import { GetConfigInMemory, GetConnection } from '../Libraries/Near/connection';
+
+Modal.setAppElement('#root');
 
 function parseToken(token: string): ClaimDetails {
     let claimDetails!: ClaimDetails
@@ -23,46 +27,58 @@ function parseToken(token: string): ClaimDetails {
     return claimDetails;
 }
 
-function generateClaimChallenge(owner_id: string, nft_account_id: string, token_id: string, claimDetails: ClaimDetails): string {
-    if (claimDetails.NFTContract !== nft_account_id || claimDetails.TokenId !== token_id) {
-        throw new Error("nft mismatch");
-    }
-    let key = nearAPI.utils.KeyPairEd25519.fromString(claimDetails.PrivateKey);
-    let challenge = {
-        nft_account_id: nft_account_id,
-        token_id: token_id,
-        timestamp_millis: new Date().getTime(),
-        owner_id: owner_id,
-    } as ClaimChallenge;
-    let challengeBuff = Buffer.from(JSON.stringify(challenge), 'utf-8');
-    let sig = key.sign(challengeBuff);
-
-    return `${challengeBuff.toString('base64')}.${Buffer.from(sig.signature).toString('base64')}`
-}
-
-async function claimHandler(claim_token: string, callback: string) {
+async function claimHandler(receiver_id: string, claimable_id: string, callback: string) {
     let vaultContract = GetVaultContract(GetWallet().account());
     await vaultContract.claim({
         callbackUrl: callback,
         args: {
-            claim_token: claim_token
-        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS, amount: "1"
+            receiver_id: receiver_id,
+            claimable_id: claimable_id
+        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
     })
 }
 
-function createWalletHandler() {
-    let network = process.env.REACT_APP_NEAR_NETWORK ?? "testnet";
-    switch (network) {
-        case "testnet":
-            window.location.href = 'https://wallet.testnet.near.org/create';
-            break;
-        case "mainnet":
-            window.location.href = 'https://wallet.near.org/create'
-            break;
-        default:
-            throw new Error(`unkown network ${network}`)
-    }
+async function addressOnChangeHandler(setIsAddressValid: Dispatch<SetStateAction<boolean>>, address: string) {
+    console.log(address);
+    validateAddress(address);
 }
+
+async function validateAddress(address: string): Promise<boolean> {
+    let conn = await GetConnection();
+    let account = await conn.account(address);
+    let accountDetails = await account.getAccountDetails();
+    console.log(JSON.stringify(accountDetails));
+    let keys = await account.getAccessKeys();
+    
+    console.log(JSON.stringify(keys));
+    let state = await account.state();
+    console.log(JSON.stringify(state));
+    return true;
+}
+
+async function sendHandler(receiver_id: string, nft_account_id: string, token_id: string , private_key: string) {
+    let network = process.env.REACT_APP_NEAR_NETWORK as any;
+    let nearConfig = GetConfigInMemory(network);
+    let keyStore = new nearAPI.keyStores.InMemoryKeyStore();
+    let accountId = process.env.REACT_APP_VAULT_CONTRACT as string;
+    console.log(accountId);
+    console.log(private_key);
+    await keyStore.setKey(network, accountId, nearAPI.KeyPair.fromString(private_key));
+
+    nearConfig.keyStore = keyStore;
+    let conn = await nearAPI.connect(nearConfig);
+    let vaultContract = GetVaultContract(await conn.account(accountId));
+
+    let callback = `https://wallet.${network}.near.org/nft-detail/${nft_account_id}/${token_id}`;
+    let result = await vaultContract.claim({
+        callbackUrl: callback,
+        args: {
+            claimable_id: `${nft_account_id}:${token_id}`,
+            receiver_id: receiver_id
+        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
+    });
+    alert(JSON.stringify(result));
+};
 
 type NFTDetails = {
     nftMeta: NFTContractMetadata | null ,
@@ -75,13 +91,28 @@ export default function ClaimNFT() {
     let token = searchParams.get('token') ?? '';
     let isLoggedIn = useIsLoggedInHook();
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
+    const [receiverAddress, setReceiverAddress] = useState<string>('');
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [isReceiverAddressvalid, setIsReceiverAddressValid] = useState<boolean>(false);
     const navigate = useNavigate();
 
     function claim() {
-        let claimToken = generateClaimChallenge(GetWallet().account().accountId, nft as string, token_id as string, parseToken(token));
-        claimHandler(claimToken, `https://wallet.${process.env.REACT_APP_NEAR_NETWORK ?? "testnet"}.near.org/nft-detail/${nft}/${token_id}`);
+        setIsModalOpen(true);
+    }
+
+    function addressOnChange(event: ChangeEvent<HTMLInputElement>) {
+        let receiver = event.currentTarget.value;
+        setReceiverAddress(receiver);
+        addressOnChangeHandler(setIsReceiverAddressValid, receiver);
+    }
+
+    function send() {
+        let claimDetails = parseToken(token);
+        sendHandler(receiverAddress, claimDetails.NFTContract, claimDetails.TokenId, claimDetails.PrivateKey).then(() => {
+            window.location.href = `https://wallet.${process.env.REACT_APP_NEAR_NETWORK ?? 'testnet'}.near.org/nft-detail/${nft}/${token_id}`;
+        });
     }
 
     useEffect(() => {
@@ -160,6 +191,31 @@ export default function ClaimNFT() {
                     </div>
                 </div>
             </Tilt>
+            <Modal isOpen={isModalOpen} shouldCloseOnOverlayClick={true} shouldCloseOnEsc={true} onRequestClose={() => setIsModalOpen(false)} style={{
+                content: {
+                    height: 'fit-content',
+                    width: 'fit-content',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    padding: 0,
+                    borderRadius: 20,
+                    borderStyle: 'none',
+                    boxShadow: '3px 3px 3px rgba(0,0,0,0.1)',
+                    backgroundColor: 'rgba(154,234,183,1)'
+                }
+            }}>
+                <div className={style.confirm_modal}>
+                    <div className={style.address_input_container}>
+                        <span>Send to:</span>
+                        <input className={style.address_input} type={"text"} onChange={addressOnChange}/>
+                    </div>
+                    <div>
+                        <button className={style.proceed_btn} onClick={send}>Send</button>
+                        <button className={style.cancel_btn} onClick={() => setIsModalOpen(false)}>Cancel</button>
+                    </div>
+                </div>
+            </Modal>
             
         </div>
     );

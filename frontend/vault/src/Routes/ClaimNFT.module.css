@@ -121,6 +121,78 @@
     border-color: rgb(2, 86, 165);
 }
 
+.confirm_modal {
+    padding: 10px;
+    margin: 0;
+    background: rgb(154,234,183);
+    background: -moz-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+    background: -webkit-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+    background: linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#9aeab7",endColorstr="#2e4fdb",GradientType=1);
+    padding: 40px;
+}
+
+.confirm_modal > .address_input_container {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
+}
+
+.confirm_modal > .address_input_container {
+    border: 2px solid rgb(255, 66, 66);
+    margin-bottom: 30px;
+}
+
+.confirm_modal > .address_input_container > span {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.confirm_modal > .address_input_container > .address_input {
+    width: 300px;
+    outline: none;
+    border-style: none;
+    color: rgb(81, 81, 81);
+}
+
+.confirm_modal div {
+    text-align: center;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.confirm_modal > div > button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
+    font-weight: bold;
+}
+
+.confirm_modal > div > button:hover {
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.confirm_modal > div > .proceed_btn {
+    margin-right: 10px;
+    background-color: rgb(167, 255, 167);
+}
+
+.confirm_modal > div > .proceed_btn:hover {
+    background-color: rgb(107, 255, 107);
+}
+
+.confirm_modal > div > .cancel_btn {
+    
+}
+
+.confirm_modal > div > .cancel_btn:hover{
+    background-color: rgb(210, 210, 210);
+}
+
 
 @media only screen and (min-width: 1250px) {
  .greetings {
