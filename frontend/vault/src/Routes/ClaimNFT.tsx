@@ -69,15 +69,18 @@ async function sendHandler(receiver_id: string, nft_account_id: string, token_id
     let conn = await nearAPI.connect(nearConfig);
     let vaultContract = GetVaultContract(await conn.account(accountId));
 
-    let callback = `https://wallet.${network}.near.org/nft-detail/${nft_account_id}/${token_id}`;
-    let result = await vaultContract.claim({
+    let callback = network === 'mainnet'? `https://app.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}`;
+    
+    let tx = vaultContract.claim({
         callbackUrl: callback,
         args: {
             claimable_id: `${nft_account_id}:${token_id}`,
             receiver_id: receiver_id
         }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
     });
-    alert(JSON.stringify(result));
+    alert('claim transaction sent');
+    await tx;
+    //alert(JSON.stringify(result));
 };
 
 type NFTDetails = {
@@ -105,13 +108,14 @@ export default function ClaimNFT() {
     function addressOnChange(event: ChangeEvent<HTMLInputElement>) {
         let receiver = event.currentTarget.value;
         setReceiverAddress(receiver);
-        addressOnChangeHandler(setIsReceiverAddressValid, receiver);
+        //addressOnChangeHandler(setIsReceiverAddressValid, receiver);
     }
 
     function send() {
         let claimDetails = parseToken(token);
+        setIsModalOpen(false);
         sendHandler(receiverAddress, claimDetails.NFTContract, claimDetails.TokenId, claimDetails.PrivateKey).then(() => {
-            window.location.href = `https://wallet.${process.env.REACT_APP_NEAR_NETWORK ?? 'testnet'}.near.org/nft-detail/${nft}/${token_id}`;
+            window.location.href = process.env.REACT_APP_NEAR_NETWORK === 'mainnet' ? `https://app.mynearwallet.com//nft-detail/${nft}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft}/${token_id}`;
         });
     }
 
@@ -209,6 +213,9 @@ export default function ClaimNFT() {
                     <div className={style.address_input_container}>
                         <span>Send to:</span>
                         <input className={style.address_input} type={"text"} onChange={addressOnChange}/>
+                    </div>
+                    <div className={style.create_wallet_message}>
+                        <span>Don't have a wallet yet? Create your account <a href={ process.env.REACT_APP_NEAR_NETWORK === 'mainnet' ? 'https://app.mynearwallet.com/create' : 'https://testnet.mynearwallet.com/create'} target={'_blank'}>here</a></span>
                     </div>
                     <div>
                         <button className={style.proceed_btn} onClick={send}>Send</button>

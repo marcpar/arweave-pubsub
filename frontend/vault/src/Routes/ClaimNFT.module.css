@@ -141,7 +141,7 @@
 
 .confirm_modal > .address_input_container {
     border: 2px solid rgb(255, 66, 66);
-    margin-bottom: 30px;
+    margin-bottom: 5px;
 }
 
 .confirm_modal > .address_input_container > span {
@@ -154,6 +154,15 @@
     outline: none;
     border-style: none;
     color: rgb(81, 81, 81);
+}
+
+.confirm_modal > .create_wallet_message {
+    margin-bottom: 20px;
+    color: white;
+}
+
+.confirm_modal > .create_wallet_message > span a {
+    font-weight: bold;
 }
 
 .confirm_modal div {
