@@ -57,7 +57,7 @@ async function validateAddress(address: string): Promise<boolean> {
 }
 
 async function sendHandler(receiver_id: string, nft_account_id: string, token_id: string , private_key: string) {
-    let network = process.env.REACT_APP_NEAR_NETWORK as any;
+    let network = process.env.REACT_APP_NEAR_NETWORK as any ?? 'testnet';
     let nearConfig = GetConfigInMemory(network);
     let keyStore = new nearAPI.keyStores.InMemoryKeyStore();
     let accountId = process.env.REACT_APP_VAULT_CONTRACT as string;
