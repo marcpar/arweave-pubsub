@@ -7,7 +7,7 @@ import { ClaimDetails, GetVaultContract, GetVaultContractAnonAsync } from '../Li
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
-import { GridLoader } from "react-spinners";
+import { GridLoader, SyncLoader } from "react-spinners";
 import Modal from "react-modal";
 import { GetConfigInMemory, GetConnection } from '../Libraries/Near/connection';
 
@@ -70,16 +70,13 @@ async function sendHandler(receiver_id: string, nft_account_id: string, token_id
 
     let callback = network === 'mainnet'? `https://app.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}`;
     
-    let tx = vaultContract.claim({
+    await vaultContract.claim({
         callbackUrl: callback,
         args: {
             claimable_id: `${nft_account_id}:${token_id}`,
             receiver_id: receiver_id
         }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
     });
-    alert('claim transaction sent');
-    await tx;
-    //alert(JSON.stringify(result));
 };
 
 type NFTDetails = {
@@ -97,6 +94,7 @@ export default function ClaimNFT() {
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [isLoadingModalOpen, setIsLoadingModalOpen] = useState<boolean>(false);
     const [isReceiverAddressvalid, setIsReceiverAddressValid] = useState<boolean>(false);
     const navigate = useNavigate();
 
@@ -113,8 +111,13 @@ export default function ClaimNFT() {
     function send() {
         let claimDetails = parseToken(token);
         setIsModalOpen(false);
+        setIsLoadingModalOpen(true);
         sendHandler(receiverAddress, claimDetails.NFTContract, claimDetails.TokenId, claimDetails.PrivateKey).then(() => {
             window.location.href = process.env.REACT_APP_NEAR_NETWORK === 'mainnet' ? `https://app.mynearwallet.com//nft-detail/${nft}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft}/${token_id}`;
+        }).catch((e) => {
+            alert(e);
+        }).finally(() => {
+            setIsLoadingModalOpen(false);
         });
     }
 
@@ -221,6 +224,19 @@ export default function ClaimNFT() {
                         <button className={style.cancel_btn} onClick={() => setIsModalOpen(false)}>Cancel</button>
                     </div>
                 </div>
+            </Modal>
+            <Modal isOpen={isLoadingModalOpen} style={{
+                content: {
+                    height: 'fit-content',
+                    width: 'fit-content',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    background: 'none',
+                    border: 'none'
+                }
+            }}>
+                <SyncLoader color='rgb(42, 73, 220)'/>
             </Modal>
             
         </div>
