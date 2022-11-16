@@ -61,7 +61,7 @@ async function sendHandler(receiver_id: string, nft_account_id: string, token_id
     let nearConfig = GetConfigInMemory(network);
     let keyStore = new nearAPI.keyStores.InMemoryKeyStore();
     let accountId = process.env.REACT_APP_VAULT_CONTRACT as string ?? 'vault.world-triathlon.testnet';
-    
+
     await keyStore.setKey(network, accountId, nearAPI.KeyPair.fromString(private_key));
 
     nearConfig.keyStore = keyStore;
@@ -180,9 +180,9 @@ export default function ClaimNFT() {
     return (
         <div className={style.main_container}>
             <div className={style.greetings}>
-                <h3>{fullname}</h3>
+                <p className={style.full_name}>{fullname}</p>
                 <p>Congratulations for competing in the 2022 World Triathlon Age-Group Championships Abu Dhabi.</p>
-                <p>Your Competior Capsule is ready to be claimed.</p>
+                <p>Your Race Capsule is ready to be claimed.</p>
             </div>
             <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
                 <div className={style.card}>
