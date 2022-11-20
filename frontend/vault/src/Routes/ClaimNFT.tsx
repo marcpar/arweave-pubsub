@@ -95,6 +95,8 @@ export default function ClaimNFT() {
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isLoadingModalOpen, setIsLoadingModalOpen] = useState<boolean>(false);
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+    const [isClaimButtonHidden, setIsClaimButtonHidden] = useState<boolean>(false);
     const [isReceiverAddressvalid, setIsReceiverAddressValid] = useState<boolean>(false);
     const navigate = useNavigate();
 
@@ -113,7 +115,8 @@ export default function ClaimNFT() {
         setIsModalOpen(false);
         setIsLoadingModalOpen(true);
         sendHandler(receiverAddress, claimDetails.NFTContract, claimDetails.TokenId, claimDetails.PrivateKey).then(() => {
-            window.location.href = process.env.REACT_APP_NEAR_NETWORK === 'mainnet' ? `https://app.mynearwallet.com//nft-detail/${nft}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft}/${token_id}`;
+            setIsSuccessModalOpen(true);
+            setIsClaimButtonHidden(true);
         }).catch((e) => {
             alert(e);
         }).finally(() => {
@@ -193,7 +196,7 @@ export default function ClaimNFT() {
                         <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />
                     </div>
                     <div className={style.button_container}>
-                        <button className={isMediaLoading ? style.hidden : style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
+                        <button className={isMediaLoading || isClaimButtonHidden ? style.hidden : style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
                     </div>
                 </div>
             </Tilt>
@@ -237,6 +240,25 @@ export default function ClaimNFT() {
                 }
             }}>
                 <SyncLoader color='rgb(42, 73, 220)'/>
+            </Modal>
+            <Modal isOpen={isSuccessModalOpen} style={{
+                content: {
+                    height: 'fit-content',
+                    width: 'fit-content',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    padding: 0,
+                    borderRadius: 10,
+                    borderStyle: 'none',
+                    boxShadow: '3px 3px 3px rgba(0,0,0,0.1)',
+                    backgroundColor: 'rgba(154,234,183,1)'
+                },
+            }} shouldCloseOnEsc={true} shouldCloseOnOverlayClick={true} onRequestClose={() => {setIsSuccessModalOpen(false)}}>
+                <div className={style.success_message}>
+                    <div>Successful transfer, please check your wallet</div>
+                    <button onClick={() => {setIsSuccessModalOpen(false)}}>Ok</button>
+                </div>
             </Modal>
             
         </div>

@@ -216,6 +216,40 @@
     background-color: rgb(210, 210, 210);
 }
 
+.success_message {
+    padding: 1em;
+    color: white;
+    background: rgb(154,234,183);
+    background: -moz-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+    background: -webkit-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+    background: linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#9aeab7",endColorstr="#2e4fdb",GradientType=1);
+    text-align: center;
+}
+
+.success_message > div {
+    font-size: 20px;
+    min-width: 340px;
+}
+
+.success_message > button {
+    margin-top: 10px;
+    padding: 5px 20px;
+    border: none;
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
+    font-weight: bold;
+    color: rgb(42, 73, 220);
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.151);
+    background-color: rgb(155, 235, 183);
+}
+
+.success_message > button:hover {
+    cursor: pointer;
+    box-shadow: none;
+}
 
 @media only screen and (min-width: 1250px) {
     .greetings {

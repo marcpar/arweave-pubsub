@@ -9,7 +9,8 @@ function GetConfig(network: "mainnet" | "testnet"): nearAPI.ConnectConfig {
                 networkId: network,
                 nodeUrl: 'https://rpc.mainnet.near.org',
                 keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
-                walletUrl: 'https://wallet.near.org',
+                walletUrl: 'https://app.mynearwallet.com',
+                headers: {}
 
             };
         case "testnet":
@@ -17,7 +18,8 @@ function GetConfig(network: "mainnet" | "testnet"): nearAPI.ConnectConfig {
                 networkId: network,
                 nodeUrl: 'https://rpc.testnet.near.org',
                 keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
-                walletUrl: 'https://wallet.testnet.near.org',
+                walletUrl: 'https://testnet.mynearwallet.com',
+                headers: {}
             };
         default:
             throw new Error(`"Unsupported network ${network}`);
@@ -31,7 +33,8 @@ function GetConfigInMemory(network: "mainnet" | "testnet"): nearAPI.ConnectConfi
                 networkId: network,
                 nodeUrl: 'https://rpc.mainnet.near.org',
                 keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
-                walletUrl: 'https://wallet.near.org',
+                walletUrl: 'https://app.mynearwallet.com',
+                headers: {}
 
             };
         case "testnet":
@@ -39,7 +42,8 @@ function GetConfigInMemory(network: "mainnet" | "testnet"): nearAPI.ConnectConfi
                 networkId: network,
                 nodeUrl: 'https://rpc.testnet.near.org',
                 keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
-                walletUrl: 'https://wallet.testnet.near.org',
+                walletUrl: 'https://testnet.mynearwallet.com',
+                headers: {}
             };
         default:
             throw new Error(`"Unsupported network ${network}`);
