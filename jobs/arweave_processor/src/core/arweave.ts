@@ -132,6 +132,12 @@ async function ConfirmUpload(txID: string, minConfirmations?: number): Promise<n
     let currentConfirmations = 0;
     while (true) {
         let status = await _client.transactions.getStatus(txID);
+
+        if (status.status === 429) {
+            Logger().warn(`tx ${txID} Throttled by arweave api with status ${status.status}, sleeping for 6000ms`);
+            await Sleep(6000);
+            continue;
+        }
         if (status.status < 200 || status.status > 299) {
             throw new Error(`Invalid transaction status code ${status.status} for tx ${txID}`);
         }
@@ -150,7 +156,7 @@ async function ConfirmUpload(txID: string, minConfirmations?: number): Promise<n
             Logger().debug(`TX: ${txID}, Status: ${status.status}`);
         }
 
-        await Sleep(5000);
+        await Sleep(10000);
     }
 
 }
