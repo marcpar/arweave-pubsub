@@ -79,7 +79,37 @@ impl Contract {
     }
 
     #[private]
-    #[payable]
+    pub fn update_meta(&mut self, name: Option<String>, symbol: Option<String>, icon: Option<String>, base_uri: Option<String>, reference: Option<String>, reference_hash: Option<Base64VecU8>) -> bool {
+        let mut metadata = self.metadata.get().unwrap();
+
+        if let Some(name) = name {
+            metadata.name = name;
+        }
+
+        if let Some(symbol) = symbol {
+            metadata.symbol = symbol;
+        }
+
+        if let Some(icon) = icon {
+            metadata.icon = Some(icon);
+        }
+
+        if let Some(base_uri) = base_uri {
+            metadata.base_uri = Some(base_uri);
+        }
+
+        if let Some(reference) = reference {
+            metadata.reference = Some(reference);
+        }
+
+        if let Some(reference_hash) = reference_hash {
+            metadata.reference_hash = Some(reference_hash);
+        }
+        
+        self.metadata.set(&metadata)
+    }
+
+    #[private]
     pub fn mint(
         &mut self,
         token_id: String,
