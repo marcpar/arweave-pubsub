@@ -110,6 +110,7 @@ impl Contract {
     }
 
     #[private]
+    #[payable]
     pub fn mint(
         &mut self,
         token_id: String,
