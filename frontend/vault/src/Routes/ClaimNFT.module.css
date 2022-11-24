@@ -162,6 +162,13 @@
     color: rgb(81, 81, 81);
 }
 
+.confirm_modal > .address_error_message {
+    color: rgb(144, 0, 0);
+    text-align: left;
+    font-size: 14px;
+    margin: 0;
+}
+
 .confirm_modal > .create_wallet_message {
     margin-bottom: 20px;
     color: white;
@@ -196,12 +203,18 @@
     cursor: pointer;
 }
 
+
 .confirm_modal > div > .proceed_btn {
     margin: 10px;
     border: none;
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.151);
     background-color: rgb(155, 235, 183);
     
+}
+
+.confirm_modal > div > .proceed_btn:disabled {
+    background-color: rgb(208, 208, 208);
+    box-shadow: none;
 }
 
 .confirm_modal > div > .proceed_btn:hover {

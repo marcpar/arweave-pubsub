@@ -38,21 +38,39 @@ async function claimHandler(receiver_id: string, claimable_id: string, callback:
     })
 }
 
-async function addressOnChangeHandler(setIsAddressValid: Dispatch<SetStateAction<boolean>>, address: string) {
-    console.log(address);
-    validateAddress(address);
+const TIME_BEFORE_VALIDATE = 1000;
+let currentTimeOut = setTimeout(() => {}, TIME_BEFORE_VALIDATE);
+function addressOnChangeHandler(setIsAddressValid: Dispatch<SetStateAction<boolean>>, address: string) {
+    setIsAddressValid(false);
+    clearTimeout(currentTimeOut);
+    currentTimeOut = setTimeout(async () => {
+        setIsAddressValid(await validateAddress(address));
+    }, TIME_BEFORE_VALIDATE);
 }
 
 async function validateAddress(address: string): Promise<boolean> {
+    if (address.length === 64) {
+        for (let index = 0; index < address.length; index++) {
+            let char = address.charCodeAt(index);
+            // check a-f
+            if (char >= 97 && char <= 102) {
+                continue;
+            }
+            // check 0-9
+            if (char >= 48 && char <= 57) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
     let conn = await GetConnection();
-    let account = await conn.account(address);
-    let accountDetails = await account.getAccountDetails();
-    console.log(JSON.stringify(accountDetails));
-    let keys = await account.getAccessKeys();
-    
-    console.log(JSON.stringify(keys));
-    let state = await account.state();
-    console.log(JSON.stringify(state));
+    try {
+            let account = await conn.account(address);
+            await account.state();
+    } catch (e) {
+        return false
+    }
     return true;
 }
 
@@ -97,7 +115,8 @@ export default function ClaimNFT() {
     const [isLoadingModalOpen, setIsLoadingModalOpen] = useState<boolean>(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
     const [isClaimButtonHidden, setIsClaimButtonHidden] = useState<boolean>(false);
-    const [isReceiverAddressvalid, setIsReceiverAddressValid] = useState<boolean>(false);
+    const [isReceiverAddressValid, setIsReceiverAddressValid] = useState<boolean>(false);
+
     const navigate = useNavigate();
 
     function claim() {
@@ -107,7 +126,7 @@ export default function ClaimNFT() {
     function addressOnChange(event: ChangeEvent<HTMLInputElement>) {
         let receiver = event.currentTarget.value;
         setReceiverAddress(receiver);
-        //addressOnChangeHandler(setIsReceiverAddressValid, receiver);
+        addressOnChangeHandler(setIsReceiverAddressValid, receiver);
     }
 
     function send() {
@@ -219,11 +238,14 @@ export default function ClaimNFT() {
                         <span>Send to:</span>
                         <input className={style.address_input} type={"text"} onChange={addressOnChange}/>
                     </div>
+                    <div className={style.address_error_message}>
+                        <span>{isReceiverAddressValid ? "" : "Receiver address is not valid"}</span>
+                    </div>
                     <div className={style.create_wallet_message}>
                         <span>Don't have a wallet yet? Create your account <a href={ process.env.REACT_APP_NEAR_NETWORK === 'mainnet' ? 'https://app.mynearwallet.com/create' : 'https://testnet.mynearwallet.com/create'} target={'_blank'}>here</a></span>
                     </div>
                     <div>
-                        <button className={style.proceed_btn} onClick={send}>Send</button>
+                        <button className={style.proceed_btn} onClick={send} disabled={!isReceiverAddressValid}>Send</button>
                         <button className={style.cancel_btn} onClick={() => setIsModalOpen(false)}>Cancel</button>
                     </div>
                 </div>
