@@ -23,6 +23,10 @@
 		{
 			"path": "./frontend/vault",
 			"name": "frontend/vault"
+		},
+		{
+			"path": "./tools/distribution-check",
+			"name": "tools/distribution-check"
 		}
 	],
 	"settings": {}

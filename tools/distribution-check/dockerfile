@@ -1,0 +1,14 @@
+FROM node:16.17.0 as BUILDER
+
+COPY ./ /home/app
+WORKDIR /home/app
+
+RUN yarn install && yarn build
+
+FROM node:16.17.0-slim
+
+COPY --from=BUILDER /home/app/dist /home/app/dist
+WORKDIR /home/app
+
+ENTRYPOINT [ "sh", "-c" ]
+CMD [ "node dist/index.js" ]
