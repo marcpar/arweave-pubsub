@@ -1,0 +1,16 @@
+FROM node:16.17.0 as BUILDER
+
+WORKDIR /home/app
+
+COPY . /home/app/
+
+RUN yarn install && yarn build
+
+FROM node:16.17.0-alpine
+
+COPY --from=BUILDER ./home/app/dist/index.js /home/app/balance-exporter.js
+
+ENV NODE_ENV production
+WORKDIR /home/app
+ENTRYPOINT ["node", "/home/app/balance-exporter.js"]
+CMD ["--help"]

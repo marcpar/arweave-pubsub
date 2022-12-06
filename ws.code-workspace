@@ -27,6 +27,10 @@
 		{
 			"path": "./tools/distribution-check",
 			"name": "tools/distribution-check"
+		},
+		{
+			"path": "./tools/balance-exporter",
+			"name": "tools/balance-exporter"
 		}
 	],
 	"settings": {}
