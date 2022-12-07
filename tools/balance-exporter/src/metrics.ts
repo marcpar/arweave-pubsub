@@ -5,6 +5,10 @@ import * as nearAPI from 'near-api-js';
 
 function ExposeMetrics(addresses: string[], network: string): koa.Middleware {
     let registry = new prom.Registry();
+    registry.setDefaultLabels({
+        network: network
+    });
+    
     nearAPI.connect({
         networkId: network,
         nodeUrl: `https://rpc.${network}.near.org/`
