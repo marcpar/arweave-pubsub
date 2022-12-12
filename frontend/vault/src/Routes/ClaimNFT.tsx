@@ -9,93 +9,9 @@ import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
 import { GridLoader, SyncLoader } from "react-spinners";
 import Modal from "react-modal";
-import { GetConfigInMemory, GetConnection } from '../Libraries/Near/connection';
+import { AddressOnChangeHandler, ClaimWithExistingAccountHandler, ParseToken, SendHandler } from './ClaimNFTHandler';
 
 Modal.setAppElement('#root');
-
-function parseToken(token: string): ClaimDetails {
-    let claimDetails!: ClaimDetails
-    try {
-        claimDetails = JSON.parse(Buffer.from(token, 'base64').toString("utf-8")) as ClaimDetails;
-    } catch (e) {
-        throw new Error(`Invalid token: ${e}`);
-    }
-
-    if (claimDetails.PrivateKey === null || claimDetails.PrivateKey === undefined) {
-        throw new Error("invalid token");
-    }
-    return claimDetails;
-}
-
-async function claimHandler(receiver_id: string, claimable_id: string, callback: string) {
-    let vaultContract = GetVaultContract(GetWallet().account());
-    await vaultContract.claim({
-        callbackUrl: callback,
-        args: {
-            receiver_id: receiver_id,
-            claimable_id: claimable_id
-        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
-    })
-}
-
-const TIME_BEFORE_VALIDATE = 1000;
-let currentTimeOut = setTimeout(() => {}, TIME_BEFORE_VALIDATE);
-function addressOnChangeHandler(setIsAddressValid: Dispatch<SetStateAction<boolean>>, address: string) {
-    setIsAddressValid(false);
-    clearTimeout(currentTimeOut);
-    currentTimeOut = setTimeout(async () => {
-        setIsAddressValid(await validateAddress(address));
-    }, TIME_BEFORE_VALIDATE);
-}
-
-async function validateAddress(address: string): Promise<boolean> {
-    if (address.length === 64) {
-        for (let index = 0; index < address.length; index++) {
-            let char = address.charCodeAt(index);
-            // check a-f
-            if (char >= 97 && char <= 102) {
-                continue;
-            }
-            // check 0-9
-            if (char >= 48 && char <= 57) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-    let conn = await GetConnection();
-    try {
-            let account = await conn.account(address);
-            await account.state();
-    } catch (e) {
-        return false
-    }
-    return true;
-}
-
-async function sendHandler(receiver_id: string, nft_account_id: string, token_id: string , private_key: string) {
-    let network = process.env.REACT_APP_NEAR_NETWORK as any ?? 'testnet';
-    let nearConfig = GetConfigInMemory(network);
-    let keyStore = new nearAPI.keyStores.InMemoryKeyStore();
-    let accountId = process.env.REACT_APP_VAULT_CONTRACT as string ?? 'vault.world-triathlon.testnet';
-
-    await keyStore.setKey(network, accountId, nearAPI.KeyPair.fromString(private_key));
-
-    nearConfig.keyStore = keyStore;
-    let conn = await nearAPI.connect(nearConfig);
-    let vaultContract = GetVaultContract(await conn.account(accountId));
-
-    let callback = network === 'mainnet'? `https://app.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}`;
-    
-    await vaultContract.claim({
-        callbackUrl: callback,
-        args: {
-            claimable_id: `${nft_account_id}:${token_id}`,
-            receiver_id: receiver_id
-        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
-    });
-};
 
 type NFTDetails = {
     nftMeta: NFTContractMetadata | null ,
@@ -104,43 +20,19 @@ type NFTDetails = {
 
 export default function ClaimNFT() {
     const { nft, token_id } = useParams();
-    let [searchParams] = useSearchParams();
-    let token = searchParams.get('token') ?? '';
-    let isLoggedIn = useIsLoggedInHook();
+    let token = window.location.hash ?? 'ff';
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
-    const [receiverAddress, setReceiverAddress] = useState<string>('');
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [isLoadingModalOpen, setIsLoadingModalOpen] = useState<boolean>(false);
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
     const [isClaimButtonHidden, setIsClaimButtonHidden] = useState<boolean>(false);
-    const [isReceiverAddressValid, setIsReceiverAddressValid] = useState<boolean>(false);
 
     const navigate = useNavigate();
 
-    function claim() {
-        setIsModalOpen(true);
-    }
-
-    function addressOnChange(event: ChangeEvent<HTMLInputElement>) {
-        let receiver = event.currentTarget.value;
-        setReceiverAddress(receiver);
-        addressOnChangeHandler(setIsReceiverAddressValid, receiver);
-    }
-
-    function send() {
-        let claimDetails = parseToken(token);
-        setIsModalOpen(false);
-        setIsLoadingModalOpen(true);
-        sendHandler(receiverAddress, claimDetails.NFTContract, claimDetails.TokenId, claimDetails.PrivateKey).then(() => {
-            setIsSuccessModalOpen(true);
-            setIsClaimButtonHidden(true);
-        }).catch((e) => {
-            alert(e);
-        }).finally(() => {
-            setIsLoadingModalOpen(false);
-        });
+    function claimOnClick() {
+        let claimDetails = ParseToken(token);
+        let uuid = window.crypto.randomUUID();
+        localStorage.setItem(uuid, JSON.stringify(claimDetails));
+        ClaimWithExistingAccountHandler(uuid);
     }
 
     useEffect(() => {
@@ -166,7 +58,7 @@ export default function ClaimNFT() {
                     })
                 });
                 
-                let claimDetails = parseToken(token);
+                let claimDetails = ParseToken(token);
                 let claimKeyPair = nearAPI.utils.KeyPair.fromString(claimDetails.PrivateKey);
 
                 if (claimable !== null && claimable.public_key === claimKeyPair.getPublicKey().toString()) {
@@ -215,74 +107,10 @@ export default function ClaimNFT() {
                         <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />
                     </div>
                     <div className={style.button_container}>
-                        <button className={isMediaLoading || isClaimButtonHidden ? style.hidden : style.button} onClick={claim} disabled={!isClaimable}>Claim</button>
+                        <button className={isMediaLoading || isClaimButtonHidden ? style.hidden : style.button} onClick={claimOnClick} disabled={!isClaimable}>Claim</button>
                     </div>
                 </div>
-            </Tilt>
-            <Modal isOpen={isModalOpen} shouldCloseOnOverlayClick={true} shouldCloseOnEsc={true} onRequestClose={() => setIsModalOpen(false)} style={{
-                content: {
-                    height: 'fit-content',
-                    width: 'fit-content',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    padding: 0,
-                    borderRadius: 20,
-                    borderStyle: 'none',
-                    boxShadow: '3px 3px 3px rgba(0,0,0,0.1)',
-                    backgroundColor: 'rgba(154,234,183,1)'
-                }
-            }}>
-                <div className={style.confirm_modal}>
-                    <div className={style.address_input_container}>
-                        <span>Send to:</span>
-                        <input className={style.address_input} type={"text"} onChange={addressOnChange}/>
-                    </div>
-                    <div className={style.address_error_message}>
-                        <span>{isReceiverAddressValid ? "" : "Receiver address is not valid"}</span>
-                    </div>
-                    <div className={style.create_wallet_message}>
-                        <span>Don't have a wallet yet? Create your account <a href={ process.env.REACT_APP_NEAR_NETWORK === 'mainnet' ? 'https://app.mynearwallet.com/create' : 'https://testnet.mynearwallet.com/create'} target={'_blank'}>here</a></span>
-                    </div>
-                    <div>
-                        <button className={style.proceed_btn} onClick={send} disabled={!isReceiverAddressValid}>Send</button>
-                        <button className={style.cancel_btn} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                    </div>
-                </div>
-            </Modal>
-            <Modal isOpen={isLoadingModalOpen} style={{
-                content: {
-                    height: 'fit-content',
-                    width: 'fit-content',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    background: 'none',
-                    border: 'none'
-                }
-            }}>
-                <SyncLoader color='rgb(42, 73, 220)'/>
-            </Modal>
-            <Modal isOpen={isSuccessModalOpen} style={{
-                content: {
-                    height: 'fit-content',
-                    width: 'fit-content',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    padding: 0,
-                    borderRadius: 10,
-                    borderStyle: 'none',
-                    boxShadow: '3px 3px 3px rgba(0,0,0,0.1)',
-                    backgroundColor: 'rgba(154,234,183,1)'
-                },
-            }} shouldCloseOnEsc={true} shouldCloseOnOverlayClick={true} onRequestClose={() => {setIsSuccessModalOpen(false)}}>
-                <div className={style.success_message}>
-                    <div>Successful transfer, please check your wallet</div>
-                    <button onClick={() => {setIsSuccessModalOpen(false)}}>Ok</button>
-                </div>
-            </Modal>
-            
+            </Tilt>            
         </div>
     );
 }

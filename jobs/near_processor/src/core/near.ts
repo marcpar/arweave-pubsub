@@ -120,7 +120,7 @@ class Minter extends Account {
 
         if (claimDetails) {
             let claimUrl = new URL(`${_vaultBaseUrl}claim/${_contractID}/${token_id}`);
-            claimUrl.searchParams.append("token", Buffer.from(JSON.stringify(claimDetails), 'utf-8').toString('base64'));
+            claimUrl.hash = Buffer.from(JSON.stringify(claimDetails), 'utf-8').toString('base64');
             mintResult.ClaimURL = claimUrl.toString();
         }
         
