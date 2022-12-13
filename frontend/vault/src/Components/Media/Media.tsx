@@ -38,7 +38,7 @@ export default function Media(props: MediaProps) {
         if (mediaSrc !== '') {
             return;
         }
-        if (browser && browser.name === 'safari') {
+        if (browser && (browser.name === 'safari' || browser.name === 'crios' || browser.name === 'ios' || browser.name === 'ios-webview')) {
             getMediaSafari(props.src).then((src) => {
                 setIsLoading(false);
                 setMediaSrc(src);

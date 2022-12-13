@@ -10,35 +10,41 @@ import Tilt from "react-parallax-tilt";
 import { GridLoader, SyncLoader } from "react-spinners";
 import Modal from "react-modal";
 import { AddressOnChangeHandler, ClaimWithExistingAccountHandler, ParseToken, SendHandler } from './ClaimNFTHandler';
-
-Modal.setAppElement('#root');
+import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
 
 type NFTDetails = {
-    nftMeta: NFTContractMetadata | null ,
-    nftToken: NFTToken | null 
+    nftMeta: NFTContractMetadata | null,
+    nftToken: NFTToken | null
 }
 
 export default function ClaimNFT() {
     const { nft, token_id } = useParams();
-    let token = window.location.hash ?? 'ff';
-    const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
+    let token = window.location.hash ?? '';
+    const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null>(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const [isClaimButtonHidden, setIsClaimButtonHidden] = useState<boolean>(false);
+    const [isClaimOptionsModalOpen, setIsClaimOptionsModalOpen] = useState<boolean>(false);
 
     const navigate = useNavigate();
 
     function claimOnClick() {
-        let claimDetails = ParseToken(token);
+        setIsClaimOptionsModalOpen(true);
+    }
+
+    function claimOnExistingAccount() {
         let uuid = window.crypto.randomUUID();
-        localStorage.setItem(uuid, JSON.stringify(claimDetails));
+        localStorage.setItem(uuid, JSON.stringify(ParseToken(token)));
         ClaimWithExistingAccountHandler(uuid);
+    }
+
+    function claimWithNewAccount() {
+        setIsClaimOptionsModalOpen(false);
     }
 
     useEffect(() => {
         if (nftDetails === undefined) {
             GetVaultContractAnonAsync().then(async (contract) => {
-                console.log(`${nft}:${token_id}`);
                 let claimable = await contract.get_claimable({
                     nft_account: nft as string,
                     token_id: token_id as string
@@ -57,7 +63,7 @@ export default function ClaimNFT() {
                         token_id: claimable.token_id
                     })
                 });
-                
+
                 let claimDetails = ParseToken(token);
                 let claimKeyPair = nearAPI.utils.KeyPair.fromString(claimDetails.PrivateKey);
 
@@ -67,11 +73,11 @@ export default function ClaimNFT() {
             })
         }
     });
-    
+
     if (nftDetails === undefined) {
         return (
             <div className={style.loader_container}>
-                <GridLoader color={"rgb(0, 98, 190)"}/>
+                <GridLoader color={"rgb(0, 98, 190)"} />
             </div>
         );
     }
@@ -85,12 +91,12 @@ export default function ClaimNFT() {
     let fullname: string | undefined = ""
     try {
         let extra = JSON.parse(nftDetails.nftToken.metadata?.extra as string);
-        let valuePairs = extra.ValuePairs as Array<{Key: string, Value: string}>;
+        let valuePairs = extra.ValuePairs as Array<{ Key: string, Value: string }>;
         let recipientName = valuePairs.find((el) => {
             return el.Key === "RecipientName";
         });
         fullname = recipientName?.Value as string;
-    } catch(_) {
+    } catch (_) {
         fullname = "Participant";
     }
 
@@ -110,7 +116,8 @@ export default function ClaimNFT() {
                         <button className={isMediaLoading || isClaimButtonHidden ? style.hidden : style.button} onClick={claimOnClick} disabled={!isClaimable}>Claim</button>
                     </div>
                 </div>
-            </Tilt>            
+            </Tilt>
+            <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccount} onClaimWithExistingAccount={claimOnExistingAccount} />
         </div>
     );
 }

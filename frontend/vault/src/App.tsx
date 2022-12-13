@@ -6,6 +6,10 @@ import VaultLayout from './Components/Layout/VaultLayout';
 import "./App.css";
 import GlobeImage from "./Assets/WT-3D-Globe.png"
 import ClaimNFTCallback from './Routes/ClaimNFTCallback';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
+
 function App() {
   return (
     <div className="App">
