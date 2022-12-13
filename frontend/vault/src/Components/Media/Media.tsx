@@ -53,7 +53,7 @@ export default function Media(props: MediaProps) {
         case "mp4" || "webp":
             return (
                 <div className={styles.media_container}>
-                    <video src={mediaSrc} autoPlay muted controls={false} loop className={isLoading ? styles.hidden : styles.media} onPlay={() => {onLoadHandler()}}/>
+                    <video src={mediaSrc} autoPlay muted playsInline={true} controls={false} loop className={isLoading ? styles.hidden : styles.media} onPlay={() => {onLoadHandler()}}/>
                     <BounceLoader className={styles.loader} loading={isLoading} color={"rgb(0, 98, 190)"} />
                 </div>
             );
