@@ -23,6 +23,9 @@ export default function ClaimOptionsModal(props: {
                 padding: 0,
                 boxShadow: '3px 3px 3px rgba(0,0,0,0.1)'
             },
+            overlay: {
+                backgroundColor: 'rgba(0,0,0,0.6)'
+            }
         }}>
             <div className={styles.main}>
                 <div className={styles.header}>

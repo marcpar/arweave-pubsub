@@ -1,0 +1,55 @@
+
+.main > h1 {
+    font-weight: bold;
+}
+
+.main > p {
+    max-width: 600px;
+    margin: auto;
+}
+
+.main > .phrase {
+    margin: 10px auto;
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 300px;
+}
+
+.main > .phrase > div {
+    width: 80px;
+    margin: 10px auto;
+    box-shadow: inset 3px 3px 3px rgba(0, 0, 0, 0.1),
+                inset -3px -3px 3px rgba(255, 255, 255, 0.2),
+                -3px -3px 3px rgba(255, 255, 255, 0.2);
+    text-align: left;
+    padding: 10px 5px;
+    border-radius: 8px;
+}
+
+.main > .phrase > div > span {
+    margin-left: 3px;
+}
+
+.main > .button_group {
+    margin: auto;
+    text-align: center;
+    margin: 20px;
+}
+
+.main > .button_group > button {
+    border: none;
+    margin: 5px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1),
+                -3px -3px 3px rgba(255,255,255,0.2);
+    background-color: inherit;
+    color: inherit;
+}
+
+.main > .button_group > button:hover {
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1),
+                -1px -1px 3px rgba(255,255,255,0.2);
+    cursor: pointer;
+}

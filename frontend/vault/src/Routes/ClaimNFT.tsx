@@ -11,6 +11,7 @@ import { GridLoader, SyncLoader } from "react-spinners";
 import Modal from "react-modal";
 import { AddressOnChangeHandler, ClaimWithExistingAccountHandler, ParseToken, SendHandler } from './ClaimNFTHandler';
 import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
+import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWIthNewAccountModal';
 
 type NFTDetails = {
     nftMeta: NFTContractMetadata | null,
@@ -25,7 +26,7 @@ export default function ClaimNFT() {
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const [isClaimButtonHidden, setIsClaimButtonHidden] = useState<boolean>(false);
     const [isClaimOptionsModalOpen, setIsClaimOptionsModalOpen] = useState<boolean>(false);
-
+    const [isClaimWithNewAccountModalOpen, setIsClaimWithNewAccountModalOpen] = useState<boolean>(false);
     const navigate = useNavigate();
 
     function claimOnClick() {
@@ -40,6 +41,7 @@ export default function ClaimNFT() {
 
     function claimWithNewAccount() {
         setIsClaimOptionsModalOpen(false);
+        setIsClaimWithNewAccountModalOpen(true);
     }
 
     useEffect(() => {
@@ -118,6 +120,7 @@ export default function ClaimNFT() {
                 </div>
             </Tilt>
             <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccount} onClaimWithExistingAccount={claimOnExistingAccount} />
+            <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen}/>
         </div>
     );
 }
