@@ -119,7 +119,7 @@ export default function ClaimNFT() {
                 </div>
             </Tilt>
             <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccount} onClaimWithExistingAccount={claimOnExistingAccount} />
-            <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen}/>
+            <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen} onRequestClose={() => setIsClaimWithNewAccountModalOpen(false)}/>
         </div>
     );
 }

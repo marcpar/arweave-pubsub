@@ -2,8 +2,11 @@ import { generateSeedPhrase, Seed } from 'near-seed-phrase';
 import { useState } from 'react';
 import styles from './SecurePhrase.module.css';
 
-export default function SecurePhrase() {
+export default function SecurePhrase(props: {
+    onContinue: (seedPhrase: Seed) => void
+}) {
     let [seed, setSeed] = useState<Seed>(generateSeedPhrase());
+
 
     function copy() {
         navigator.clipboard.writeText(seed.seedPhrase).then(() => {
@@ -22,7 +25,7 @@ export default function SecurePhrase() {
             <div className={styles.phrase}>
                 {seed.seedPhrase.split(' ').map((e, i) => {
                     return (
-                        <div>
+                        <div key={i}>
                             <span>{i+1}</span><span>{e}</span>
                         </div>
                     )
@@ -33,7 +36,9 @@ export default function SecurePhrase() {
                 <button type="button" onClick={generateNew}>Generate New</button>
             </div>
             <div className={styles.button_group}>
-                <button type="button">Continue</button>
+                <button type="button" onClick={() => {
+                    props.onContinue(seed)
+                }}>Continue</button>
             </div>
         </div>
     )

@@ -1,0 +1,78 @@
+.main {
+
+}
+
+.main > h1 {
+    font-weight: bold;
+}
+
+.main > p {
+    padding: 10px 20px;
+}
+
+.main > .verify_word {
+    padding: 10px;
+}
+
+.main > .verify_word > span {
+    display: block;
+    font-weight: bold;
+}
+
+.main > .verify_word > .input_container {
+    display: flex;
+    width: 100%;
+}
+
+.main > .verify_word > .input_container > input {
+    flex-grow: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px;
+    font-size: 20px;
+    background-color: inherit;
+    box-shadow: inset 3px 3px 5px rgba(0,0,0,0.1),
+                inset -3px -3px 5px rgba(255,255,255,0.15),
+                -3px -3px 5px rgba(255,255,255,0.15);
+    color: inherit;
+}
+
+.main > .verify_word > .input_container > input:focus-visible {
+    outline: none;
+    box-shadow: inset 5px 5px 3px rgba(0,0,0,0.1),
+                inset -5px -5px 3px rgba(255,255,255,0.15),
+                -5px -5px 3px rgba(255,255,255,0.15);
+}
+
+.main > .button_group {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.main > .button_group > button {
+    background: inherit;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.1),
+                -3px -3px 3px rgba(255,255,255,0.15);
+    font-weight: bold;
+    color: inherit;
+}
+
+.main > .button_group > button:hover {
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1),
+                -1px -1px 3px rgba(255,255,255,0.15);
+    cursor: pointer;
+}
+
+.main > .button_group > button:disabled {
+    box-shadow: inset 3px 3px 3px rgba(0,0,0,0.1),
+                inset -3px -3px 3px rgba(255,255,255,0.15),
+                -3px -3px 3px rgba(255,255,255,0.15);
+}
+
+.main > .button_group > button:disabled:hover {
+    cursor: not-allowed;
+}

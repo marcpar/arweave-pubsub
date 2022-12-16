@@ -1,3 +1,4 @@
+import { Seed } from "near-seed-phrase";
 import { useState } from "react";
 import CreateAccount from "./CreateAccount";
 import SecurePhrase from "./SecurePhrase";
@@ -5,21 +6,40 @@ import VerifyPhrase from "./VerifyPhrase";
 
 
 export default function CreateNewAccount() {
-    let [currentStage] = useState<number>(0);
-
+    let [currentStage, setCurrentStage] = useState<number>(0);
+    let [seed, setSeed] = useState<Seed | undefined>(undefined);
+    
     switch (currentStage) {
         case 0:
             return (
-                <SecurePhrase/>
+                <SecurePhrase onContinue={(seed) => {
+                    setSeed(seed);
+                    setCurrentStage(1);
+                }} />
             )
-            
+
         case 1:
+            let seedPhraseArray = seed?.seedPhrase.split(' ') ?? [];
+            let wordIndex = Math.round(Math.random() * seedPhraseArray.length);
             return (
-                <VerifyPhrase/>
+                <VerifyPhrase
+                    onStartOver={() => {
+                        setCurrentStage(0);
+                    }}
+                    onVerified={() => {
+                        setCurrentStage(2);
+                    }}
+                    wordIndex = {wordIndex}
+                    word = {seedPhraseArray[wordIndex]}
+                />
             )
-        case 3:
+        case 2:
             return (
-                <CreateAccount/>
+                <CreateAccount onStartOver={() => {
+                    setCurrentStage(0);
+                }} onValidAccountId = {(accountId) => {
+                    alert(accountId);
+                }}/>
             )
         default:
             throw new Error(`Unknown Stage ${currentStage}`)

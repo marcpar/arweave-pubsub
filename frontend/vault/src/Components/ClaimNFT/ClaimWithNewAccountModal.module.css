@@ -2,4 +2,18 @@
     padding: 1em;
     background-color: rgb(155, 235, 183);
     color: rgb(33, 55, 166);
+    max-width: 600px;
+    padding: 20px;
+}
+
+.main > span {
+    display: block;
+    text-align: right;
+    margin: none;
+    padding: none;
+    font-weight: bold;
+}
+
+.main > span:hover {
+    cursor: pointer;
 }
