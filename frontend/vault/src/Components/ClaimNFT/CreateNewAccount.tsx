@@ -8,7 +8,7 @@ import VerifyPhrase from "./VerifyPhrase";
 export default function CreateNewAccount() {
     let [currentStage, setCurrentStage] = useState<number>(0);
     let [seed, setSeed] = useState<Seed | undefined>(undefined);
-    
+
     switch (currentStage) {
         case 0:
             return (
@@ -20,7 +20,7 @@ export default function CreateNewAccount() {
 
         case 1:
             let seedPhraseArray = seed?.seedPhrase.split(' ') ?? [];
-            let wordIndex = Math.round(Math.random() * seedPhraseArray.length);
+            let wordIndex = Math.round(Math.random() * (seedPhraseArray.length - 1));
             return (
                 <VerifyPhrase
                     onStartOver={() => {
