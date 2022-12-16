@@ -1,15 +1,13 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { GetWallet, useIsLoggedInHook } from '../Providers/Wallet';
 import style from "./ClaimNFT.module.css";
 import { GetNFTContract, NFTContractMetadata, NFTToken } from "../Libraries/Near/nft";
-import { Dispatch, SetStateAction, useEffect, useState, ChangeEvent } from "react";
-import { ClaimDetails, GetVaultContract, GetVaultContractAnonAsync } from '../Libraries/Near/vault';
+import { useEffect, useState } from "react";
+import { GetVaultContractAnonAsync } from '../Libraries/Near/vault';
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
-import { GridLoader, SyncLoader } from "react-spinners";
-import Modal from "react-modal";
-import { AddressOnChangeHandler, ClaimWithExistingAccountHandler, ParseToken, SendHandler } from './ClaimNFTHandler';
+import { GridLoader } from "react-spinners";
+import { ClaimWithExistingAccountHandler, ParseToken } from './ClaimNFTHandler';
 import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
 import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWIthNewAccountModal';
 
@@ -20,11 +18,12 @@ type NFTDetails = {
 
 export default function ClaimNFT() {
     const { nft, token_id } = useParams();
-    let token = window.location.hash ?? '';
+    let searchParams = useSearchParams();
+    let token = window.location.hash ?? searchParams[0].get('token') ?? '';
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null>(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
-    const [isClaimButtonHidden, setIsClaimButtonHidden] = useState<boolean>(false);
+    const [isClaimButtonHidden] = useState<boolean>(false);
     const [isClaimOptionsModalOpen, setIsClaimOptionsModalOpen] = useState<boolean>(false);
     const [isClaimWithNewAccountModalOpen, setIsClaimWithNewAccountModalOpen] = useState<boolean>(false);
     const navigate = useNavigate();

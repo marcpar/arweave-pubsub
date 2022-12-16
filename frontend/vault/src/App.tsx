@@ -24,7 +24,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-      <img className="globe-background" src={GlobeImage}/>  
+      <img className="globe-background" src={GlobeImage} alt=""/>  
     </div>
   );
 }

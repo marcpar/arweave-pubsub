@@ -5,7 +5,7 @@ import VerifyPhrase from "./VerifyPhrase";
 
 
 export default function CreateNewAccount() {
-    let [currentStage, setCurrentStage] = useState<number>(0);
+    let [currentStage] = useState<number>(0);
 
     switch (currentStage) {
         case 0:

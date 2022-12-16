@@ -46,7 +46,7 @@ export default function Media(props: MediaProps) {
         } else {
             setMediaSrc(props.src);
         }
-    });
+    }, [mediaSrc, browser, props.src]);
     
     
     switch (ext) {

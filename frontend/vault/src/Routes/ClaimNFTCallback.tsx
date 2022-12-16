@@ -2,12 +2,12 @@ import { useSearchParams } from "react-router-dom";
 import { NETWORK } from "../Libraries/Near/constants";
 import { ClaimDetails } from "../Libraries/Near/vault";
 import { ClaimWithLoggedInAccountCallback } from "./ClaimNFTHandler";
-import { DotLoader, GridLoader } from 'react-spinners';
+import { GridLoader } from 'react-spinners';
 import style from "./ClaimNFT.module.css"
 
 
 export default function ClaimNFTCallback() {
-    let [searchParams, _] = useSearchParams();
+    let [searchParams] = useSearchParams();
     let claimDetailsId = searchParams.get('claimDetailsId') as string;
     let claimDetails = JSON.parse(localStorage.getItem(claimDetailsId) as string) as ClaimDetails;
     
