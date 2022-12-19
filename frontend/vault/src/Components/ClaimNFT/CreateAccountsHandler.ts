@@ -13,10 +13,9 @@ function IsAccountIDValid(accountId: string): boolean {
 
     let _accountId = accountId.replaceAll(ACCOUNT_POSTFIX, '');
 
-    let pattern = /^(([a-z\d]+[\-_])*[a-z\d]+)$/;
+    let pattern = /^(([a-z\d]+[-_])*[a-z\d]+)$/;
     return pattern.test(_accountId);
 }
-
 
 async function IsAccountIDAvailableCallback(accountID: string, callback: (isAvailable: boolean) => void) {
     let connection = await NewConnection();
