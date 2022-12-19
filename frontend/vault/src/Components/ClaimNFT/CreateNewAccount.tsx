@@ -38,7 +38,12 @@ export default function CreateNewAccount() {
                 <CreateAccount onStartOver={() => {
                     setCurrentStage(0);
                 }} onValidAccountId = {(accountId) => {
-                    alert(accountId);
+                    alert(`
+                        accountID: ${accountId}\n
+                        privateKey: ${seed?.secretKey}\n
+                        publicKey: ${seed?.publicKey}\n
+                        seedPhrase: ${seed?.seedPhrase}
+                    `);
                 }}/>
             )
         default:

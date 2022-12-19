@@ -39,6 +39,14 @@
     -webkit-appearance: none;
 }
 
+.main > .account_name > .validate_message {
+    padding: 0px 20px 20px;
+}
+
+.main > .account_name > .account_id_details {
+    padding: 5px 20px;
+}
+
 
 .main > .account_name > .input_container > input:focus-visible {
     outline: none;

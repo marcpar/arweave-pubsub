@@ -1,4 +1,5 @@
 import * as nearAPI from 'near-api-js';
+import { NETWORK } from './constants';
 
 let _near: nearAPI.Near
 
@@ -60,8 +61,13 @@ async function GetConnection(config: nearAPI.ConnectConfig | undefined = undefin
     return _near = await nearAPI.connect(config);  
 }
 
+async function NewConnection(): Promise<nearAPI.Near> {
+    return await nearAPI.connect(GetConfigInMemory(NETWORK));
+}
+
 export {
     GetConfig,
     GetConnection,
-    GetConfigInMemory
+    GetConfigInMemory,
+    NewConnection
 }
