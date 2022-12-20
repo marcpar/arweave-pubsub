@@ -73,7 +73,7 @@ async function SendHandler(receiver_id: string, nft_account_id: string, token_id
         args: {
             claimable_id: `${nft_account_id}:${token_id}`,
             receiver_id: receiver_id
-        }, gas: nearAPI.DEFAULT_FUNCTION_CALL_GAS
+        }, gas: "60000000000000"
     });
 };
 
@@ -102,10 +102,34 @@ async function ClaimWithExistingAccountHandler(claimDetailsId: string) {
     });
 }
 
+async function CreateNewAccountAndClaim(claimDetails: ClaimDetails, newAccountId: string, newPrivateKey: string, newPublicKey: string) {
+    let nearConfig = GetConfigInMemory(NETWORK);
+    let keyStore = new nearAPI.keyStores.InMemoryKeyStore();
+    let accountId = process.env.REACT_APP_VAULT_CONTRACT as string ?? 'vault.world-triathlon.testnet';
+
+    await keyStore.setKey(NETWORK, accountId, nearAPI.KeyPair.fromString(claimDetails.PrivateKey));
+
+    nearConfig.keyStore = keyStore;
+    let conn = await nearAPI.connect(nearConfig);
+    let vaultContract = GetVaultContract(await conn.account(accountId));
+
+    let callback = NETWORK === 'mainnet'? `https://app.mynearwallet.com/auto-import-secret-key#${newAccountId}/${newPrivateKey}` : `https://testnet.mynearwallet.com/auto-import-secret-key#${newAccountId}/${newPrivateKey}`;
+    
+    await vaultContract.claim({
+        callbackUrl: callback,
+        args: {
+            claimable_id: `${claimDetails.NFTContract}:${claimDetails.TokenId}`,
+            receiver_id: newAccountId,
+            new_public_key: newPublicKey
+        }, gas: "60000000000000"
+    });
+}
+
 export {
     ParseToken,
     AddressOnChangeHandler,
     SendHandler,
     ClaimWithExistingAccountHandler,
-    ClaimWithLoggedInAccountCallback
+    ClaimWithLoggedInAccountCallback,
+    CreateNewAccountAndClaim
 }

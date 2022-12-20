@@ -7,9 +7,11 @@ import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
 import { GridLoader } from "react-spinners";
-import { ClaimWithExistingAccountHandler, ParseToken } from './ClaimNFTHandler';
+import { ClaimWithExistingAccountHandler, CreateNewAccountAndClaim, ParseToken } from './ClaimNFTHandler';
 import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
-import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWIthNewAccountModal';
+import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWithNewAccountModal';
+import { NETWORK } from '../Libraries/Near/constants';
+
 
 type NFTDetails = {
     nftMeta: NFTContractMetadata | null,
@@ -19,7 +21,7 @@ type NFTDetails = {
 export default function ClaimNFT() {
     const { nft, token_id } = useParams();
     let searchParams = useSearchParams();
-    let token = window.location.hash ?? searchParams[0].get('token') ?? '';
+    let token = window.location.hash === undefined || window.location.hash === null || window.location.hash === '' ? searchParams[0].get('token') ?? '' : window.location.hash;
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null>(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
@@ -38,9 +40,19 @@ export default function ClaimNFT() {
         ClaimWithExistingAccountHandler(uuid);
     }
 
-    function claimWithNewAccount() {
+    function claimWithNewAccountOpen() {
         setIsClaimOptionsModalOpen(false);
         setIsClaimWithNewAccountModalOpen(true);
+    }
+
+    function onClaimWithNewAccount(accountId: string, privateKey: string, publicKey: string) {
+        setIsClaimWithNewAccountModalOpen(false);
+        alert(accountId);
+        CreateNewAccountAndClaim(ParseToken(token), accountId, privateKey, publicKey).then(() => {
+            window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/auto-import-secret-key#${accountId}/${privateKey}`
+        }).catch(e => {
+            alert(`${e}`);
+        });
     }
 
     useEffect(() => {
@@ -118,8 +130,8 @@ export default function ClaimNFT() {
                     </div>
                 </div>
             </Tilt>
-            <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccount} onClaimWithExistingAccount={claimOnExistingAccount} />
-            <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen} onRequestClose={() => setIsClaimWithNewAccountModalOpen(false)}/>
+            <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccountOpen} onClaimWithExistingAccount={claimOnExistingAccount} />
+            <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen} onRequestClose={() => setIsClaimWithNewAccountModalOpen(false)} onClaimWithNewAccount={onClaimWithNewAccount} />
         </div>
     );
 }

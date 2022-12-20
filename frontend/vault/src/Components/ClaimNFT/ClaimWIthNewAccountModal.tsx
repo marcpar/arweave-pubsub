@@ -4,7 +4,8 @@ import CreateNewAccount from './CreateNewAccount';
 
 export default function ClaimWithNewAccountModal(props: {
     isOpen: boolean
-    onRequestClose: () => void
+    onRequestClose: () => void,
+    onClaimWithNewAccount: (accountId: string, privateKey: string, publicKey: string) => void,
 }) {
     return (
         <Modal isOpen={props.isOpen} style={{
@@ -26,7 +27,7 @@ export default function ClaimWithNewAccountModal(props: {
         }}>
             <div className={styles.main}>
                 <span onClick={props.onRequestClose}>X</span>
-                <CreateNewAccount/>
+                <CreateNewAccount onCompleteFlow={props.onClaimWithNewAccount}/>
             </div>
         </Modal>
     )

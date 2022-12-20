@@ -37,7 +37,8 @@ interface VaultContract extends nearAPI.Contract {
         callbackUrl: string,
         args: {
             receiver_id: string,
-            claimable_id: string
+            claimable_id: string,
+            new_public_key?: string,
         }, gas: string
     }) => Promise<boolean> | Promise<void>
 }

@@ -5,9 +5,15 @@ import SecurePhrase from "./SecurePhrase";
 import VerifyPhrase from "./VerifyPhrase";
 
 
-export default function CreateNewAccount() {
+export default function CreateNewAccount(props: {
+    onCompleteFlow: (accountId: string, privateKey: string, publicKey: string) => void
+}) {
     let [currentStage, setCurrentStage] = useState<number>(0);
     let [seed, setSeed] = useState<Seed | undefined>(undefined);
+
+    function createAccountAndClaim(accountId: string, seed: Seed) {
+        props.onCompleteFlow(accountId, seed.secretKey, seed.publicKey);
+    }
 
     switch (currentStage) {
         case 0:
@@ -38,12 +44,11 @@ export default function CreateNewAccount() {
                 <CreateAccount onStartOver={() => {
                     setCurrentStage(0);
                 }} onValidAccountId = {(accountId) => {
-                    alert(`
-                        accountID: ${accountId}\n
-                        privateKey: ${seed?.secretKey}\n
-                        publicKey: ${seed?.publicKey}\n
-                        seedPhrase: ${seed?.seedPhrase}
-                    `);
+                    if (seed === undefined) {
+                        setCurrentStage(0);
+                        return;
+                    }
+                    createAccountAndClaim(accountId, seed);
                 }}/>
             )
         default:

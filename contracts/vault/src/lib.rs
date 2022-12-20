@@ -1,4 +1,4 @@
-use external::nft::external_nft;
+use external::{account_creator::external_account_creator, nft::external_nft};
 use internal::claimable::Claimable;
 use near_contract_standards::{
     non_fungible_token::TokenId,
@@ -74,7 +74,12 @@ impl Contract {
     ///
     /// this method is called using an access key
     #[private]
-    pub fn claim(&mut self, receiver_id: AccountId, claimable_id: String) -> Promise {
+    pub fn claim(
+        &mut self,
+        receiver_id: AccountId,
+        claimable_id: String,
+        new_public_key: Option<PublicKey>,
+    ) -> Promise {
         let claimable = self.claimables.get(&claimable_id);
         if claimable.is_none() {
             env::panic_str(format!("claimable does not exist: {}", claimable_id).as_str());
@@ -83,6 +88,43 @@ impl Contract {
 
         if claimable.public_key.parse::<PublicKey>().unwrap() != env::signer_account_pk() {
             env::panic_str("claimable public key does not match signer_account_pk");
+        }
+
+        let top_level_account: AccountId =
+            match env::current_account_id().as_str().ends_with(".near") {
+                true => "near".parse().unwrap(),
+                false => "testnet".parse().unwrap(),
+            };
+
+        match new_public_key {
+            Some(public_key) => external_account_creator::ext(top_level_account)
+                .with_attached_deposit(20 * ONE_MILLINEAR)
+                .with_static_gas(Gas(10_000_000_000_000))
+                .create_account(receiver_id.clone(), public_key)
+                .then(
+                    Self::ext(env::current_account_id())
+                        .create_account_callback(receiver_id, claimable),
+                ),
+            None => external_nft::ext(claimable.nft_account_id.clone())
+                .with_attached_deposit(ONE_YOCTO)
+                .nft_transfer(receiver_id, claimable.token_id.clone(), None, None)
+                .then(Self::ext(env::current_account_id()).claim_callback(claimable)),
+        }
+    }
+
+    #[private]
+    /// create account callback
+    pub fn create_account_callback(
+        &mut self,
+        #[callback_result] call_result: Result<bool, PromiseError>,
+        receiver_id: AccountId,
+        claimable: Claimable,
+    ) -> Promise {
+        if let Err(error) = call_result {
+            env::panic_str(format!("Failed to create account: {:?}", error).as_str())
+        }
+        if !call_result.unwrap() {
+            env::panic_str("Failed to create account: false")
         }
 
         external_nft::ext(claimable.nft_account_id.clone())
@@ -97,9 +139,9 @@ impl Contract {
         &mut self,
         #[callback_result] call_result: Result<(), PromiseError>,
         claimable: Claimable,
-    ) {
+    ) -> PromiseOrValue<()> {
         if call_result.is_err() {
-            return;
+            return PromiseOrValue::Value(());
         }
 
         self.claimables.remove(&format!(
@@ -108,8 +150,12 @@ impl Contract {
         ));
 
         if env::current_account_id() == env::signer_account_id() {
-            Promise::new(env::current_account_id()).delete_key(env::signer_account_pk());
+            return PromiseOrValue::Promise(
+                Promise::new(env::current_account_id()).delete_key(env::signer_account_pk()),
+            );
         }
+
+        PromiseOrValue::Value(())
     }
 
     #[private]
@@ -153,7 +199,6 @@ impl Contract {
 
 #[near_bindgen]
 impl NonFungibleTokenReceiver for Contract {
-    #[payable]
     fn nft_on_transfer(
         &mut self,
         sender_id: AccountId,
@@ -161,13 +206,6 @@ impl NonFungibleTokenReceiver for Contract {
         token_id: TokenId,
         msg: String,
     ) -> PromiseOrValue<bool> {
-        let payload: OnTransferMessage = OnTransferMessage::from_string(msg.to_string()).unwrap();
-        log!(
-            "message: {}, public_key: {}",
-            payload.message,
-            payload.public_key
-        );
-
         let nft = env::predecessor_account_id();
 
         require!(
@@ -178,8 +216,18 @@ impl NonFungibleTokenReceiver for Contract {
             )
         );
 
+        let payload: OnTransferMessage = OnTransferMessage::from_string(msg.to_string()).unwrap();
+        log!(
+            "message: {}, public_key: {}",
+            payload.message,
+            payload.public_key
+        );
+
         if let Some(err) = payload.public_key.parse::<PublicKey>().err() {
-            panic!("public_key should be a valid near parsable PublicKey: {:?}", err)
+            panic!(
+                "public_key should be a valid near parsable PublicKey: {:?}",
+                err
+            )
         }
 
         PromiseOrValue::Promise(external_nft::ext(nft.clone()).nft_token(token_id).then(
