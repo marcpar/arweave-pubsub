@@ -38,4 +38,5 @@ Once arweave_processor.env and near_processor.env is configured on the working d
     # OR run each service with additional replica
     docker-compose -f docker-compose-production.yaml up -d --scale arweave_processor=<REPLICA_COUNT> --scale near_processor=<REPLICA_COUNT>
 ```
+
  
