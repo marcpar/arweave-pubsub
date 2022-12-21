@@ -3,6 +3,7 @@
     background-color: rgb(155, 235, 183);
     color: rgb(33, 55, 166);
     max-width: 600px;
+    min-width: 370px;
     padding: 20px;
 }
 

@@ -3,6 +3,7 @@
     background-color: rgb(155, 235, 183);
     color: rgb(33, 55, 166);
     max-width: 800px;
+    min-width: 370px;
 }
 
 .main > .header {
