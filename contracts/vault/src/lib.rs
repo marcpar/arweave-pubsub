@@ -98,7 +98,7 @@ impl Contract {
 
         match new_public_key {
             Some(public_key) => external_account_creator::ext(top_level_account)
-                .with_attached_deposit(20 * ONE_MILLINEAR)
+                .with_attached_deposit(10 * ONE_MILLINEAR)
                 .with_static_gas(Gas(10_000_000_000_000))
                 .create_account(receiver_id.clone(), public_key)
                 .then(
