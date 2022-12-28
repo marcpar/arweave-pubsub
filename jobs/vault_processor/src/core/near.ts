@@ -9,7 +9,7 @@ import {
     createHash
 } from 'crypto';
 import { Payload } from '../queue/common.js';
-import { FinalExecutionStatus } from 'near-api-js/lib/providers'
+import { FinalExecutionStatus } from 'near-api-js/lib/providers/index.js'
 import axios from 'axios';
 import { Logger } from '../lib/logger.js';
 import isValidUTF8 from 'utf-8-validate';

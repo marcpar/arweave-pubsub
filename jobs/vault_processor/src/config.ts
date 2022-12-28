@@ -15,6 +15,8 @@ type Config = {
     NearEnv: "testnet" | "mainnet",
     NearDeposit: string,
     DefaultCallbackURL: string,
+    VaultBaseURL: string,
+    VaultContractAddress: string,
     MaxJobs: number
 }
 
@@ -76,6 +78,8 @@ function LoadConfig() {
             DefaultCallbackURL: process.env.DEFAULT_CALLBACK_URL,
             MaxJobs: process.env.MAX_JOBS ? parseInt(process.env.MAX_JOBS) : 0,
             NearDeposit: process.env.NEAR_DEPOSIT,
+            VaultBaseURL: new URL(process.env.VAULT_BASE_URL).toString(),
+            VaultContractAddress: process.env.VAULT_CONTRACT_ADDRESS
         }
     } catch (e) {
         let err = e as Error;
