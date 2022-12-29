@@ -29,11 +29,25 @@ services:
     env_file:
       - near_processor.local.env
 
+  vault_processor:
+    build:
+      context: jobs/vault_processor
+      dockerfile: dockerfile
+    env_file:
+      - vault_processor.local.env
+  
+  vault_util:
+    build:
+      context: jobs/vault_processor
+      dockerfile: util.dockerfile
+    env_file: vault_processor.local.env
+
   vault:
     build:
       context: frontend/vault
       dockerfile: testnet.dockerfile
     ports:
       - 8000:3000
+  
 
   

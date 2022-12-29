@@ -27,8 +27,6 @@ let config = GetConfig();
         accountKey: config.NearAccountPrivateKey,
         contractID: config.NearMinterContractName,
         deposit: config.NearDeposit,
-        vaultBaseURL: config.VaultBaseURL,
-        vaultContractAddress: config.VaultContractAddress
     });
     // ---- CONFIGURATION ---- //
 

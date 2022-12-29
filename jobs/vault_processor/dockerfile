@@ -7,18 +7,18 @@ RUN yarn install && yarn build
 
 FROM node:16.6.2-alpine3.14 as runtime
 
-WORKDIR /home/near-processor
+WORKDIR /home/vault-processor
 
-COPY --from=build /workdir/dist /home/near-processor/dist
-COPY --from=build /workdir/package.json /home/near-processor/package.json
-COPY --from=build /workdir/yarn.lock /home/near-processor/yarn.lock
+COPY --from=build /workdir/dist /home/vault-processor/dist
+COPY --from=build /workdir/package.json /home/vault-processor/package.json
+COPY --from=build /workdir/yarn.lock /home/vault-processor/yarn.lock
 
 ENV NODE_ENV production
 
 RUN yarn install && \
-    chown -R node:node /home/near-processor && \
-    find /home/near-processor -type f -exec chmod 400 {} \; && \
-    find /home/near-processor -type d -exec chmod 500 {} \;
+    chown -R node:node /home/vault-processor && \
+    find /home/vault-processor -type f -exec chmod 400 {} \; && \
+    find /home/vault-processor -type d -exec chmod 500 {} \;
 
 LABEL Maintainer="Marc Par <marc.par10@gmail.com>"
 LABEL Repository="https://github.com/marcpar/near-nft-processor"

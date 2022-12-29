@@ -10,15 +10,7 @@ interface Job {
 
 type Payload = {
     JobId: string,
-    ArweaveTxnId: string,
-    OwnerAddress?: string,
-    Title?: string,
-    Description?: string,
-    Copies?: number,
-    IssuedAt?: string,
-    ExpiresAt?: string,
-    StartsAt?: string,
-    UpdatedAt?: string,
+    TokenId: string
 }
 
 function ParsePayloadFromJSONString(payloadString: string): {
@@ -34,10 +26,10 @@ function ParsePayloadFromJSONString(payloadString: string): {
         };
     }
 
-    if (payload.ArweaveTxnId === undefined || payload.ArweaveTxnId === null) {
+    if (payload.TokenId === undefined || payload.TokenId === null) {
         return {
             Payload: payload,
-            Error: "ArweaveTxnId is a required parameter"
+            Error: "TokenId is a required parameter"
         };
     }
 

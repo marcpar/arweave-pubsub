@@ -10,7 +10,7 @@ describe("test", () => {
 describe("Payload Validation", () => {
     it("should be able parse valid payload", () => {
         let payloadString = JSON.stringify({
-            ArweaveTxnId: "",
+            TokenId: "",
             JobId: "",
         } as Payload);
         let result = ParsePayloadFromJSONString(payloadString);
@@ -19,7 +19,7 @@ describe("Payload Validation", () => {
 
     it("should fail on undefined JobId", () => {
         let payloadString = JSON.stringify({
-            ArweaveTxnId: "",
+            TokenId: "",
             JobId: undefined as any,
         } as Payload);
         let result = ParsePayloadFromJSONString(payloadString);
@@ -28,28 +28,28 @@ describe("Payload Validation", () => {
 
     it("should fail on null JobId", () => {
         let payloadString = JSON.stringify({
-            ArweaveTxnId: "",
+            TokenId: "",
             JobId: null as any,
         } as Payload);
         let result = ParsePayloadFromJSONString(payloadString);
         equal(result.Error, "JobId is a required parameter");
     });
 
-    it("should fail on undefined ArweaveTxnId", () => {
+    it("should fail on undefined TokenId", () => {
         let payloadString = JSON.stringify({
-            ArweaveTxnId: undefined as any,
+            TokenId: undefined as any,
             JobId: "",
         } as Payload);
         let result = ParsePayloadFromJSONString(payloadString);
-        equal(result.Error, "ArweaveTxnId is a required parameter");
+        equal(result.Error, "TokenId is a required parameter");
     });
 
-    it("should fail on null ArweaveTxnId", () => {
+    it("should fail on null TokenId", () => {
         let payloadString = JSON.stringify({
-            ArweaveTxnId: null as any,
+            TokenId: null as any,
             JobId: "",
         } as Payload);
         let result = ParsePayloadFromJSONString(payloadString);
-        equal(result.Error, "ArweaveTxnId is a required parameter");
+        equal(result.Error, "TokenId is a required parameter");
     });
 });

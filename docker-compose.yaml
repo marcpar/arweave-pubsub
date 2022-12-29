@@ -41,6 +41,16 @@ services:
     volumes:
       - ./jobs/near_processor:/home/app
   
+  vault_processor:
+    build:
+      context: jobs/vault_processor
+      dockerfile: local.dockerfile
+    entrypoint: yarn
+    command: dev:watch
+    working_dir: /home/app
+    volumes:
+      - ./jobs/vault_processor:/home/app
+  
   vault_front:
     build:
       context: frontend/vault

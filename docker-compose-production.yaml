@@ -17,3 +17,10 @@ services:
       - near_processor.env
     restart: unless-stopped
   
+  vault_processor:
+    build:
+      context: jobs/vault_processor
+      dockerfile: dockerfile
+    env_file:
+      - vault_processor.env
+    restart: unless-stopped

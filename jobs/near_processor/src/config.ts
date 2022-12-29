@@ -55,14 +55,6 @@ function LoadConfig() {
         Logger().error("NEAR_DEPOSIT is a required environment variable");
         process.exit(1);
     }
-    if (!process.env.VAULT_BASE_URL) {
-        Logger().error("VAULT_BASE_URL is a required environment variable");
-        process.exit(1);
-    }
-    if (!process.env.VAULT_CONTRACT_ADDRESS) {
-        Logger().error("VAULT_CONTRACT_ADDRESS is a required environment variable");
-        process.exit(1);
-    }
 
     try {
         config = {

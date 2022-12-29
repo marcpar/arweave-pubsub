@@ -15,7 +15,6 @@ import { Logger } from '../lib/logger.js';
 import isValidUTF8 from 'utf-8-validate';
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { fileTypeFromBuffer } from 'file-type';
-import { KeyPairEd25519 } from 'near-api-js/lib/utils/key_pair.js';
 
 let _near: Near;
 let _account: Account;
@@ -25,8 +24,6 @@ let _contractID: string;
 let _explorerBaseURL: string;
 let _deposit: string;
 let _minter: Minter;
-let _vaultBaseUrl: string;
-let _vaultContractAddress: string;
 
 class Minter extends Account {
 
@@ -72,34 +69,6 @@ class Minter extends Account {
             ),
         ];
 
-        /*
-        let claimDetails: ClaimDetails | undefined;
-        if (payload.OwnerAddress === undefined || payload.OwnerAddress === null) {
-            let keypair = KeyPairEd25519.fromRandom();
-
-            claimDetails = {
-                NFTContract: this.accountId,
-                TokenId: token_id,
-                PrivateKey: keypair.toString(),
-                VaultContract: _vaultContractAddress
-            };
-
-            actions.push(functionCall(
-                'nft_transfer_call',
-                {
-                    receiver_id: _vaultContractAddress,
-                    token_id: token_id,
-                    msg: JSON.stringify({
-                        public_key: keypair.publicKey.toString(),
-                        message: `lock nft ${this.accountId}:${token_id} on vault`
-                    })
-                },
-                40000000000000,
-                "1"
-            ));
-        }
-        */
-
         let result = await this.signAndSendTransaction({
             receiverId: this.accountId,
             actions: actions
@@ -120,15 +89,6 @@ class Minter extends Account {
             TransactionId: result.transaction_outcome.id,
             TokenId: token_id
         } as MintResult;
-
-        /*
-        if (claimDetails) {
-            let claimUrl = new URL(`${_vaultBaseUrl}claim/${_contractID}/${token_id}`);
-            claimUrl.hash = Buffer.from(JSON.stringify(claimDetails), 'utf-8').toString('base64');
-            mintResult.ClaimURL = claimUrl.toString();
-        }
-        */
-        
         
         return mintResult;
     }
@@ -171,8 +131,6 @@ type InitConfig = {
     accountID: string,
     accountKey: string, 
     contractID: string,
-    vaultBaseURL: string,
-    vaultContractAddress: string
 }
 
 async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
@@ -181,8 +139,6 @@ async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
     _contractID = initConfig.contractID;
     _explorerBaseURL = `https://explorer.${connectConfig.networkId}.near.org`;
     _deposit = initConfig.deposit;
-    _vaultBaseUrl = initConfig.vaultBaseURL;
-    _vaultContractAddress = initConfig.vaultContractAddress;
 
     await connectConfig.keyStore?.setKey(connectConfig.networkId, _accountID, KeyPair.fromString(_accountKey))
 

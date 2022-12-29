@@ -1,9 +1,8 @@
-import { Job, Payload, Queue } from '../queue/common.js';
-import axios from 'axios';
+import { Job, Queue } from '../queue/common.js';
 import { Sleep } from '../lib/util.js';
 import { Logger } from '../lib/logger.js';
 import { Emit } from './event.js';
-import { Mint } from './near.js';
+import { LockNFTtoVault } from './near.js';
 
 let _queue: Queue;
 
@@ -91,7 +90,22 @@ async function processJob(job: Job) {
         return;
     }
 
-    let result = await Mint(payload);
+    let result;
+    try {
+        result = await LockNFTtoVault(payload);
+    } catch (e) {
+        Emit({
+            JobId: job.payload.JobId,
+            Event: "failure",
+            Message: `Failed to lock nft to vault: ${e}`,
+            Details: {
+                Error: e,
+            }
+        });
+        Logger().error(`Failed to lock nft to vault: ${e}`)
+        return;
+    }
+
     Logger().info(`Job ${payload.JobId} has been successfully processed`, {
         log_type: 'job_completed',
         job_id: payload.JobId
