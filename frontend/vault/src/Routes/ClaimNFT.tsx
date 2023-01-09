@@ -108,7 +108,7 @@ export default function ClaimNFT() {
         let extra = JSON.parse(nftDetails.nftToken.metadata?.extra as string);
         let valuePairs = extra.ValuePairs as Array<{ Key: string, Value: string }>;
         let recipientName = valuePairs.find((el) => {
-            return el.Key === "RecipientName";
+            return el.Key === "RecipientName" || el.Key === "Recipient Name";
         });
         fullname = recipientName?.Value as string;
     } catch (_) {

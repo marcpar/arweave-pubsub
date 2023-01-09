@@ -104,10 +104,10 @@ export default function CreateAccount(props: {
             <div className={styles.button_group}>
                 <button type="button" disabled={!isAccountIDValid} onClick={() => {
                     props.onValidAccountId(accountIdInputRef.current?.value + ACCOUNT_POSTFIX ?? '')
-                }}>Create and Claim NFT</button>
+                }}>Create and claim NFT</button>
             </div>
             <div className={styles.button_group}>
-                <button type="button" onClick={props.onStartOver}>Start Over</button>
+                <button type="button" onClick={props.onStartOver}>Start over</button>
             </div>
         </div>
     )

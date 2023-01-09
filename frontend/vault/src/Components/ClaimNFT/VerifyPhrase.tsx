@@ -48,7 +48,7 @@ export default function VerifyPhrase(props: {
                 >Verify</button>
             </div>
             <div className={styles.button_group}>
-                <button type="button" onClick={onStartOver}>Start Over</button>
+                <button type="button" onClick={onStartOver}>Start over</button>
             </div>
         </div>
     )

@@ -65,10 +65,10 @@
     padding: 10px 20px;
     border: none;
     border-radius: 10px;
-    box-shadow: 3px 3px 3px rgba(0,0,0,0.1),
-                -3px -3px 3px rgba(255,255,255,0.15);
     font-weight: bold;
-    color: inherit;
+    background-color: rgb(154, 234, 171);
+    color: rgb(35, 68, 219);
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
 }
 
 .main > .button_group > button:hover {

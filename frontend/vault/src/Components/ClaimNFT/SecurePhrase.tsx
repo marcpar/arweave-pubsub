@@ -33,7 +33,7 @@ export default function SecurePhrase(props: {
             </div>
             <div className={styles.button_group}>
                 <button type="button" onClick={copy}>Copy</button>
-                <button type="button" onClick={generateNew}>Generate New</button>
+                <button type="button" onClick={generateNew}>Generate new</button>
             </div>
             <div className={styles.button_group}>
                 <button type="button" onClick={() => {

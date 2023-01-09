@@ -35,14 +35,14 @@ export default function ClaimOptionsModal(props: {
                 </div>
                 <div className={styles.content}>
                     <div className={styles.option}>
-                        <h1>Claim with an Existing Account</h1>
-                        <p>For users with existing account on the near protocol, you can quickly transfer to your account by clicking the button below.</p>
-                        <button type="button" onClick={onClaimWithExistingAccount}>Claim with Existing Account</button>
+                        <h1>Claim with an existing account</h1>
+                        <p>For users with an existing account on the Near protocol. You can quickly transfer to your account by clicking the button below.</p>
+                        <button type="button" onClick={onClaimWithExistingAccount}>Claim with existing account</button>
                     </div>
                     <div className={styles.option}>
-                        <h1>Claim with a New Account</h1>
-                        <p>For users with no existing account, you can click the button below to claim the nft with a newly created account.</p>
-                        <button type="button" onClick={onClaimWithNewAccount}>Claim with a New Account</button>
+                        <h1>Claim with a new account</h1>
+                        <p>For users without an existing account on the Near protocol. Click the button below to create a new account and claim your NFT.</p>
+                        <button type="button" onClick={onClaimWithNewAccount}>Claim with a new account</button>
                     </div>
                 </div>
                 
