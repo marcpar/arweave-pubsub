@@ -1,23 +1,41 @@
 .main_container {
-    width: fit-content;
+    width: 100vw;
+    height: auto;
     margin: auto;
     text-align: center;
-    margin-top: 7em;
+    margin-bottom: 2em;
 }
 
-.card {
-    width: 400px;
-    overflow: hidden;
+.greetings {
+    color: #FFFFFF;
+    max-width: 400px;
     margin: auto;
-    margin-top: 1em;
-    background-color: rgb(243, 243, 243);
+    margin-top: 20px;
+    text-align: center;
     padding: 10px;
-    border-radius: 20px;
-    box-shadow: 3px 3px 10px rgba(27, 27, 27, 0.096);
 }
+
+.greetings > p {
+    font-size: 1.2em;
+}
+
+.greetings > p.full_name {
+    margin: 0;
+    font-size: 2em;
+}
+
+.hidden {
+    display: none;
+}
+
+
+.card {
+    width: fit-content;
+    margin: auto;
+}
+
 .card:hover {
     cursor: pointer;
-    background-color: rgb(238, 238, 238);
 }
 
 .card_header {
@@ -26,12 +44,12 @@
     text-align: center
 }
 
-.card_title {
+.nft_name {
     font-weight: bold;
     font-size: 18px;
 }
 
-.card_subtitle {
+.nft_title {
     padding: 5px;
     font-size: 16px;
 }
@@ -48,23 +66,30 @@
     color: rgb(116, 116, 116);
 }
 
+.card > .button_container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 100%;
+}
+
 .button {
     margin: 15px;
     border: none;
-    padding: 10px 30px;
-    width: 60%;
+    padding: 5px 20px;
     font-weight: bold;
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.151);
-    background-color: rgb(0, 98, 190);
-    color: rgb(245, 245, 245);
-    border-radius: 3px;
+    background-color: rgb(155, 235, 183);
+    color: rgb(42, 73, 220);
+    border-radius: 25px;
     font-size: 18px;
 }
 
 .button:hover {
     cursor: pointer;
     box-shadow: none;
-    background-color: rgb(2, 86, 165);
+    background-color: rgb(96, 234, 144);
 }
 
 .button[disabled] {
@@ -76,27 +101,31 @@
     margin-top: 300px;
 }
 
-
-.metadata_container > pre {
-    overflow-x: scroll;
-    padding: 15px;
-    border-radius: 5px;
+.link_container {
+    margin: auto;
+    color: rgb(42, 73, 220);
 }
 
-.metadata_container > pre::-webkit-scrollbar {
-    height: 10px;
+.link_container > .copy_icon {
+    fill: rgb(42, 73, 220);
+    display: inline-block;
+    position: relative;
+    top: 50%;
+    margin: 10px;
 }
 
-.metadata_container > pre::-webkit-scrollbar-track {
-    background-color: rgb(160, 160, 160);
-    
+.link_container > .copy_icon > svg {
+    height: 25px;
 }
 
-.metadata_container > pre::-webkit-scrollbar-thumb {
-    background: rgb(85, 85, 85);
-    border-radius: 10px;
+.link_container > .copy_icon > svg:hover {
+    cursor: pointer;
 }
 
-.metadata_container > pre::-webkit-scrollbar-thumb:hover {
-    background: rgb(58, 58, 58);
+@media only screen and (min-width: 1250px) {
+    .greetings {
+        float: left;
+        margin-left: 20px;
+        text-align: left;
+    }
 }
