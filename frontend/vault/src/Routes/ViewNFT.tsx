@@ -17,6 +17,7 @@ type NFTDetails = {
 export default function ViewNFT() {
     const { nft, token_id } = useParams();
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null >(undefined);
+    const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -69,14 +70,14 @@ export default function ViewNFT() {
             <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
                 <div className={style.card}>
                     <div className={style.card_media}>
-                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`}/>
+                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />
                     </div>
                     <div className={style.button_container}>
-                        <button className={style.button} type="button">Download</button>
+                        <button className={ isMediaLoading ? style.hidden : style.button} type="button">Download</button>
                     </div>
                 </div>
             </Tilt>
-            <div className={style.link_container}>
+            <div className={ isMediaLoading ? style.hidden : style.link_container}>
                 <span>Link: </span>
                 <span><a href={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`}>{nftDetails.nftMeta.base_uri}/{nftDetails.nftToken.metadata.media}</a></span>
                 <span className={style.copy_icon}>
