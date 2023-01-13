@@ -75,23 +75,35 @@ export default function ViewNFT() {
         return (<div>not found</div>);
     }
 
-    let fullname: string | undefined = ""
+    let fullName: string | undefined = "";
+    let eventName: string | undefined = "";
+    let groupName: string | undefined = "";
+    let eventCountry: string | undefined = "";
     try {
         let extra = JSON.parse(nftDetails.nftToken.metadata?.extra as string);
         let valuePairs = extra.ValuePairs as Array<{ Key: string, Value: string }>;
-        let recipientName = valuePairs.find((el) => {
-            return el.Key === "RecipientName" || el.Key === "Recipient Name";
+        valuePairs.forEach((el) => {
+            let key = el.Key.toLowerCase();
+            if (key === "recipient name" || key === "recipientname") {
+                fullName = el.Value;
+            } else if (key === "event name" || key === "eventname") {
+                eventName = el.Value;
+            } else if (key === "group name" || key === "groupname") {
+                groupName = el.Value
+            } else if (key === "event country" || key === "eventcountry")  {
+                eventCountry = el.Value
+            }
         });
-        fullname = recipientName?.Value as string;
     } catch (_) {
-        fullname = "Participant";
+        fullName = "Participant";
+        eventName = "World Triathlon";
     }
 
     return (
         <div className={style.main_container}>
             <div className={style.greetings}>
-                <p className={style.full_name}>{fullname}</p>
-                <p>Congratulations for competing in the 2022 World Triathlon Age-Group Championships Abu Dhabi.</p>
+                <p className={style.full_name}>{fullName}</p>
+                <p>Congratulations for competing in the {eventName} {groupName} {eventCountry}.</p>
                 <p>Your Race Capsule is ready to be claimed.</p>
             </div>
             <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
