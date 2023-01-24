@@ -6,10 +6,9 @@ import { Sleep } from "../lib/util.js";
 import {
     createData,
     bundleAndSignData,
+    DataItem,
 } from "arbundles";
 import { ArweaveSigner } from "arbundles/src/signing/index.js";
-import { logger } from "@azure/storage-queue";
-
 
 type PathManifest = {
     manifest: 'arweave/paths',
@@ -28,14 +27,26 @@ type Paths = {
 
 type UploadResult = {
     BundleTxID: string,
-    PathManifestTxID: string,
+    JobIDPathManifestID: JobIDPathManifestMap
+}
+
+type JobIDPathManifestMap = {
+    [jobID: string]: string
+}
+
+type UploadParams = {
+    media: Buffer,
+    metadata: any,
+    jobID: string
+}
+
+type NFTDataItems = {
+    media: DataItem,
+    metadata: DataItem,
+    pathManifest: DataItem
 }
 
 let _minConfirmations: number;
-
-function SetMinConfirmations(minConfirmations: number) {
-    _minConfirmations = minConfirmations;
-}
 
 let _client: Arweave = Arweave.init({
     host: 'arweave.net',
@@ -45,19 +56,57 @@ let _client: Arweave = Arweave.init({
 
 let _wallet: JWKInterface;
 
+function SetMinConfirmations(minConfirmations: number) {
+    _minConfirmations = minConfirmations;
+}
+
 function SetArweaveWallet(wallet: JWKInterface) {
     _wallet = wallet;
 }
 
-async function UploadMediaToPermaweb(media: Buffer, metadata: any, jobID: string): Promise<UploadResult> {
+async function UploadMediaToPermaweb(uploadParams: UploadParams[]): Promise<UploadResult> {
+    
     let signer = new ArweaveSigner(_wallet);
+    
+    let jobIDPathManifestMap: JobIDPathManifestMap = {};
 
-    let mediaFileType = await fileTypeFromBuffer(media);
-    if (!mediaFileType) {
-        throw new Error(`Job ${jobID}, failed to get mime of media`);
+    let dataItems: DataItem[] = [];
+    for (const uploadParam of uploadParams) {
+        let nftDataItems = await createNFTDataItem(uploadParam, signer);
+        dataItems.push(nftDataItems.media, nftDataItems.metadata, nftDataItems.pathManifest);
+        jobIDPathManifestMap[uploadParam.jobID] = nftDataItems.pathManifest.id;
     }
 
-    let mediaData = createData(media, signer, {
+    let bundle = await bundleAndSignData(dataItems, signer);
+
+    let tx = await bundle.toTransaction({}, _client, _wallet);
+
+
+    tx.addTag("App-Name", "NFTDesignWorks");
+
+    await _client.transactions.sign(tx, _wallet);
+    
+    
+
+    let uploader = await _client.transactions.getUploader(tx);
+    while (!uploader.isComplete) {
+        await uploader.uploadChunk();
+        Logger().info(`TX: ${tx.id}, Status; uploading ${uploader.pctComplete}%`)
+    }
+    
+    return {
+        BundleTxID: tx.id,
+        JobIDPathManifestID: jobIDPathManifestMap
+    };
+}
+
+async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): Promise<NFTDataItems> {
+    let mediaFileType = await fileTypeFromBuffer(params.media);
+    if (!mediaFileType) {
+        throw new Error(`Job ${params.jobID}, failed to get mime of media`);
+    }
+
+    let mediaData = createData(params.media, signer, {
         tags: [{
             name: 'Content-Type',
             value: mediaFileType.mime
@@ -65,7 +114,7 @@ async function UploadMediaToPermaweb(media: Buffer, metadata: any, jobID: string
     });
     await mediaData.sign(signer);
 
-    let metadataData = createData(JSON.stringify(metadata), signer, {
+    let metadataData = createData(JSON.stringify(params.metadata), signer, {
         tags: [{
             name: 'Content-Type',
             value: 'application/json'
@@ -102,25 +151,10 @@ async function UploadMediaToPermaweb(media: Buffer, metadata: any, jobID: string
     await pathManifestData.sign(signer);
     
     Logger().debug(`path manifest ${pathManifestData.id}:\n${pathManifest}`)
-
-    let bundle = await bundleAndSignData([mediaData, metadataData, pathManifestData], signer);
-
-    let tx = await bundle.toTransaction({}, _client, _wallet);
-
-    tx.addTag("App-Name", "NFTDesignWorks");
-    if (jobID) tx.addTag("JobID", jobID);
-
-    await _client.transactions.sign(tx, _wallet);
-
-    let uploader = await _client.transactions.getUploader(tx);
-    while (!uploader.isComplete) {
-        await uploader.uploadChunk();
-        Logger().debug(`Job: ${jobID}, Status; uploading ${uploader.pctComplete}%`)
-    }
-    
     return {
-        BundleTxID: tx.id,
-        PathManifestTxID: pathManifestData.id
+        media: mediaData,
+        metadata: metadataData,
+        pathManifest: pathManifestData
     };
 }
 
@@ -161,11 +195,10 @@ async function ConfirmUpload(txID: string, minConfirmations?: number): Promise<n
 
 }
 
-
-
 export {
+    UploadParams,
     SetArweaveWallet,
     UploadMediaToPermaweb,
     SetMinConfirmations,
-    ConfirmUpload
+    ConfirmUpload,
 }

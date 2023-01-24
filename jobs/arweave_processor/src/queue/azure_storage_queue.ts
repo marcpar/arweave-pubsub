@@ -1,4 +1,4 @@
-import { DequeuedMessageItem, QueueServiceClient, StorageSharedKeyCredential } from "@azure/storage-queue";
+import { DequeuedMessageItem, QueueClient, QueueServiceClient, StorageSharedKeyCredential } from "@azure/storage-queue";
 import { Emit } from "../core/event.js";
 import { Logger } from "../lib/logger.js";
 import { Sleep } from "../lib/util.js";
@@ -6,7 +6,8 @@ import { Job, ParsePayloadFromJSONString, Payload, Queue } from "./common.js";
 
 
 const STORAGE_QUEUE_POLL_INTERVAL = 3000;
-const STORAGE_QUEUE_RENEW_LOCK_INTERVAL = 20000;
+const STORAGE_QUEUE_RENEW_LOCK_INTERVAL = 30000;
+
 
 function CreateAzureStorageQueue(accountName: string, accountKey: string, queueName: string): Queue {
     let qsClient = new QueueServiceClient(
@@ -31,18 +32,14 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                     if (currentMessage) {
                         Logger().info(`message received: ${currentMessage.messageId} : ${currentMessage.popReceipt}`)
 
-                        let renewLockInterval = setInterval(async () => {
-                            Logger().debug(`renewing lock for message: ${currentMessage.messageId}`)
-                            let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, undefined, 30);
-                            currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
-                        }, STORAGE_QUEUE_RENEW_LOCK_INTERVAL);
+                        let renewLockInterval = createRenewLockInterval(currentMessage, qClient);
 
                         let parseResult = ParsePayloadFromJSONString(currentMessage.messageText);
                         if (parseResult.Error !== null && parseResult.Error !== undefined || parseResult.Payload === null) {
                             clearInterval(renewLockInterval);
                             Emit({
                                 Event: 'failure',
-                                JobId: parseResult.Payload?.JobId ?? "",
+                                JobId: parseResult.Payload?.pop()?.JobId ?? "",
                                 Message: `Failed to parse payload: ${parseResult.Error}`,
                             });
                             qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
@@ -59,9 +56,14 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                                 await qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
                             },
                             async setState(newState) {
-                                payload.State = newState;
-                                let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, JSON.stringify(payload), 30);
+                                for (const index in payload) {
+                                    const jobID = payload[index].JobId;
+                                    payload[index].State = newState[jobID];
+                                }
+                                clearInterval(renewLockInterval);
+                                let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, JSON.stringify(payload), 120);
                                 currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
+                                renewLockInterval = createRenewLockInterval(currentMessage, qClient);
                             },
                             async requeue() {
                                 clearInterval(renewLockInterval);
@@ -79,6 +81,16 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
 
     return queue;
 }
+
+function createRenewLockInterval(currentMessage: DequeuedMessageItem, qClient: QueueClient): NodeJS.Timer {
+    return setInterval(async () => {
+        Logger().debug(`renewing lock for message: ${currentMessage.messageId}`)
+        let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, undefined, 120);
+        currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;
+    }, STORAGE_QUEUE_RENEW_LOCK_INTERVAL);
+}
+
+
 
 export {
     CreateAzureStorageQueue
