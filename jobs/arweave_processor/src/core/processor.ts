@@ -1,5 +1,5 @@
 import { Job, JobIDStateMap, Payload, Queue, State } from '../queue/common.js';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Sleep } from '../lib/util.js';
 import { ConfirmUpload, UploadMediaToPermaweb, UploadParams } from './arweave.js';
 import { Logger } from '../lib/logger.js';
@@ -77,28 +77,28 @@ async function loop() {
 }
 
 async function processJob(job: Job) {
-    
+
     let payload = job.payload;
     let bundleTxID = undefined;
     let state: JobIDStateMap = {};
 
     for (const _payload of payload) {
-        if (!_payload.State || !_payload.State.BundleTxID ||!_payload.State.PathManifestTxID) {
+        if (!_payload.State || !_payload.State.BundleTxID || !_payload.State.PathManifestTxID) {
             break;
-        } 
+        }
         bundleTxID = _payload.State.BundleTxID;
         state[_payload.JobId] = _payload.State;
     }
-    
+
     if (!bundleTxID) {
         let uploadParams: UploadParams[] = []
-        let downloadPromises: Promise<void>[] = [];
+
         for (const _payload of payload) {
             let emitResult = await Emit({
                 JobId: _payload.JobId,
                 Event: "started",
                 Message: `Job ${_payload.JobId} has been started`
-            }); 
+            });
             if (emitResult === "not_found" || emitResult === "error") {
                 Logger().warn(`callback endpoint failed with emit result ${emitResult}, removing the job from queue`);
                 return;
@@ -107,25 +107,33 @@ async function processJob(job: Job) {
                 log_type: 'job_started',
                 job_id: _payload.JobId
             });
-
-            downloadPromises.push(axios.default.get<Buffer>(_payload.MediaURL, {
-                responseType: "arraybuffer"
-            }).then((response) => {
+            try {
+                let response = await axios.default.get<Buffer>(_payload.MediaURL, {
+                    responseType: "arraybuffer"
+                });
                 uploadParams.push({
                     jobID: _payload.JobId,
                     media: response.data,
                     metadata: _payload.Metadata
                 });
-            }));
+            } catch (e) {
+                Logger().error(e);
+                let _e = e as AxiosError;
+                if (_e.isAxiosError && _e.code) {
+                    let message = `Failed to download media ${_payload.MediaURL} for JobID ${_payload.JobId} with error: ${_e}`
+                    Logger().error(message);
+                    payload.forEach(el => Emit({
+                        Event: 'failure',
+                        JobId: el.JobId,
+                        Message: message,
+                        Details: e
+                    }));
+                    return;
+                }
+                throw e;
+            }
         }
-        try {
-            
-            await Promise.all(downloadPromises);
-        } catch(e) {
-            Logger().error(e);
-            throw e;
-        }
-        
+
         let result = await UploadMediaToPermaweb(uploadParams);
 
         bundleTxID = result.BundleTxID;
@@ -144,17 +152,17 @@ async function processJob(job: Job) {
                 Event: "started",
                 Message: `Job ${_payload.JobId} has been restarted`
             });
-    
+
             if (emitResult === "not_found" || emitResult === "error") {
                 Logger().warn(`callback endpoint failed with emit result ${emitResult}, removing the job from queue`);
                 return;
             }
-    
+
             Logger().info(`Job ${_payload.JobId} has been restarted`, {
                 log_type: 'job_restarted',
                 job_id: _payload.JobId
             });
-    
+
         }
     }
 

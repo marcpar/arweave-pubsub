@@ -7,6 +7,7 @@ import { Job, ParsePayloadFromJSONString, Payload, Queue } from "./common.js";
 
 const STORAGE_QUEUE_POLL_INTERVAL = 3000;
 const STORAGE_QUEUE_RENEW_LOCK_INTERVAL = 30000;
+const MAX_DEQUEUE_COUNT = 10;
 
 
 function CreateAzureStorageQueue(accountName: string, accountKey: string, queueName: string): Queue {
@@ -31,6 +32,11 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                     currentMessage = msgResponse.receivedMessageItems.pop() as DequeuedMessageItem;
                     if (currentMessage) {
                         Logger().info(`message received: ${currentMessage.messageId} : ${currentMessage.popReceipt}`)
+                        if (currentMessage.dequeueCount > MAX_DEQUEUE_COUNT) {
+                            Logger().warn(`Message reached max dequeue count (${MAX_DEQUEUE_COUNT}), deleting from queue`);
+                            await qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
+                            break;
+                        }
 
                         let renewLockInterval = createRenewLockInterval(currentMessage, qClient);
 
