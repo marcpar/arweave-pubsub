@@ -23,19 +23,20 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
 
             return new Promise<Job>(async (resolve, reject) => {
                 await qClient.createIfNotExists();
-                let currentMessage: DequeuedMessageItem;
+                let currentMessage: DequeuedMessageItem | undefined;
 
                 do {
                     Logger().debug('fetching messages from storage queue');
                     let msgResponse = await qClient.receiveMessages({});
 
-                    currentMessage = msgResponse.receivedMessageItems.pop() as DequeuedMessageItem;
+                    currentMessage = msgResponse.receivedMessageItems.pop();
                     if (currentMessage) {
                         Logger().info(`message received: ${currentMessage.messageId} : ${currentMessage.popReceipt}`)
                         if (currentMessage.dequeueCount > MAX_DEQUEUE_COUNT) {
                             Logger().warn(`Message reached max dequeue count (${MAX_DEQUEUE_COUNT}), deleting from queue`);
                             await qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
-                            break;
+                            currentMessage = undefined;
+                            continue;
                         }
 
                         let renewLockInterval = createRenewLockInterval(currentMessage, qClient);
@@ -58,10 +59,12 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                         resolve({
                             payload: payload,
                             async complete() {
+                                if (!currentMessage) return;
                                 clearInterval(renewLockInterval);
                                 await qClient.deleteMessage(currentMessage.messageId, currentMessage.popReceipt);
                             },
                             async setState(newState) {
+                                if (!currentMessage) return;
                                 for (const index in payload) {
                                     const jobID = payload[index].JobId;
                                     payload[index].State = newState[jobID];
@@ -75,12 +78,11 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
                                 clearInterval(renewLockInterval);
                             }
                         });
-
                         break;
                     }
                     Logger().debug(`none received, sleeping for ${STORAGE_QUEUE_POLL_INTERVAL}ms`);
                     await Sleep(STORAGE_QUEUE_POLL_INTERVAL);
-                } while (currentMessage === undefined);
+                } while (!currentMessage);
             });
         },
     };
@@ -89,7 +91,12 @@ function CreateAzureStorageQueue(accountName: string, accountKey: string, queueN
 }
 
 function createRenewLockInterval(currentMessage: DequeuedMessageItem, qClient: QueueClient): NodeJS.Timer {
-    return setInterval(async () => {
+    let interval: NodeJS.Timer;
+    return interval = setInterval(async () => {
+        if (!currentMessage) {
+            clearInterval(interval);
+            return;
+        }
         Logger().debug(`renewing lock for message: ${currentMessage.messageId}`)
         let response = await qClient.updateMessage(currentMessage.messageId, currentMessage.popReceipt, undefined, 120);
         currentMessage.popReceipt = response.popReceipt ?? currentMessage.popReceipt;

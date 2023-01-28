@@ -1,4 +1,3 @@
-import Arweave from "arweave";
 import { JWKInterface } from "arweave/node/lib/wallet.js";
 import { fileTypeFromBuffer } from "file-type";
 import { Logger } from "../lib/logger.js";
@@ -9,6 +8,7 @@ import {
     DataItem,
 } from "arbundles";
 import { ArweaveSigner } from "arbundles/src/signing/index.js";
+import Arweave from 'arweave';
 
 type PathManifest = {
     manifest: 'arweave/paths',
@@ -65,9 +65,9 @@ function SetArweaveWallet(wallet: JWKInterface) {
 }
 
 async function UploadMediaToPermaweb(uploadParams: UploadParams[]): Promise<UploadResult> {
-    
+
     let signer = new ArweaveSigner(_wallet);
-    
+
     let jobIDPathManifestMap: JobIDPathManifestMap = {};
 
     let dataItems: DataItem[] = [];
@@ -80,20 +80,15 @@ async function UploadMediaToPermaweb(uploadParams: UploadParams[]): Promise<Uplo
     let bundle = await bundleAndSignData(dataItems, signer);
 
     let tx = await bundle.toTransaction({}, _client, _wallet);
-
-
     tx.addTag("App-Name", "NFTDesignWorks");
-
     await _client.transactions.sign(tx, _wallet);
-    
-    
 
-    let uploader = await _client.transactions.getUploader(tx);
+    let uploader = await _client.transactions.getUploader(tx, bundle.getRaw());
     while (!uploader.isComplete) {
         await uploader.uploadChunk();
         Logger().info(`TX: ${tx.id}, Status; uploading ${uploader.pctComplete}%`)
     }
-    
+
     return {
         BundleTxID: tx.id,
         JobIDPathManifestID: jobIDPathManifestMap
@@ -110,6 +105,9 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         tags: [{
             name: 'Content-Type',
             value: mediaFileType.mime
+        }, {
+            name: "JobID",
+            value: params.jobID
         }]
     });
     await mediaData.sign(signer);
@@ -118,11 +116,13 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         tags: [{
             name: 'Content-Type',
             value: 'application/json'
-        }]
+        }, {
+            name: "JobID",
+            value: params.jobID
+        }],
     });
-    
     await metadataData.sign(signer);
-    
+
     let mediaPath = `nft.${mediaFileType.ext}`
 
     let paths = {} as Paths;
@@ -141,15 +141,17 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         paths: paths
     } as PathManifest);
 
-    
     let pathManifestData = createData(pathManifest, signer, {
         tags: [{
             name: 'Content-Type',
             value: 'application/x.arweave-manifest+json'
+        }, {
+            name: "JobID",
+            value: params.jobID
         }]
     });
     await pathManifestData.sign(signer);
-    
+
     Logger().debug(`path manifest ${pathManifestData.id}:\n${pathManifest}`)
     return {
         media: mediaData,

@@ -20,8 +20,9 @@ let config = GetConfig();
     let job = {
         JobId: "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
         //OwnerAddress: "test-claimer.testnet",
-        ArweaveTxnId: "BI4aHEJt4sOk-kGgUvZfWDO8mTswcNw0WZi7rN-J5D8", // mp4
+        //ArweaveTxnId: "BI4aHEJt4sOk-kGgUvZfWDO8mTswcNw0WZi7rN-J5D8", // mp4
         //ArweaveTxnId: "NxWWRUM8twj9hipCFm6WMt-a-cucoZoJ-zoSuSc8zso", // image
+        ArweaveTxnId: "1mn1wYf6Od2qq_An56I3q-8_fKRUVuo77WldmYtBnuI", // 404
         Title: "Tilda Månsson - 2022 World Triathlon Cup Bergen",
         Description: "Tilda Månsson - 2022 World Triathlon Cup Bergen",
         Copies: 1,

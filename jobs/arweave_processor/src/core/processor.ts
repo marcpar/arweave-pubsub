@@ -162,17 +162,34 @@ async function processJob(job: Job) {
                 log_type: 'job_restarted',
                 job_id: _payload.JobId
             });
-
         }
     }
 
     let confirmations = await ConfirmUpload(bundleTxID);
 
     for (const _payload of payload) {
+        try {
+            let res = await axios.default.get<Buffer>(`https://arweave.net/${state[_payload.JobId].PathManifestTxID}`);
+            if (res.status < 200 && res.status > 299 ) {
+                throw new Error(`${res.statusText} - ${res.status}: ${res.data}`);
+            }
+        } catch (e) {
+            await Emit({
+                JobId: _payload.JobId,
+                Event: 'failure',
+                Message: `Job ${_payload.JobId} failed to verify media on arweave: ${e}`,
+                Details: {
+                    Error: e
+                }
+            });
+            continue;
+        }
+        
         Logger().info(`Job ${_payload.JobId} has been successfully processed: ${bundleTxID}`, {
             log_type: 'job_completed',
             job_id: _payload.JobId
         });
+
         await Emit({
             JobId: _payload.JobId,
             Event: "success",

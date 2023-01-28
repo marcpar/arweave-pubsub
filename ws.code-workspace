@@ -21,6 +21,10 @@
 			"name": "jobs/near_processor"
 		},
 		{
+			"path": "./jobs/vault_processor",
+			"name": "jobs/vault_processor"
+		},
+		{
 			"path": "./frontend/vault",
 			"name": "frontend/vault"
 		},
