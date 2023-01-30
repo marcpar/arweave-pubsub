@@ -12,6 +12,7 @@ interface Job {
 type Payload = {
     JobId: string,
     MediaURL: string,
+    ThumbnailURL?: string,
     Metadata: any,
     MinConfirmations?: number,
     State?: State

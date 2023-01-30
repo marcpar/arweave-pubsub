@@ -108,19 +108,27 @@ async function processJob(job: Job) {
                 job_id: _payload.JobId
             });
             try {
-                let response = await axios.default.get<Buffer>(_payload.MediaURL, {
+                let mediaResponse = await axios.default.get<Buffer>(_payload.MediaURL, {
                     responseType: "arraybuffer"
                 });
+                let thumbnailData: Buffer | undefined;
+                if (_payload.ThumbnailURL) {
+                    let thumbnailResponse = await axios.default.get<Buffer>(_payload.ThumbnailURL, {
+                        responseType: 'arraybuffer'
+                    });
+                    thumbnailData = thumbnailResponse.data;
+                }
                 uploadParams.push({
                     jobID: _payload.JobId,
-                    media: response.data,
-                    metadata: _payload.Metadata
+                    media: mediaResponse.data,
+                    metadata: _payload.Metadata,
+                    thumbnail: thumbnailData
                 });
             } catch (e) {
                 Logger().error(e);
                 let _e = e as AxiosError;
                 if (_e.isAxiosError && _e.code) {
-                    let message = `Failed to download media ${_payload.MediaURL} for JobID ${_payload.JobId} with error: ${_e}`
+                    let message = `Failed to download media for JobID ${_payload.JobId} with error: ${_e}`
                     Logger().error(message);
                     payload.forEach(el => Emit({
                         Event: 'failure',
@@ -168,23 +176,6 @@ async function processJob(job: Job) {
     let confirmations = await ConfirmUpload(bundleTxID);
 
     for (const _payload of payload) {
-        try {
-            let res = await axios.default.get<Buffer>(`https://arweave.net/${state[_payload.JobId].PathManifestTxID}`);
-            if (res.status < 200 && res.status > 299 ) {
-                throw new Error(`${res.statusText} - ${res.status}: ${res.data}`);
-            }
-        } catch (e) {
-            await Emit({
-                JobId: _payload.JobId,
-                Event: 'failure',
-                Message: `Job ${_payload.JobId} failed to verify media on arweave: ${e}`,
-                Details: {
-                    Error: e
-                }
-            });
-            continue;
-        }
-        
         Logger().info(`Job ${_payload.JobId} has been successfully processed: ${bundleTxID}`, {
             log_type: 'job_completed',
             job_id: _payload.JobId

@@ -22,6 +22,11 @@ interface _Event extends Event {
 type EmitResult = "ok" | "not_found" | "error";
 
 async function Emit(event: Event): Promise<EmitResult> {
+    if (_callbackURL === 'debug') {
+        Logger().warn(`Callback URL is set to debug`);
+        Logger().info(JSON.stringify(event));
+        return "ok";
+    }
     let _event = event as _Event;
     _event.Time = new Date().getTime();
     let response = await _client.post(_callbackURL, _event);

@@ -36,12 +36,14 @@ type JobIDPathManifestMap = {
 
 type UploadParams = {
     media: Buffer,
+    thumbnail?: Buffer,
     metadata: any,
     jobID: string
 }
 
 type NFTDataItems = {
     media: DataItem,
+    thumbnail?: DataItem,
     metadata: DataItem,
     pathManifest: DataItem
 }
@@ -74,6 +76,7 @@ async function UploadMediaToPermaweb(uploadParams: UploadParams[]): Promise<Uplo
     for (const uploadParam of uploadParams) {
         let nftDataItems = await createNFTDataItem(uploadParam, signer);
         dataItems.push(nftDataItems.media, nftDataItems.metadata, nftDataItems.pathManifest);
+        if (nftDataItems.thumbnail) dataItems.push(nftDataItems.thumbnail);
         jobIDPathManifestMap[uploadParam.jobID] = nftDataItems.pathManifest.id;
     }
 
@@ -101,37 +104,47 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         throw new Error(`Job ${params.jobID}, failed to get mime of media`);
     }
 
-    let mediaData = createData(params.media, signer, {
-        tags: [{
-            name: 'Content-Type',
-            value: mediaFileType.mime
-        }, {
-            name: "JobID",
-            value: params.jobID
-        }]
-    });
-    await mediaData.sign(signer);
-
-    let metadataData = createData(JSON.stringify(params.metadata), signer, {
-        tags: [{
-            name: 'Content-Type',
-            value: 'application/json'
-        }, {
-            name: "JobID",
-            value: params.jobID
-        }],
-    });
-    await metadataData.sign(signer);
-
-    let mediaPath = `nft.${mediaFileType.ext}`
-
     let paths = {} as Paths;
+
+    let mediaData = await createDataItemAndSign(params.media, signer, [{
+        name: 'Content-Type',
+        value: mediaFileType.mime
+    }, {
+        name: "JobID",
+        value: params.jobID
+    }]);
+    let mediaPath = `nft.${mediaFileType.ext}`
     paths[mediaPath] = {
         id: mediaData.id
     };
+
+    let thumbnailData: DataItem | undefined = undefined;
+    if (params.thumbnail) {
+        let thumbnailMediaType = await fileTypeFromBuffer(params.thumbnail);
+        thumbnailData = await createDataItemAndSign(params.thumbnail, signer, [{
+            name: 'Content-Type',
+            value: thumbnailMediaType?.mime ?? 'image/jpg'
+        }, {
+            name: "JobID",
+            value: params.jobID
+        }]);
+        paths[`thumbnail.${thumbnailMediaType?.ext ?? 'jpg'}`] = {
+            id: thumbnailData.id
+        };
+    }
+
+    let metadataData = await createDataItemAndSign(JSON.stringify(params.metadata), signer, [{
+        name: 'Content-Type',
+        value: 'application/json'
+    }, {
+        name: "JobID",
+        value: params.jobID
+    }]);
+
     paths['metadata.json'] = {
         id: metadataData.id
     }
+
     let pathManifest = JSON.stringify({
         manifest: 'arweave/paths',
         version: '0.1.0',
@@ -141,23 +154,27 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         paths: paths
     } as PathManifest);
 
-    let pathManifestData = createData(pathManifest, signer, {
-        tags: [{
-            name: 'Content-Type',
-            value: 'application/x.arweave-manifest+json'
-        }, {
-            name: "JobID",
-            value: params.jobID
-        }]
-    });
-    await pathManifestData.sign(signer);
+    let pathManifestData = await createDataItemAndSign(pathManifest, signer, [{
+        name: 'Content-Type',
+        value: 'application/x.arweave-manifest+json'
+    }, {
+        name: "JobID",
+        value: params.jobID
+    }]);
 
     Logger().debug(`path manifest ${pathManifestData.id}:\n${pathManifest}`)
     return {
         media: mediaData,
+        thumbnail: thumbnailData,
         metadata: metadataData,
         pathManifest: pathManifestData
     };
+}
+
+async function createDataItemAndSign(data: string | Uint8Array, signer: ArweaveSigner, tags?: { name: string, value: string }[]): Promise<DataItem> {
+    let dataItem = createData(data, signer, { tags: tags });
+    await dataItem.sign(signer);
+    return dataItem;
 }
 
 async function ConfirmUpload(txID: string, minConfirmations?: number): Promise<number> {
