@@ -176,15 +176,15 @@ async function processJob(job: Job) {
     let confirmations = await ConfirmUpload(bundleTxID);
 
     for (const _payload of payload) {
-        Logger().info(`Job ${_payload.JobId} has been successfully processed: ${bundleTxID}`, {
+        Logger().info(`Job ${_payload.JobId} has been successfully submitted: ${bundleTxID}`, {
             log_type: 'job_completed',
             job_id: _payload.JobId
         });
 
         await Emit({
             JobId: _payload.JobId,
-            Event: "success",
-            Message: `Job ${_payload.JobId} has been successfully processed: ${bundleTxID}`,
+            Event: "submitted",
+            Message: `Job ${_payload.JobId} has been successfully submitted: ${bundleTxID}`,
             Details: {
                 TransactionID: state[_payload.JobId].PathManifestTxID,
                 Confirmations: confirmations

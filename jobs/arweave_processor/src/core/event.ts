@@ -10,7 +10,7 @@ function SetDefaultCallBack(callback: string) {
 
 interface Event {
     JobId: string,
-    Event: "started" | "failure" | "success",
+    Event: "started" | "failure" | "submitted" |"success",
     Message: string,
     Details?: any
 }
