@@ -1,6 +1,6 @@
 .media {
-    max-width: 400px;
-    min-height: 500px;
+    max-width: 200px;
+    min-height: 300px;
     max-height: 70vh;
     border-radius: 5px;
     box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3),

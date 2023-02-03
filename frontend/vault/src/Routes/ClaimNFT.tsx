@@ -1,7 +1,7 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import style from "./ClaimNFT.module.css";
 import { GetNFTContract, NFTContractMetadata, NFTToken } from "../Libraries/Near/nft";
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { GetVaultContractAnonAsync } from '../Libraries/Near/vault';
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
@@ -12,6 +12,8 @@ import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
 import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWithNewAccountModal';
 import { NETWORK } from '../Libraries/Near/constants';
 import LoaderModal from '../Components/LoaderModal/LoaderModal';
+import ordinal from "ordinal";
+import Podium from "../Assets/podium_logo.svg";
 
 
 type NFTDetails = {
@@ -26,7 +28,6 @@ export default function ClaimNFT() {
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null>(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
-    const [isClaimButtonHidden] = useState<boolean>(false);
     const [isClaimOptionsModalOpen, setIsClaimOptionsModalOpen] = useState<boolean>(false);
     const [isClaimWithNewAccountModalOpen, setIsClaimWithNewAccountModalOpen] = useState<boolean>(false);
     const [isLoaderModalOpen, setIsLoaderModalOpen] = useState<boolean>(false);
@@ -54,6 +55,20 @@ export default function ClaimNFT() {
             window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/auto-import-secret-key#${accountId}/${privateKey}`
         }).catch(e => {
             alert(`${e}`);
+        });
+    }
+
+    function onClickDownload(e: MouseEvent<HTMLButtonElement>) {
+        let anchor = document.createElement<"a">("a");
+        let link = `${nftDetails?.nftMeta?.base_uri}/${nftDetails?.nftToken?.metadata.media}`;
+        let button = e.currentTarget;
+        button.disabled = true;
+        fetch(link).then(async data => {
+            anchor.href = URL.createObjectURL(await data.blob());;
+            anchor.download = link.split('/').pop() ?? "nft";
+            anchor.click();
+        }).finally(() => {
+            button.disabled = false;
         });
     }
 
@@ -106,8 +121,8 @@ export default function ClaimNFT() {
 
     let fullName: string | undefined = "";
     let eventName: string | undefined = "";
-    let groupName: string | undefined = "";
-    let eventCountry: string | undefined = "";
+    let racePosition: string | undefined = "";
+    let eventDate: string | undefined = "";
     try {
         let extra = JSON.parse(nftDetails.nftToken.metadata?.extra as string);
         let valuePairs = extra.ValuePairs as Array<{ Key: string, Value: string }>;
@@ -117,10 +132,10 @@ export default function ClaimNFT() {
                 fullName = el.Value;
             } else if (key === "event name" || key === "eventname") {
                 eventName = el.Value;
-            } else if (key === "group name" || key === "groupname") {
-                groupName = el.Value
-            } else if (key === "event country" || key === "eventcountry")  {
-                eventCountry = el.Value
+            } else if (key === "race position" || key === "raceposition") {
+                racePosition = el.Value
+            } else if (key === "event date" || key === "eventdate") {
+                eventDate = el.Value
             }
         });
     } catch (_) {
@@ -131,23 +146,52 @@ export default function ClaimNFT() {
     return (
         <div className={style.main_container}>
             <div className={style.greetings}>
-                <p className={style.full_name}>{fullName}</p>
-                <p>Congratulations for competing in the {eventName} {groupName} {eventCountry}.</p>
-                <p>Your Race Capsule is ready to be claimed.</p>
+                <p><b>Congratulations {fullName} for coming {ordinal(parseInt(racePosition, 10))} in the {eventName}, {eventDate}.</b></p>
+                <p>Your virtual medal is ready to claim as an NFT for all of the benefits and features. Or download the media file as a digital collectible.</p>
             </div>
-            <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
-                <div className={style.card}>
-                    <div className={style.card_media}>
-                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />
+            <div className={style.flex_container}>
+                <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
+                    <div className={style.media_container}>
+                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />    
                     </div>
-                    <div className={style.button_container}>
-                        <button className={isMediaLoading || isClaimButtonHidden ? style.hidden : style.button} onClick={claimOnClick} disabled={!isClaimable}>Claim</button>
+                </Tilt>
+                <div className={style.card}>
+                    <div className={style.card_header}>NFT</div>
+                    <div className={style.card_body}>
+                        <hr />
+                        <span>Digital collective</span>
+                        <hr />
+                        <span>Social media ready</span>
+                        <hr />
+                        <span>Sponsor rewards enabled</span>
+                        <hr />
+                        <span>Blockchain certified carbon offset</span>
+                        <hr />
+                        <span>NFT minted to Blockchain</span>
+                        <hr />
+                    </div>
+                    <div className={style.card_footer}>
+                        <button onClick={claimOnClick} disabled={!isMediaLoading || !isClaimable}>Claim your NFT</button>
                     </div>
                 </div>
-            </Tilt>
+                <div className={style.card}>
+                    <div className={style.card_header}>Media file</div>
+                    <div className={style.card_body}>
+                        <hr />
+                        <span>Digital collective</span>
+                        <hr />
+                        <span>Social media ready</span>
+                        <hr />
+                    </div>
+                    <div className={style.card_footer}>
+                        <button onClick={onClickDownload}>Download</button>
+                    </div>
+                </div>
+            </div>
+            <img alt="podium_logo" className={style.podium_logo} src={Podium} />
             <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccountOpen} onClaimWithExistingAccount={claimOnExistingAccount} />
             <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen} onRequestClose={() => setIsClaimWithNewAccountModalOpen(false)} onClaimWithNewAccount={onClaimWithNewAccount} />
-            <LoaderModal isOpen={isLoaderModalOpen}/>
+            <LoaderModal isOpen={isLoaderModalOpen} />
         </div>
     );
 }

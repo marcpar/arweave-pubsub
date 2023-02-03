@@ -11,13 +11,12 @@ body {
   font-family: 'Ubuntu', "Share Tech", "Share Tech Mono", sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  background: rgb(154,234,183);
-  background: -moz-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
-  background: -webkit-linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
-  background: linear-gradient(315deg, rgba(154,234,183,1) 0%, rgba(46,79,219,1) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#9aeab7",endColorstr="#2e4fdb",GradientType=1);
   min-height: 100vh;
+  background: rgb(128,254,254);
+  background: -moz-linear-gradient(90deg, rgba(128,254,254,1) 0%, rgba(164,253,90,1) 100%);
+  background: -webkit-linear-gradient(90deg, rgba(128,254,254,1) 0%, rgba(164,253,90,1) 100%);
+  background: linear-gradient(90deg, rgba(128,254,254,1) 0%, rgba(164,253,90,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#80fefe",endColorstr="#a4fd5a",GradientType=1);
 }
 
 code {
@@ -25,10 +24,12 @@ code {
     monospace;
 }
 
-.globe-background {
-  position: fixed;
-  bottom: -300px;
-  right: -300px;
-  z-index: -100;
-  width: 600px;
+@media only screen and (min-width: 1200px) {
+  body {
+    background: rgb(128,254,254);
+    background: -moz-linear-gradient(135deg, rgba(128,254,254,1) 0%, rgba(164,253,90,1) 100%);
+    background: -webkit-linear-gradient(135deg, rgba(128,254,254,1) 0%, rgba(164,253,90,1) 100%);
+    background: linear-gradient(135deg, rgba(128,254,254,1) 0%, rgba(164,253,90,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#80fefe",endColorstr="#a4fd5a",GradientType=1);
+  }
 }
