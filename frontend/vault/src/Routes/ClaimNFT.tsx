@@ -171,7 +171,7 @@ export default function ClaimNFT() {
                         <hr />
                     </div>
                     <div className={style.card_footer}>
-                        <button onClick={claimOnClick} disabled={!isMediaLoading || !isClaimable}>Claim your NFT</button>
+                        <button onClick={claimOnClick} disabled={isMediaLoading || !isClaimable}>Claim your NFT</button>
                     </div>
                 </div>
                 <div className={style.card}>

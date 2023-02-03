@@ -51,10 +51,6 @@
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
 }
 
-.card:hover {
-    cursor: pointer;
-}
-
 .card_header {
     font-weight: bold;
     font-size: 25px;
