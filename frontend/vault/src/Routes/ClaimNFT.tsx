@@ -159,7 +159,7 @@ export default function ClaimNFT() {
                     <div className={style.card_header}>NFT</div>
                     <div className={style.card_body}>
                         <hr />
-                        <span>Digital collective</span>
+                        <span>Digital collectible</span>
                         <hr />
                         <span>Social media ready</span>
                         <hr />
@@ -167,7 +167,7 @@ export default function ClaimNFT() {
                         <hr />
                         <span>Blockchain certified carbon offset</span>
                         <hr />
-                        <span>NFT minted to Blockchain</span>
+                        <span>NFT minted to blockchain</span>
                         <hr />
                     </div>
                     <div className={style.card_footer}>
@@ -178,7 +178,7 @@ export default function ClaimNFT() {
                     <div className={style.card_header}>Media file</div>
                     <div className={style.card_body}>
                         <hr />
-                        <span>Digital collective</span>
+                        <span>Digital collectible</span>
                         <hr />
                         <span>Social media ready</span>
                         <hr />
