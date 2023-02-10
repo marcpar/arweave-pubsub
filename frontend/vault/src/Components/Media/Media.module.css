@@ -1,13 +1,12 @@
 .media {
-    max-width: 200px;
-    min-height: 300px;
-    max-height: 70vh;
+    min-width: 00px;
+    max-height: 359px;
+    height: 100%;
     border-radius: 5px;
     box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3),
                 -3px -3px 5px rgba(255, 255, 255, 0.05);
     border-radius: 20px;
 }
-
 
 .loader {
     margin: auto;

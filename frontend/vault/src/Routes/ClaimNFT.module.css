@@ -28,9 +28,8 @@
     display: none;
 }
 
-
 .media_container {
-    width: fit-content;
+    height: 100%;
     margin: auto;
 }
 
@@ -116,7 +115,6 @@
         display: flex;
         margin: auto;
         justify-content: center;
-        
     }
     
     .flex_container > :nth-child(1) {
