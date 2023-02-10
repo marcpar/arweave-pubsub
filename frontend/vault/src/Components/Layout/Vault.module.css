@@ -1,6 +1,6 @@
 .top_bar {
     width: fit-content;
-    padding-top: 20px;
+    padding-top: 5px;
     margin: auto;
 }
 .top_bar > img {
@@ -15,6 +15,6 @@
 @media only screen and (min-width: 1250px) {
     .top_bar {
         margin-left: 30px;
-        margin-bottom: 50px;
+        margin-bottom: 5px;
     }
 }

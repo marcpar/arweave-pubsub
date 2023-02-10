@@ -5,6 +5,11 @@
         url('./fonts/Ubuntu/Ubuntu-MediumItalic.ttf');
 }
 
+@font-face {
+  font-family: 'Work Sans';
+  src: url('./fonts/WorkSans-Regular.ttf');
+}
+
 body {
   margin: 0;
   padding: 0;

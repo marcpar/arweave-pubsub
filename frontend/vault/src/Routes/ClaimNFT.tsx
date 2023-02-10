@@ -13,7 +13,7 @@ import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWithNewAccount
 import { NETWORK } from '../Libraries/Near/constants';
 import LoaderModal from '../Components/LoaderModal/LoaderModal';
 import ordinal from "ordinal";
-import Podium from "../Assets/podium_logo.svg";
+import Podium from "../Assets/PODIUM-VirtualMedal.png";
 
 
 type NFTDetails = {
@@ -145,9 +145,10 @@ export default function ClaimNFT() {
 
     return (
         <div className={style.main_container}>
+            <img alt="podium_logo" className={style.podium_logo} src={Podium} />
             <div className={style.greetings}>
                 <p><b>Congratulations {fullName} for coming {ordinal(parseInt(racePosition, 10))} in the {eventName}, {eventDate}.</b></p>
-                <p>Your virtual medal is ready to claim as an NFT for all of the benefits and features. Or download the media file as a digital collectible.</p>
+                <p>Your virtual medal is ready to claim as an NFT, featuring many benefits. Or simply download the media file as a digital collectible.</p>
             </div>
             <div className={style.flex_container}>
                 <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
@@ -156,7 +157,7 @@ export default function ClaimNFT() {
                     </div>
                 </Tilt>
                 <div className={style.card}>
-                    <div className={style.card_header}>NFT</div>
+                    <div className={style.card_header}>NFT benefits</div>
                     <div className={style.card_body}>
                         <hr />
                         <span>Digital collectible</span>
@@ -175,7 +176,7 @@ export default function ClaimNFT() {
                     </div>
                 </div>
                 <div className={style.card}>
-                    <div className={style.card_header}>Media file</div>
+                    <div className={style.card_header}>Media file benefits</div>
                     <div className={style.card_body}>
                         <hr />
                         <span>Digital collectible</span>
@@ -188,7 +189,6 @@ export default function ClaimNFT() {
                     </div>
                 </div>
             </div>
-            <img alt="podium_logo" className={style.podium_logo} src={Podium} />
             <ClaimOptionsModal isOpen={isClaimOptionsModalOpen} onRequestClose={() => { setIsClaimOptionsModalOpen(false) }} onClaimWithNewAccount={claimWithNewAccountOpen} onClaimWithExistingAccount={claimOnExistingAccount} />
             <ClaimWithNewAccountModal isOpen={isClaimWithNewAccountModalOpen} onRequestClose={() => setIsClaimWithNewAccountModalOpen(false)} onClaimWithNewAccount={onClaimWithNewAccount} />
             <LoaderModal isOpen={isLoaderModalOpen} />
