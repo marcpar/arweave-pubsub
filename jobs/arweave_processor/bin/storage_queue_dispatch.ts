@@ -78,7 +78,7 @@ let config = GetConfig();
             ]
         };
         (metadata as any).uuid = uuid;
-        batch.push({ "JobId": uuid, "MediaURL": mediaURL, "Metadata": metadata });
+        batch.push({ "JobId": uuid, "MediaURL": mediaURL, "Metadata": metadata, "ThumbnailURL": thumbnailURL });
     }
     let response = await qClient.sendMessage(JSON.stringify(batch));
 

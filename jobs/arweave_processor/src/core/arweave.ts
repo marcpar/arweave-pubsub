@@ -25,6 +25,18 @@ type Paths = {
     }
 }
 
+type OpenSeaMetadata = {
+    description?: string,
+    external_url?: string,
+    image?: string,
+    name?: string,
+    animation_url?: string,
+    attributes?: {
+        trait_type?: string,
+        value?: any
+    }[]
+}
+
 type UploadResult = {
     BundleTxID: string,
     JobIDPathManifestID: JobIDPathManifestMap
@@ -45,7 +57,8 @@ type NFTDataItems = {
     media: DataItem,
     thumbnail?: DataItem,
     metadata: DataItem,
-    pathManifest: DataItem
+    pathManifest: DataItem,
+    openSeaMetadata: DataItem
 }
 
 let _minConfirmations: number;
@@ -75,7 +88,7 @@ async function UploadMediaToPermaweb(uploadParams: UploadParams[]): Promise<Uplo
     let dataItems: DataItem[] = [];
     for (const uploadParam of uploadParams) {
         let nftDataItems = await createNFTDataItem(uploadParam, signer);
-        dataItems.push(nftDataItems.media, nftDataItems.metadata, nftDataItems.pathManifest);
+        dataItems.push(nftDataItems.media, nftDataItems.metadata, nftDataItems.pathManifest, nftDataItems.openSeaMetadata);
         if (nftDataItems.thumbnail) dataItems.push(nftDataItems.thumbnail);
         jobIDPathManifestMap[uploadParam.jobID] = nftDataItems.pathManifest.id;
     }
@@ -145,6 +158,50 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         id: metadataData.id
     }
 
+    let openSeaMetadata = {};
+    if (params.metadata.ValuePairs) {
+        let attributes: any[] = [];
+        let eventName = "";
+        let recipientName = "";
+
+        params.metadata.ValuePairs.forEach((valuePair: any) => {
+            attributes.push({
+                trait_type: valuePair.Key,
+                value: valuePair.Value
+            });
+            switch ((valuePair.Key as string).toLowerCase()) {
+                case 'event name':
+                    eventName = valuePair.Value
+                    break;
+                case 'recipient name':
+                    recipientName = valuePair.Value
+                    break;
+                default:
+            }
+        });
+
+        openSeaMetadata = {
+            name: `${recipientName} - ${eventName}`,
+            animation_url: `ar://${mediaData.id}`,
+            image: thumbnailData ? `ar://${thumbnailData.id}` : null,
+            attributes: attributes,
+            external_url: `ar://${metadataData.id}`,
+            description: eventName
+        } as OpenSeaMetadata
+    }
+
+    let openSeaDataItem = await createDataItemAndSign(JSON.stringify(openSeaMetadata), signer, [{
+        name: 'Content-Type',
+        value: 'application/json'
+    }, {
+        name: "JobID",
+        value: params.jobID
+    }]);
+
+    paths['opensea.json'] = {
+        id: openSeaDataItem.id
+    }
+
     let pathManifest = JSON.stringify({
         manifest: 'arweave/paths',
         version: '0.1.0',
@@ -167,7 +224,8 @@ async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): P
         media: mediaData,
         thumbnail: thumbnailData,
         metadata: metadataData,
-        pathManifest: pathManifestData
+        pathManifest: pathManifestData,
+        openSeaMetadata: openSeaDataItem
     };
 }
 
