@@ -123,6 +123,7 @@ export default function ClaimNFT() {
     let eventName: string | undefined = "";
     let racePosition: string | undefined = "";
     let eventDate: string | undefined = "";
+    let groupName: string | undefined = "";
     try {
         let extra = JSON.parse(nftDetails.nftToken.metadata?.extra as string);
         let valuePairs = extra.ValuePairs as Array<{ Key: string, Value: string }>;
@@ -130,6 +131,8 @@ export default function ClaimNFT() {
             let key = el.Key.toLowerCase();
             if (key === "recipient name" || key === "recipientname") {
                 fullName = el.Value;
+            } else if (key === "group name" || key === "groupname") {
+                groupName = el.Value;
             } else if (key === "event name" || key === "eventname") {
                 eventName = el.Value;
             } else if (key === "race position" || key === "raceposition") {
@@ -147,7 +150,7 @@ export default function ClaimNFT() {
         <div className={style.main_container}>
             <img alt="podium_logo" className={style.podium_logo} src={Podium} />
             <div className={style.greetings}>
-                <p><b>Congratulations {fullName} for coming {ordinal(parseInt(racePosition, 10))} in the {eventName}, {eventDate}.</b></p>
+                <p><b>Congratulations {fullName} for coming {ordinal(parseInt(racePosition, 10))} in {groupName} at the {eventName}, {eventDate}.</b></p>
                 <p>Your virtual medal is ready to claim as an NFT, featuring many benefits. Or simply download the media file as a digital collectible.</p>
             </div>
             <div className={style.flex_container}>
