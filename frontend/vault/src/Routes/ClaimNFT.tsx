@@ -74,26 +74,19 @@ export default function ClaimNFT() {
 
     useEffect(() => {
         if (nftDetails === undefined) {
+            GetNFTContract(nft as string).then(async (nftContract) => {
+                setnftDetails({
+                    nftMeta: await nftContract.nft_metadata(),
+                    nftToken: await nftContract.nft_token({
+                        token_id: token_id as string
+                    })
+                });
+            });
             GetVaultContractAnonAsync().then(async (contract) => {
                 let claimable = await contract.get_claimable({
                     nft_account: nft as string,
                     token_id: token_id as string
                 });
-
-                if (claimable === null) {
-                    setnftDetails(null);
-                    return;
-                }
-
-                let nftContract = await GetNFTContract(claimable.nft_account_id)
-
-                setnftDetails({
-                    nftMeta: await nftContract.nft_metadata(),
-                    nftToken: await nftContract.nft_token({
-                        token_id: claimable.token_id
-                    })
-                });
-
                 let claimDetails = ParseToken(token);
                 let claimKeyPair = nearAPI.utils.KeyPair.fromString(claimDetails.PrivateKey);
 

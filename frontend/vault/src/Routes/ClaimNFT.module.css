@@ -69,6 +69,7 @@
     padding-right: 0;
     margin: auto;
     text-align: right;
+    min-height: 32px;
 }
 
 .card_footer > button {
@@ -81,18 +82,17 @@
     font-size: 120%;
 }
 
+
 .card_footer > button:hover {
     cursor: pointer;
 }
 
-.button:hover {
-    cursor: pointer;
-    box-shadow: none;
-    background-color: rgb(96, 234, 144);
+.card_footer > button:disabled {
+    display: none;
 }
 
-.button[disabled] {
-    background-color: rgb(105, 105, 105);
+.card_footer > button:disabled:hover {
+    cursor: not-allowed;
 }
 
 .loader_container {
