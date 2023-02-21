@@ -27,6 +27,7 @@ export default function ClaimNFT() {
     let token = window.location.hash === undefined || window.location.hash === null || window.location.hash === '' ? searchParams[0].get('token') ?? '' : window.location.hash;
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null>(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
+    const [isAlreadyClaimed, setIsAlreadyClaimed] = useState<boolean>(false);
     const [isMediaLoading, setIsMediaLoading] = useState<boolean>(true);
     const [isClaimOptionsModalOpen, setIsClaimOptionsModalOpen] = useState<boolean>(false);
     const [isClaimWithNewAccountModalOpen, setIsClaimWithNewAccountModalOpen] = useState<boolean>(false);
@@ -75,12 +76,14 @@ export default function ClaimNFT() {
     useEffect(() => {
         if (nftDetails === undefined) {
             GetNFTContract(nft as string).then(async (nftContract) => {
+                let token = await nftContract.nft_token({
+                    token_id: token_id as string
+                });
                 setnftDetails({
                     nftMeta: await nftContract.nft_metadata(),
-                    nftToken: await nftContract.nft_token({
-                        token_id: token_id as string
-                    })
+                    nftToken: token
                 });
+                setIsAlreadyClaimed(token?.owner_id !== process.env.REACT_APP_VAULT_CONTRACT);
             });
             GetVaultContractAnonAsync().then(async (contract) => {
                 let claimable = await contract.get_claimable({
@@ -168,7 +171,7 @@ export default function ClaimNFT() {
                         <hr />
                     </div>
                     <div className={style.card_footer}>
-                        <button onClick={claimOnClick} disabled={isMediaLoading || !isClaimable}>Claim your NFT</button>
+                        <button onClick={claimOnClick} disabled={isMediaLoading || !isClaimable || isAlreadyClaimed}>{isAlreadyClaimed ? 'Already Claimed' : 'Claim your NFT'}</button>
                     </div>
                 </div>
                 <div className={style.card}>
