@@ -10,7 +10,7 @@ import { GridLoader } from "react-spinners";
 import { ClaimWithExistingAccountHandler, CreateNewAccountAndClaim, ParseToken } from './ClaimNFTHandler';
 import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
 import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWithNewAccountModal';
-import { NETWORK } from '../Libraries/Near/constants';
+import { NETWORK, VAULT_CONTRACT_ADDRESS } from '../Libraries/Near/constants';
 import LoaderModal from '../Components/LoaderModal/LoaderModal';
 import ordinal from "ordinal";
 import Podium from "../Assets/PODIUM-VirtualMedal.png";
@@ -83,7 +83,7 @@ export default function ClaimNFT() {
                     nftMeta: await nftContract.nft_metadata(),
                     nftToken: token
                 });
-                setIsAlreadyClaimed(token?.owner_id !== process.env.REACT_APP_VAULT_CONTRACT);
+                setIsAlreadyClaimed(token?.owner_id !== VAULT_CONTRACT_ADDRESS);
             });
             GetVaultContractAnonAsync().then(async (contract) => {
                 let claimable = await contract.get_claimable({
