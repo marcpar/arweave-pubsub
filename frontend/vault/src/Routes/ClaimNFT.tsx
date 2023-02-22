@@ -40,8 +40,9 @@ export default function ClaimNFT() {
 
     function claimOnExistingAccount() {
         let uuid = window.crypto.randomUUID();
-        localStorage.setItem(uuid, JSON.stringify(ParseToken(token)));
-        ClaimWithExistingAccountHandler(uuid);
+        let claimDetails = ParseToken(token);
+        localStorage.setItem(uuid, JSON.stringify(claimDetails));
+        ClaimWithExistingAccountHandler(uuid, claimDetails.NFTContract, claimDetails.TokenId);
     }
 
     function claimWithNewAccountOpen() {

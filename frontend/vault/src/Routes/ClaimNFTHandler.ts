@@ -87,7 +87,7 @@ async function ClaimWithLoggedInAccountCallback(claimDetails: ClaimDetails) {
     wallet.signOut();
 }
 
-async function ClaimWithExistingAccountHandler(claimDetailsId: string) {
+async function ClaimWithExistingAccountHandler(claimDetailsId: string, nftAccount: string, tokenId: string) {
     let wallet = new nearAPI.WalletConnection(await nearAPI.connect(GetConfig(NETWORK)), '');
     let currentLocation = window.location;
     let successRedirect = new URL(currentLocation.href);
@@ -95,6 +95,9 @@ async function ClaimWithExistingAccountHandler(claimDetailsId: string) {
     successRedirect.pathname = `/claim-callback`;
     successRedirect.search = '';
     successRedirect.searchParams.set('claimDetailsId', claimDetailsId)
+    successRedirect.searchParams.set('nftContract', nftAccount);
+    successRedirect.searchParams.set('tokenId', tokenId);
+
     successRedirect.protocol = currentLocation.protocol;
     wallet.signOut();
     wallet.requestSignIn({

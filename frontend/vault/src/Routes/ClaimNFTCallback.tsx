@@ -11,6 +11,8 @@ export default function ClaimNFTCallback() {
     let [searchParams] = useSearchParams();
     let navigate = useNavigate();
     let claimDetailsId = searchParams.get('claimDetailsId') as string;
+    let nftContract = searchParams.get('nftContract');
+    let tokenId = searchParams.get('tokenId');
     
     let claimDetails = JSON.parse(localStorage.getItem(claimDetailsId) as string) as ClaimDetails;
 
@@ -19,12 +21,12 @@ export default function ClaimNFTCallback() {
             localStorage.removeItem(claimDetailsId);
             window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/nft-detail/${claimDetails.NFTContract}/${claimDetails.TokenId}`
         }).catch(_ => {
-            navigate('/not-found');
+            navigate(`/claim/${nftContract}/${tokenId}`);
         });
     });
 
     if (claimDetails === null ) {
-        navigate('/not-found');
+        navigate(`/claim/${nftContract}/${tokenId}`);
     }
 
     return (
