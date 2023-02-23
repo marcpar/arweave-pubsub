@@ -21,12 +21,14 @@ export default function ClaimNFTCallback() {
                 localStorage.removeItem(claimDetailsId);
                 window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/nft-detail/${claimDetails.NFTContract}/${claimDetails.TokenId}`;
             }).catch(_ => {
+                alert(`redirect to /claim/${nftContract}/${tokenId}`)
                 navigate(`/claim/${nftContract}/${tokenId}`);
             });
         } else {
+            alert(`redirect to /claim/${nftContract}/${tokenId}`)
             navigate(`/claim/${nftContract}/${tokenId}`);
         }
-    });
+    }, []);
 
     return (
         <div className={style.loader_container}>

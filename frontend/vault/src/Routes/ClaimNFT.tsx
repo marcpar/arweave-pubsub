@@ -2,12 +2,12 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import style from "./ClaimNFT.module.css";
 import { GetNFTContract, NFTContractMetadata, NFTToken } from "../Libraries/Near/nft";
 import { MouseEvent, useEffect, useState } from "react";
-import { GetVaultContractAnonAsync } from '../Libraries/Near/vault';
+import { ClaimDetails, GetVaultContractAnonAsync } from '../Libraries/Near/vault';
 import Media from '../Components/Media/Media';
 import * as nearAPI from "near-api-js";
 import Tilt from "react-parallax-tilt";
 import { GridLoader } from "react-spinners";
-import { ClaimWithExistingAccountHandler, CreateNewAccountAndClaim, ParseToken } from './ClaimNFTHandler';
+import { ClaimWithExistingAccountHandler, ClaimWithLoggedInAccountCallback, CreateNewAccountAndClaim, ParseToken } from './ClaimNFTHandler';
 import ClaimOptionsModal from '../Components/ClaimNFT/ClaimOptionsModal';
 import ClaimWithNewAccountModal from '../Components/ClaimNFT/ClaimWithNewAccountModal';
 import { NETWORK, VAULT_CONTRACT_ADDRESS } from '../Libraries/Near/constants';
@@ -23,8 +23,8 @@ type NFTDetails = {
 
 export default function ClaimNFT() {
     const { nft, token_id } = useParams();
-    let searchParams = useSearchParams();
-    let token = window.location.hash === undefined || window.location.hash === null || window.location.hash === '' ? searchParams[0].get('token') ?? '' : window.location.hash;
+    let [searchParams] = useSearchParams();
+    let token = window.location.hash === undefined || window.location.hash === null || window.location.hash === '' ? searchParams.get('token') ?? '' : window.location.hash;
     const [nftDetails, setnftDetails] = useState<NFTDetails | undefined | null>(undefined);
     const [isClaimable, setIsClaimable] = useState<boolean>(false);
     const [isAlreadyClaimed, setIsAlreadyClaimed] = useState<boolean>(false);
@@ -32,6 +32,9 @@ export default function ClaimNFT() {
     const [isClaimOptionsModalOpen, setIsClaimOptionsModalOpen] = useState<boolean>(false);
     const [isClaimWithNewAccountModalOpen, setIsClaimWithNewAccountModalOpen] = useState<boolean>(false);
     const [isLoaderModalOpen, setIsLoaderModalOpen] = useState<boolean>(false);
+    //const [isProcessingCallback, setIsProcessingCallback] = useState<boolean>(false);
+    let claimDetailsId = searchParams.get('claimDetailsId');
+
     const navigate = useNavigate();
 
     function claimOnClick() {
@@ -75,6 +78,29 @@ export default function ClaimNFT() {
     }
 
     useEffect(() => {
+        if (claimDetailsId) {
+            let claimDetailsString = localStorage.getItem(claimDetailsId);
+            localStorage.removeItem(claimDetailsId);
+            searchParams.delete(claimDetailsId);
+            if (claimDetailsString) {
+                let claimDetails!: ClaimDetails;
+                try {
+                    claimDetails = JSON.parse(claimDetailsString) as ClaimDetails;
+                } catch (e) {
+                    console.error(e);
+                }
+                if (claimDetails) {
+                    setIsLoaderModalOpen(true);
+                    ClaimWithLoggedInAccountCallback(claimDetails).then(() => {
+                        window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/nft-detail/${claimDetails.NFTContract}/${claimDetails.TokenId}`;
+                    }).catch(e => {
+                        console.log(e);
+                    }).finally(() => {
+                        setIsLoaderModalOpen(false);
+                    });
+                }
+            }
+        }
         if (nftDetails === undefined) {
             GetNFTContract(nft as string).then(async (nftContract) => {
                 let token = await nftContract.nft_token({
@@ -153,7 +179,7 @@ export default function ClaimNFT() {
             <div className={style.flex_container}>
                 <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
                     <div className={style.media_container}>
-                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />    
+                        <Media src={`${nftDetails.nftMeta.base_uri}/${nftDetails.nftToken.metadata.media}`} isLoadingSetter={setIsMediaLoading} />
                     </div>
                 </Tilt>
                 <div className={style.card}>

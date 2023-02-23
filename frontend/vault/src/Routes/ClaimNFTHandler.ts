@@ -66,7 +66,7 @@ async function SendHandler(receiver_id: string, nft_account_id: string, token_id
     let conn = await nearAPI.connect(nearConfig);
     let vaultContract = GetVaultContract(await conn.account(accountId));
 
-    let callback = NETWORK === 'mainnet'? `https://app.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}` : `https://testnet.mynearwallet.com//nft-detail/${nft_account_id}/${token_id}`;
+    let callback = NETWORK === 'mainnet'? `https://app.mynearwallet.com/nft-detail/${nft_account_id}/${token_id}` : `https://testnet.mynearwallet.com/nft-detail/${nft_account_id}/${token_id}`;
     
     await vaultContract.claim({
         callbackUrl: callback,
@@ -92,11 +92,9 @@ async function ClaimWithExistingAccountHandler(claimDetailsId: string, nftAccoun
     let currentLocation = window.location;
     let successRedirect = new URL(currentLocation.href);
     successRedirect.hash = '';
-    successRedirect.pathname = `/claim-callback`;
+    successRedirect.pathname = `/claim/${nftAccount}/${tokenId}`;
     successRedirect.search = '';
     successRedirect.searchParams.set('claimDetailsId', claimDetailsId)
-    successRedirect.searchParams.set('nftContract', nftAccount);
-    successRedirect.searchParams.set('tokenId', tokenId);
 
     successRedirect.protocol = currentLocation.protocol;
     wallet.signOut();
