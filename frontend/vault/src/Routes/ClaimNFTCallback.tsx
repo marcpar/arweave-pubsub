@@ -6,28 +6,27 @@ import { GridLoader } from 'react-spinners';
 import style from "./ClaimNFT.module.css"
 import { useEffect } from "react";
 
-
 export default function ClaimNFTCallback() {
     let [searchParams] = useSearchParams();
-    let navigate = useNavigate();
     let claimDetailsId = searchParams.get('claimDetailsId') as string;
+    let navigate = useNavigate();
     let nftContract = searchParams.get('nftContract');
     let tokenId = searchParams.get('tokenId');
-    
-    let claimDetails = JSON.parse(localStorage.getItem(claimDetailsId) as string) as ClaimDetails;
+    let claimDetailsString = localStorage.getItem(claimDetailsId);
 
     useEffect(() => {
-        ClaimWithLoggedInAccountCallback(claimDetails).then(() => {
-            localStorage.removeItem(claimDetailsId);
-            window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/nft-detail/${claimDetails.NFTContract}/${claimDetails.TokenId}`
-        }).catch(_ => {
+        if (claimDetailsString) {
+            let claimDetails = JSON.parse(claimDetailsString) as ClaimDetails;
+            ClaimWithLoggedInAccountCallback(claimDetails).then(() => {
+                localStorage.removeItem(claimDetailsId);
+                window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/nft-detail/${claimDetails.NFTContract}/${claimDetails.TokenId}`;
+            }).catch(_ => {
+                navigate(`/claim/${nftContract}/${tokenId}`);
+            });
+        } else {
             navigate(`/claim/${nftContract}/${tokenId}`);
-        });
+        }
     });
-
-    if (claimDetails === null ) {
-        navigate(`/claim/${nftContract}/${tokenId}`);
-    }
 
     return (
         <div className={style.loader_container}>
