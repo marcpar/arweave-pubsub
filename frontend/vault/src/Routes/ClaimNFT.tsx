@@ -91,6 +91,7 @@ export default function ClaimNFT() {
                 if (claimDetails) {
                     setIsLoaderModalOpen(true);
                     ClaimWithLoggedInAccountCallback(claimDetails).then(() => {
+                        setIsAlreadyClaimed(true);
                         window.location.href = `https://${NETWORK === 'mainnet' ? 'app' : 'testnet'}.mynearwallet.com/nft-detail/${claimDetails.NFTContract}/${claimDetails.TokenId}`;
                     }).catch(e => {
                         console.log(e);
