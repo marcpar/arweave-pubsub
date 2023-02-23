@@ -81,7 +81,6 @@ export default function ClaimNFT() {
         if (claimDetailsId) {
             let claimDetailsString = localStorage.getItem(claimDetailsId);
             localStorage.removeItem(claimDetailsId);
-            searchParams.delete(claimDetailsId);
             if (claimDetailsString) {
                 let claimDetails!: ClaimDetails;
                 try {
@@ -125,7 +124,7 @@ export default function ClaimNFT() {
                 }
             })
         }
-    });
+    }, [claimDetailsId, nftDetails, nft, token_id, token]);
 
     if (nftDetails === undefined) {
         return (
