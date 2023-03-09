@@ -1,5 +1,7 @@
 import axios from "axios";
-import { Logger } from "../lib/logger.js";
+import { util } from "lib";
+const Logger = util.Logger;
+const withRetry = util.withRetry;
 
 let _callbackURL: string;
 let _client = axios.default;
@@ -10,7 +12,7 @@ function SetDefaultCallBack(callback: string) {
 
 interface Event {
     JobId: string,
-    Event: "started" | "failure" | "submitted" |"success",
+    Event: "started" | "failure" | "submitted" | "success",
     Message: string,
     Details?: any
 }
@@ -29,7 +31,11 @@ async function Emit(event: Event): Promise<EmitResult> {
     }
     let _event = event as _Event;
     _event.Time = new Date().getTime();
-    let response = await _client.post(_callbackURL, _event);
+
+    let response = await withRetry(() => {
+        return _client.post(_callbackURL, _event);
+    }, 10);
+
     Logger().debug(`callback reponse: ${response.status}\n${JSON.stringify(response.data)}`);
 
     if ([400, "400"].includes(response.data)) {

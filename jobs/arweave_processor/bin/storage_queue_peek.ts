@@ -3,8 +3,7 @@ import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
-import { Logger } from "../src/lib/logger.js";
-
+import { util } from "lib";
 
 LoadConfig();
 
@@ -20,7 +19,7 @@ let config = GetConfig();
     });
     
     for (const item of response.peekedMessageItems) {
-        Logger().info(JSON.stringify(item));
+        util.Logger().info(JSON.stringify(item));
     }
 })();
 

@@ -3,7 +3,7 @@ import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
-import { Logger } from "../src/lib/logger.js";
+import { util } from "lib";
 
 LoadConfig();
 
@@ -15,7 +15,7 @@ let config = GetConfig();
 
     await qClient.createIfNotExists();
     let response = await qClient.clearMessages();
-    Logger().info(response);
+    util.Logger().info(response);
     
     
 })();

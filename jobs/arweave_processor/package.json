@@ -2,8 +2,8 @@
   "name": "arweave_processor",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "type": "module",
   "license": "MIT",
+  "type": "module",
   "devDependencies": {
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.6.5",
@@ -14,10 +14,10 @@
   },
   "scripts": {
     "dev": "ts-node --esm src/index.ts",
-    "dev:watch": "nodemon -w src -e ts,js,json --exec 'yarn run dev'",
-    "test": "yarn mocha",
-    "test:watch": "nodemon -w src -w tests -e ts,js,json --exec 'yarn run test'",
-    "build": "yarn clean && tsc -p tsconfig.build.json",
+    "dev:watch": "nodemon -w src -e ts,js,json --exec 'npm run dev'",
+    "test": "npm mocha",
+    "test:watch": "nodemon -w src -w tests -e ts,js,json --exec 'npm run test'",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
     "clean": "rm -rf ./dist",
     "dispatch:storage-queue": "ts-node --esm bin/storage_queue_dispatch.ts",
     "peek:storage-queue": "ts-node --esm bin/storage_queue_peek.ts",
@@ -30,7 +30,8 @@
     "arweave": "^1.11.4",
     "axios": "^0.27.2",
     "dotenv": "^16.0.1",
-    "file-type": "^17.1.6",
+    "file-type": "^18.2.1",
+    "lib": "file:../../lib",
     "winston": "^3.8.1"
   }
 }

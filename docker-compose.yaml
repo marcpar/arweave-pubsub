@@ -5,21 +5,23 @@ services:
     build:
       context: jobs/arweave_processor
       dockerfile: local.dockerfile
-    entrypoint: yarn
+    entrypoint: [npm, run]
     command: dev:watch
-    working_dir: /home/app
+    working_dir: /home/app/jobs/arweave_processor
     volumes:
-      - ./jobs/arweave_processor:/home/app
+      - ./jobs/arweave_processor:/home/app/jobs/arweave_processor
+      - ./lib:/home/app/lib
 
   arweave_callback:
     build:
       context: jobs/arweave_processor
       dockerfile: local.dockerfile
-    entrypoint: yarn
+    entrypoint: [npm, run]
     command: callback-server
-    working_dir: /home/app
+    working_dir: /home/app/jobs/arweave_processor
     volumes:
-      - ./jobs/arweave_processor:/home/app
+      - ./jobs/arweave_processor:/home/app/jobs/arweave_processor
+      - ./lib:/home/app/lib
 
   near_processor:
     build:

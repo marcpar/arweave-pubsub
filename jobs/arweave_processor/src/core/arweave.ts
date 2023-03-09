@@ -1,7 +1,9 @@
 import { JWKInterface } from "arweave/node/lib/wallet.js";
-import { fileTypeFromBuffer } from "file-type";
-import { Logger } from "../lib/logger.js";
-import { Sleep } from "../lib/util.js";
+import { util } from "lib";
+
+const Logger = util.Logger;
+const Sleep = util.Sleep;
+
 import {
     createData,
     bundleAndSignData,
@@ -9,6 +11,7 @@ import {
 } from "arbundles";
 import { ArweaveSigner } from "arbundles/src/signing/index.js";
 import Arweave from 'arweave';
+import { fileTypeFromBuffer } from 'file-type';
 
 type PathManifest = {
     manifest: 'arweave/paths',
@@ -112,6 +115,7 @@ async function UploadMediaToPermaweb(uploadParams: UploadParams[]): Promise<Uplo
 }
 
 async function createNFTDataItem(params: UploadParams, signer: ArweaveSigner): Promise<NFTDataItems> {
+
     let mediaFileType = await fileTypeFromBuffer(params.media);
     if (!mediaFileType) {
         throw new Error(`Job ${params.jobID}, failed to get mime of media`);

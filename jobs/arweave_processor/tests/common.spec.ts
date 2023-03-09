@@ -1,5 +1,5 @@
 import { equal, notEqual } from "assert";
-import { ParsePayloadFromJSONString, Payload } from "../src/queue/common.js";
+import { ParsePayloadFromJSONString, Payload } from "../src/queue/payload.js";
 
 describe("Payload Validation", () => {
     it("should be able to parse valid payload", () => {

@@ -1,31 +1,9 @@
-interface Queue {
-    getNextJob: () => Promise<Job>
-}
-
-interface Job {
-    payload: Payload[],
-    complete: () => Promise<void>,
-    setState: (state: JobIDStateMap) => Promise<void>,
-    requeue: () => Promise<void>
-}
-
 type Payload = {
     JobId: string,
     MediaURL: string,
     ThumbnailURL?: string,
     Metadata: any,
     MinConfirmations?: number,
-    State?: State
-}
-
-type State = {
-    JobID?: string,
-    BundleTxID?: string,
-    PathManifestTxID?: string,
-}
-
-type JobIDStateMap = {
-    [jobID: string]: State
 }
 
 type ParsePayloadResult = {
@@ -112,10 +90,6 @@ function parsePayloadBatch(payload: Payload[]): ParsePayloadResult {
 };
 
 export {
-    Queue,
-    Job,
     Payload,
-    State,
-    JobIDStateMap,
     ParsePayloadFromJSONString
 }

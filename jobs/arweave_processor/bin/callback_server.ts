@@ -1,9 +1,9 @@
 import { createServer, } from "http";
-import { Logger } from "../src/lib/logger.js";
+import { util } from 'lib';
 
 createServer((req, res) => {
     req.on('data', (data) => {
-        Logger().info(data)
+        util.Logger().info(data)
     });
 
     res.write("200")

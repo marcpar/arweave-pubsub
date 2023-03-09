@@ -1,6 +1,7 @@
 import { JWKInterface } from 'arweave/node/lib/wallet.js';
 import env from 'dotenv';
-import { Logger } from './lib/logger.js';
+import { util } from 'lib';
+const Logger = util.Logger;
 
 
 type Config = {

@@ -7,7 +7,7 @@ import {
 import {
     randomUUID
 } from 'crypto';
-import { Logger } from "../src/lib/logger.js";
+import { util } from "lib";
 
 
 LoadConfig();
@@ -82,6 +82,6 @@ let config = GetConfig();
     }
     let response = await qClient.sendMessage(JSON.stringify(batch));
 
-    Logger().info(response.messageId);
+    util.Logger().info(response.messageId);
 })();
 
