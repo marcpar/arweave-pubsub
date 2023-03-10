@@ -1,27 +1,36 @@
 FROM node:16.6.2 as build
 
+# Build from root directory of the project
 WORKDIR /workdir
-COPY . /workdir
+COPY ./lib /workdir/lib
+COPY ./jobs/arweave_processor /workdir/jobs/arweave_processor
 
-RUN apt-get update && apt-get -y install git
-RUN yarn install && yarn build
+# Install dependencies
+RUN apt-get update && \
+    apt-get -y install git
+
+# Build library
+RUN cd lib && \
+    npm run build && \
+    npm pack
+
+# Build App
+RUN cd ./jobs/arweave_processor && \
+    npm add ../../lib/lib-1.0.0.tgz && \
+    npm install && \
+    npm run build && \
+    rm -rf node_modules && \
+    NODE_ENV=production npm install
 
 FROM node:16.6.2-alpine3.14 as runtime
 
 WORKDIR /home/arweave-processor
 
-COPY --from=build /workdir/dist /home/arweave-processor/dist
-COPY --from=build /workdir/package.json /home/arweave-processor/package.json
-COPY --from=build /workdir/yarn.lock /home/arweave-processor/yarn.lock
-
-RUN apk update && apk add git
+COPY --from=build /workdir/jobs/arweave_processor/dist /home/arweave-processor/dist
+COPY --from=build /workdir/jobs/arweave_processor/node_modules /home/arweave-processor/node_modules
+COPY --from=build /workdir/jobs/arweave_processor/package.json /home/arweave-processor/package.json
 
 ENV NODE_ENV production
-
-RUN yarn install && \
-    chown -R node:node /home/arweave-processor && \
-    find /home/arweave-processor -type f -exec chmod 400 {} \; && \
-    find /home/arweave-processor -type d -exec chmod 500 {} \;
 
 LABEL Maintainer="Marc Par <marc.par10@gmail.com>"
 LABEL Repository="https://github.com/marcpar/near-nft-processor"

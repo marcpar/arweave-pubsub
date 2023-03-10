@@ -1,10 +1,10 @@
 FROM node:16.6.2 as build
 
-WORKDIR /workdir
+WORKDIR /workdir/jobs/arweave_processor
 COPY . /workdir
 
 RUN apt-get update && apt-get -y install git
-RUN yarn install
+RUN npm install
 
 ENTRYPOINT ["sh", "-c"]
-CMD ["yarn callback-server"]
+CMD ["npm run callback-server"]

@@ -3,15 +3,15 @@ version: "3.7"
 services:
   arweave_processor:
     build:
-      context: jobs/arweave_processor
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jobs/arweave_processor/dockerfile
     env_file:
       - arweave_processor.local.env
 
   arweave_util:
     build:
-      context:  jobs/arweave_processor
-      dockerfile: util.dockerfile
+      context: .
+      dockerfile: jobs/arweave_processor/util.dockerfile
     env_file:
       - arweave_processor.local.env
 

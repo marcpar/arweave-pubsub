@@ -3,8 +3,8 @@ version: "3.7"
 services:
   arweave_processor:
     build:
-      context: jobs/arweave_processor
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jobs/arweave_processor/dockerfile
     env_file:
       - arweave_processor.env
     restart: unless-stopped
