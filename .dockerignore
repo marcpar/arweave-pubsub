@@ -1,0 +1,6 @@
+**/*/node_modules
+lib/dist
+jobs/arweave_processor/dist
+jobs/near_processor/dist
+jobs/vault_processor/dist
+frontend/vault/build
