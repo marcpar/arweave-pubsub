@@ -17,29 +17,29 @@ services:
 
   near_processor:
     build:
-      context: jobs/near_processor
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jobs/near_processor/dockerfile
     env_file:
       - near_processor.local.env
   
   near_util:
     build:
-      context: jobs/near_processor
-      dockerfile: util.dockerfile
+      context: .
+      dockerfile: jobs/near_processor/util.dockerfile
     env_file:
       - near_processor.local.env
 
   vault_processor:
     build:
-      context: jobs/vault_processor
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jobs/vault_processor/dockerfile
     env_file:
       - vault_processor.local.env
   
   vault_util:
     build:
-      context: jobs/vault_processor
-      dockerfile: util.dockerfile
+      context: .
+      dockerfile: jobs/vault_processor/util.dockerfile
     env_file: vault_processor.local.env
 
   vault:

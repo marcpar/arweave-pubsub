@@ -1,7 +1,12 @@
 FROM node:16.6.2 as build
 
-WORKDIR /workdir
+WORKDIR /workdir/jobs/near_processor
 COPY . /workdir
+
+# Build Lib
+RUN cd /workdir/lib && \
+    npm install && \
+    npm run build
 
 RUN apt-get update && apt-get -y install git
 RUN yarn install

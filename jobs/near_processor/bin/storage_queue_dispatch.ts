@@ -1,9 +1,9 @@
+import { Logger } from "lib/dist/util/index.js";
 import { GetConfig, LoadConfig } from "../src/config.js";
 import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
-import { Logger } from "../src/lib/logger.js";
 
 
 LoadConfig();
@@ -17,19 +17,18 @@ let config = GetConfig();
     await qClient.createIfNotExists();
     //let uuid = randomUUID();
     //let uuid ='02bc722d-f790-4d1c-aab6-a3394921c638';
+    let time = new Date().getTime();
     let job = {
         JobId: "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
         //OwnerAddress: "test-claimer.testnet",
-        //ArweaveTxnId: "BI4aHEJt4sOk-kGgUvZfWDO8mTswcNw0WZi7rN-J5D8", // mp4
-        //ArweaveTxnId: "NxWWRUM8twj9hipCFm6WMt-a-cucoZoJ-zoSuSc8zso", // image
-        ArweaveTxnId: "1mn1wYf6Od2qq_An56I3q-8_fKRUVuo77WldmYtBnuI", // 404
-        Title: "Tilda Månsson - 2022 World Triathlon Cup Bergen",
-        Description: "Tilda Månsson - 2022 World Triathlon Cup Bergen",
+        ArweaveTxnId: "2ByKNNV6wxBa0MYh7kgQYXqstRKpe5rR9dTv-2lfLUE",
+        Title: "Sarah Artese - 2023 World Triathlon Aquathlon Championships Ibiza",
+        Description: "Sarah Artese - 2023 World Triathlon Aquathlon Championships Ibiza",
         Copies: 1,
-        IssuedAt: "1660818999614",
+        IssuedAt: `${time}}`,
         ExpiresAt: null,
-        StartsAt: "1660818999614",
-        UpdatedAt: "1660818999614"
+        StartsAt:`${time}`,
+        UpdatedAt: `${time}`
     }
     let response = await qClient.sendMessage(JSON.stringify(job));
     

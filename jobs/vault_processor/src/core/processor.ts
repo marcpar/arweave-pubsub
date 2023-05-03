@@ -1,10 +1,12 @@
-import { Job, Queue } from '../queue/common.js';
-import { Sleep } from '../lib/util.js';
-import { Logger } from '../lib/logger.js';
+import { Logger } from 'lib/dist/util/logger.js';
+import { ParsePayloadFromJSONString, Payload } from '../queue/common.js';
 import { Emit } from './event.js';
 import { LockNFTtoVault } from './near.js';
+import { Queue } from 'lib/dist/queue/common.js';
+import { Sleep } from 'lib/dist/util/sleep.js';
+import { withRetry } from 'lib/dist/util/retry.js';
 
-let _queue: Queue;
+let _queue: Queue<string>;
 
 /**
  * Number of jobs currently being processed
@@ -16,7 +18,7 @@ let _processing: number = 0;
  */
 let _maxProcessingJobs = 0;
 
-function SetQueue(queue: Queue) {
+function SetQueue(queue: Queue<string>) {
     _queue = queue;
 }
 
@@ -37,9 +39,22 @@ async function loop() {
         await Sleep(5000);
         return;
     }
-    let job!: Job;
+    let payload!: Payload;
     try {
-        job = await _queue.getNextJob();
+        let result = ParsePayloadFromJSONString(await _queue.getNextJob());
+        if (result.Error) {
+            Logger().error(`failed to parse payload from json due to error: ${result.Error}`);
+            if (result.Payload && result.Payload.JobId) {
+                Emit({
+                    Event: 'failure',
+                    JobId: result.Payload.JobId,
+                    Message: `failed to parse payload from json due to error: ${result.Error}`,
+                    Details: result
+                })
+            }
+            return;
+        }
+        payload = result.Payload as Payload;
     } catch (e) {
         Logger().error(e);
         return;
@@ -47,19 +62,19 @@ async function loop() {
 
     _processing++;
     (async () => {
-        await processJob(job);
+        await processJob(payload);
     })().then(async () => {
-        await job.complete();
+
     }).catch(async (e) => {
-        await job.requeue();
+
         let err = e as Error;
-        let err_message = `Job ${job.payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}\n${JSON.stringify(err)}`
+        let err_message = `Job ${payload.JobId} failed due to error: ${err.message}\n${err.stack ?? ''}\n${JSON.stringify(err)}`
         Logger().error(err_message, {
             log_type: 'job_failed',
-            job_id: job.payload.JobId,
+            job_id: payload.JobId,
         });
         Emit({
-            JobId: job.payload.JobId,
+            JobId: payload.JobId,
             Event: "failure",
             Message: err_message,
             Details: {
@@ -73,11 +88,10 @@ async function loop() {
     });
 }
 
-async function processJob(job: Job) {
-    let payload = job.payload;
+async function processJob(payload: Payload) {
     Logger().info(`Job ${payload.JobId} received`, {
         log_type: 'job_started',
-        job_id: job.payload.JobId
+        job_id: payload.JobId
     });
     let emitResult = await Emit({
         JobId: payload.JobId,
@@ -90,21 +104,9 @@ async function processJob(job: Job) {
         return;
     }
 
-    let result;
-    try {
-        result = await LockNFTtoVault(payload);
-    } catch (e) {
-        Emit({
-            JobId: job.payload.JobId,
-            Event: "failure",
-            Message: `Failed to lock nft to vault: ${e}`,
-            Details: {
-                Error: e,
-            }
-        });
-        Logger().error(`Failed to lock nft to vault: ${e}`)
-        return;
-    }
+    let result = await withRetry(async () => {
+        return await LockNFTtoVault(payload)
+    }, 5);
 
     Logger().info(`Job ${payload.JobId} has been successfully processed`, {
         log_type: 'job_completed',

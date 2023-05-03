@@ -1,13 +1,12 @@
 import { SetMaxJobs, SetQueue, Start } from './core/processor.js';
 import { GetConfig, LoadConfig } from './config.js';
-import { CreateAzureStorageQueue } from './queue/azure_storage_queue.js';
-
-import { Logger } from './lib/logger.js';
 import { SetDefaultCallBack } from './core/event.js';
 import {
     Init,
 } from './core/near.js';
 import { InMemoryKeyStore } from 'near-api-js/lib/key_stores/in_memory_key_store.js';
+import { CreateAzureStorageQueue } from 'lib/dist/queue/azure_storage_queue.js';
+import { Logger } from 'lib/dist/util/logger.js';
 
 LoadConfig();
 let config = GetConfig();

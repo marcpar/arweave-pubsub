@@ -11,16 +11,16 @@ services:
 
   near_processor:
     build:
-      context: jobs/near_processor
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jobs/near_processor/dockerfile
     env_file:
       - near_processor.env
     restart: unless-stopped
   
   vault_processor:
     build:
-      context: jobs/vault_processor
-      dockerfile: dockerfile
+      context: .
+      dockerfile: jobs/vault_processor/dockerfile
     env_file:
       - vault_processor.env
     restart: unless-stopped

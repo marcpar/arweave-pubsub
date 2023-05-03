@@ -1,13 +1,3 @@
-interface Queue {
-    getNextJob: () => Promise<Job>
-}
-
-interface Job {
-    payload: Payload
-    complete: () => Promise<void>,
-    requeue: () => Promise<void>
-}
-
 type Payload = {
     JobId: string,
     ArweaveTxnId: string,
@@ -48,8 +38,6 @@ function ParsePayloadFromJSONString(payloadString: string): {
 }
 
 export {
-    Queue,
-    Job,
     Payload,
     ParsePayloadFromJSONString
 }

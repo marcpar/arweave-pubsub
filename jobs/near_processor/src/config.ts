@@ -1,9 +1,7 @@
 import env from 'dotenv';
-import { Logger } from './lib/logger.js';
-import {
-    
-} from 'near-api-js'
+import { util } from 'lib';
 
+const Logger = util.Logger
 
 type Config = {
     AzureAccountName: string,

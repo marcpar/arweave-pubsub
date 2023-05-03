@@ -3,9 +3,9 @@ import {
 } from 'near-api-js';
 import { Payload } from '../queue/common.js';
 import { FinalExecutionStatus } from 'near-api-js/lib/providers/index.js'
-import { Logger } from '../lib/logger.js';
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { KeyPairEd25519 } from 'near-api-js/lib/utils/key_pair.js';
+import { Logger } from 'lib/dist/util/logger.js';
 
 let _near: Near;
 let _account: Account;

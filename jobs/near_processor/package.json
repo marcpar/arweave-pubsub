@@ -31,6 +31,7 @@
     "axios": "^0.27.2",
     "dotenv": "^16.0.1",
     "file-type": "^18.0.0",
+    "lib": "file:../../lib",
     "near-api-js": "^0.45.1",
     "utf-8-validate": "^5.0.9",
     "winston": "^3.8.1"

@@ -1,22 +1,35 @@
 FROM node:16.6.2 as build
 
 WORKDIR /workdir
-COPY . /workdir
+COPY ./lib /workdir/lib
+COPY ./jobs/near_processor /workdir/jobs/near_processor
 
-RUN yarn install && yarn build
+# Build library
+RUN cd lib && \
+    npm install && \
+    npm run build && \
+    npm pack
+
+# Build App
+RUN cd ./jobs/near_processor && \
+    yarn add file:/workdir/lib/lib-1.0.0.tgz && \
+    yarn install && \
+    yarn run build && \
+    rm -rf node_modules && \
+    NODE_ENV=production yarn install
 
 FROM node:16.6.2-alpine3.14 as runtime
 
 WORKDIR /home/near-processor
 
-COPY --from=build /workdir/dist /home/near-processor/dist
-COPY --from=build /workdir/package.json /home/near-processor/package.json
-COPY --from=build /workdir/yarn.lock /home/near-processor/yarn.lock
+COPY --from=build /workdir/jobs/near_processor/dist /home/near-processor/dist
+COPY --from=build /workdir/jobs/near_processor/node_modules /home/near-processor/node_modules
+COPY --from=build /workdir/jobs/near_processor/package.json /home/near-processor/package.json
+COPY --from=build /workdir/jobs/near_processor/yarn.lock /home/near-processor/yarn.lock
 
 ENV NODE_ENV production
 
-RUN yarn install && \
-    chown -R node:node /home/near-processor && \
+RUN chown -R node:node /home/near-processor && \
     find /home/near-processor -type f -exec chmod 400 {} \; && \
     find /home/near-processor -type d -exec chmod 500 {} \;
 

@@ -11,10 +11,12 @@ import {
 import { Payload } from '../queue/common.js';
 import { FinalExecutionStatus } from 'near-api-js/lib/providers'
 import axios from 'axios';
-import { Logger } from '../lib/logger.js';
+import { util } from 'lib';
 import isValidUTF8 from 'utf-8-validate';
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { fileTypeFromBuffer } from 'file-type';
+
+const Logger = util.Logger;
 
 let _near: Near;
 let _account: Account;

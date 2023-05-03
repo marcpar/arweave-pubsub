@@ -13,9 +13,6 @@ const CustomFormat = format((info, opts) => {
     if (!info.log_type) {
         info.log_type = 'default';
     }
-    if (opts.service_name) {
-        info.service_name = opts.service_name;
-    }
     info.time = Math.round(new Date().getTime() / 1000);
     info.hostname = host;
     info.message = `${info.message}`
@@ -27,9 +24,7 @@ function InitLogger(): Logger {
     _logger = createLogger({
         level: process.env.LOG_LEVEL ?? 'info',
         format: format.combine(
-            CustomFormat({
-                service_name: 'arweave_processor'
-            }),
+            CustomFormat({}),
             format.json()
         ),
         transports: [

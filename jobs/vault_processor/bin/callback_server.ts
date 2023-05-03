@@ -1,5 +1,5 @@
 import { createServer, } from "http";
-import { Logger } from "../src/lib/logger.js";
+import { Logger } from "lib/dist/util/logger.js";
 
 createServer((req, res) => {
     req.on('data', (data) => {

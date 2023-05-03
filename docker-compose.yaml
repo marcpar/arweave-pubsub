@@ -29,9 +29,10 @@ services:
       dockerfile: local.dockerfile
     entrypoint: yarn
     command: dev:watch
-    working_dir: /home/app
+    working_dir: /home/app/jobs/near_processor
     volumes:
-      - ./jobs/near_processor:/home/app
+      - ./jobs/near_processor:/home/app/jobs/near_processor
+      - ./lib:/home/app/lib
 
   near_callback:
     build:
@@ -39,9 +40,10 @@ services:
       dockerfile: local.dockerfile
     entrypoint: yarn
     command: callback-server
-    working_dir: /home/app
+    working_dir: /home/app/jobs/near_processor
     volumes:
-      - ./jobs/near_processor:/home/app
+      - ./jobs/near_processor:/home/app/jobs/near_processor
+      - ./lib:/home/app/lib
   
   vault_processor:
     build:
@@ -49,9 +51,10 @@ services:
       dockerfile: local.dockerfile
     entrypoint: yarn
     command: dev:watch
-    working_dir: /home/app
+    working_dir: /home/app/jobs/vault_processor
     volumes:
-      - ./jobs/vault_processor:/home/app
+      - ./jobs/vault_processor:/home/app/jobs/vault_processor
+      - ./lib:/home/app/lib
   
   vault_front:
     build:

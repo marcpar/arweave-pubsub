@@ -1,9 +1,9 @@
+import { Logger } from "lib/dist/util/logger.js";
 import { GetConfig, LoadConfig } from "../src/config.js";
 import {
     QueueServiceClient,
     StorageSharedKeyCredential
 } from "@azure/storage-queue";
-import { Logger } from "../src/lib/logger.js";
 
 LoadConfig();
 
