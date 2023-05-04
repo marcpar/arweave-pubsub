@@ -195,6 +195,54 @@ impl Contract {
         );
         false
     }
+
+    pub fn renew_claimable(
+        &mut self,
+        nft_account_id: AccountId,
+        token_id: TokenId,
+        public_key: String,
+    ) -> Promise {
+        if !(env::signer_account_id() == nft_account_id
+            && self.allowed_nfts.contains(&nft_account_id))
+            && (env::signer_account_id() != env::current_account_id())
+        {
+            env::panic_str(
+                format!(
+                    "{} is not authorized to renew claimable",
+                    env::signer_account_id()
+                )
+                .as_str(),
+            )
+        }
+
+        let claimable_key = format!("{}:{}", nft_account_id, token_id);
+        let claimable = match self.claimables.get(&claimable_key) {
+            Some(claimable) => claimable,
+            None => {
+                env::panic_str(format!("claimable {} does not exists", &claimable_key).as_str())
+            }
+        };
+
+        self.claimables
+            .insert(
+                &claimable_key,
+                &Claimable {
+                    token_id,
+                    nft_account_id,
+                    public_key: public_key.clone(),
+                },
+            )
+            .expect(format!("claimable {} exists", &claimable_key).as_str());
+
+        Promise::new(env::current_account_id())
+            .delete_key(claimable.public_key.parse().unwrap())
+            .then(Promise::new(env::current_account_id()).add_access_key(
+                public_key.parse().unwrap(),
+                100 * ONE_MILLINEAR,
+                env::current_account_id(),
+                "claim".to_string(),
+            ))
+    }
 }
 
 #[near_bindgen]
