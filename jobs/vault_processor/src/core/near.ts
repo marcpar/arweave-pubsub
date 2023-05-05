@@ -1,8 +1,8 @@
 import {
-    connect, ConnectConfig, Near, KeyPair, Account, DEFAULT_FUNCTION_CALL_GAS
+    connect, ConnectConfig, Near, KeyPair, Account, DEFAULT_FUNCTION_CALL_GAS, Contract
 } from 'near-api-js';
 import { Payload } from '../queue/common.js';
-import { FinalExecutionStatus } from 'near-api-js/lib/providers/index.js'
+import { FinalExecutionOutcome, FinalExecutionStatus } from 'near-api-js/lib/providers/index.js'
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { KeyPairEd25519 } from 'near-api-js/lib/utils/key_pair.js';
 import { Logger } from 'lib/dist/util/logger.js';
@@ -17,12 +17,32 @@ let _deposit: string;
 let _vault: Vault;
 let _vaultBaseUrl: string;
 let _vaultContractAddress: string;
+let _nftContract: {
+    nft_token: (args: {
+        token_id: string
+    }) => Promise<{
+        token_id: string,
+        owner_id: string,
+        metadata: {
+            title?: string,
+            description?: string,
+            media?: string,
+            media_hash?: string,
+            copies?: number,
+            issued_at?: string,
+            expires_at?: string,
+            starts_at?: string,
+            updated_at?: string,
+            extra?: string,
+            reference?: string,
+            reference_hash?: string
+        }
+    }>
+};
 
 class Vault extends Account {
 
-    public async LockNFTtoVault(payload: Payload): Promise<LockNFTtoVaultResult> {
-
-        let keypair = KeyPairEd25519.fromRandom();
+    public async LockNFTtoVault(payload: Payload, keypair: KeyPairEd25519): Promise<LockNFTtoVaultResult> {
         let actions = [
             functionCall(
                 'nft_transfer_call',
@@ -43,6 +63,32 @@ class Vault extends Account {
             receiverId: this.accountId,
             actions: actions
         });
+
+        return this.processResult(payload, keypair, result);
+    }
+
+    public async RenewClaimable(payload: Payload, keypair: KeyPairEd25519): Promise<LockNFTtoVaultResult> {
+        let actions = [
+            functionCall(
+                'renew_claimable',
+                {
+                    nft_account_id: this.accountId,
+                    token_id: payload.TokenId,
+                    public_key: keypair.publicKey.toString()
+                },
+                40000000000000,
+                "1"
+            )
+        ];
+
+        let result = await this.signAndSendTransaction({
+            receiverId: _vaultContractAddress,
+            actions: actions
+        });
+        return this.processResult(payload, keypair, result);
+    }
+
+    private async processResult(payload: Payload, keypair: KeyPairEd25519, result: FinalExecutionOutcome): Promise<LockNFTtoVaultResult> {
         Logger().debug(`TransferToVault transaction result:\n${JSON.stringify(result)}`);
 
         let status = result.status as FinalExecutionStatus;
@@ -108,10 +154,24 @@ async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
     _near = await connect(connectConfig);
     _account = await _near.account(_accountID);
     _vault = new Vault(_near.connection, _accountID);
+    _nftContract = new Contract(_account, _accountID, {
+        changeMethods: [],
+        viewMethods: ['nft_token']
+    }) as any;
 }
 
 async function LockNFTtoVault(payload: Payload): Promise<LockNFTtoVaultResult> {
-    return await _vault.LockNFTtoVault(payload);
+    let token = await _nftContract.nft_token({
+        token_id: payload.TokenId
+    });
+
+    let keypair = KeyPairEd25519.fromRandom();
+
+    if (token.owner_id == _vaultContractAddress) {
+        return await _vault.RenewClaimable(payload, keypair)
+    }
+
+    return await _vault.LockNFTtoVault(payload, keypair);
 }
 
 export {

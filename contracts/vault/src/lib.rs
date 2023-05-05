@@ -196,12 +196,14 @@ impl Contract {
         false
     }
 
+    #[payable]
     pub fn renew_claimable(
         &mut self,
         nft_account_id: AccountId,
         token_id: TokenId,
         public_key: String,
     ) -> Promise {
+        assert_one_yocto();
         if !(env::signer_account_id() == nft_account_id
             && self.allowed_nfts.contains(&nft_account_id))
             && (env::signer_account_id() != env::current_account_id())
