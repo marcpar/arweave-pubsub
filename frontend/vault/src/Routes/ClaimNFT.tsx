@@ -174,7 +174,7 @@ export default function ClaimNFT() {
             <img alt="podium_logo" className={style.podium_logo} src={Podium} />
             <div className={style.greetings}>
                 <p><b>Congratulations {fullName} for coming {ordinal(parseInt(racePosition, 10))} in {groupName} at the {eventName}, {eventDate}.</b></p>
-                <p>Your virtual medal is ready to claim as an NFT, featuring many benefits. Or simply download the media file as a digital collectible.</p>
+                <p>Download your Race Capsule as a digital collectible. This is the quickest and easiest way to own it. If you have a wallet and are experienced with crypto you can also claim it as an NFT.</p>
             </div>
             <div className={style.flex_container}>
                 <Tilt tiltReverse={true} tiltMaxAngleX={7} tiltMaxAngleY={7} glareReverse={true} >
@@ -183,35 +183,29 @@ export default function ClaimNFT() {
                     </div>
                 </Tilt>
                 <div className={style.card}>
-                    <div className={style.card_header}>NFT benefits</div>
+                    <div className={style.card_header}>Digital Collectible</div>
                     <div className={style.card_body}>
                         <hr />
-                        <span>Digital collectible</span>
-                        <hr />
-                        <span>Social media ready</span>
-                        <hr />
-                        <span>Sponsor rewards enabled</span>
-                        <hr />
-                        <span>Blockchain certified carbon offset</span>
-                        <hr />
-                        <span>NFT minted to blockchain</span>
-                        <hr />
-                    </div>
-                    <div className={style.card_footer}>
-                        <button onClick={claimOnClick} disabled={isMediaLoading || !isClaimable || isAlreadyClaimed}>{isAlreadyClaimed ? 'Already Claimed' : 'Claim your NFT'}</button>
-                    </div>
-                </div>
-                <div className={style.card}>
-                    <div className={style.card_header}>Media file benefits</div>
-                    <div className={style.card_body}>
-                        <hr />
-                        <span>Digital collectible</span>
+                        <span>Animated video file</span>
                         <hr />
                         <span>Social media ready</span>
                         <hr />
                     </div>
                     <div className={style.card_footer}>
                         <button onClick={onClickDownload}>Download</button>
+                    </div>
+                </div>
+                <div className={style.card}>
+                    <div className={style.card_header}>NFT</div>
+                    <div className={style.card_body}>
+                        <hr />
+                        <span>Digital collectible</span>
+                        <hr />
+                        <span>Blockchain-certified carbon offset</span>
+                        <hr />
+                    </div>
+                    <div className={style.card_footer}>
+                        <button onClick={claimOnClick} disabled={isMediaLoading || !isClaimable || isAlreadyClaimed}>{isAlreadyClaimed ? 'Already Claimed' : 'Claim your NFT'}</button>
                     </div>
                 </div>
             </div>
