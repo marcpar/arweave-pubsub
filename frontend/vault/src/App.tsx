@@ -8,6 +8,17 @@ import Modal from 'react-modal';
 Modal.setAppElement('#root');
 
 function App() {
+  if (process.env.REACT_APP_HOST_REDIRECT) {
+    try {
+      let redirectURL = new URL(process.env.REACT_APP_HOST_REDIRECT);
+      let currentURL = new URL(window.location.href);
+      redirectURL.pathname = currentURL.pathname;
+      redirectURL.hash = currentURL.hash;
+      redirectURL.search = currentURL.search;
+      window.location.replace(redirectURL);
+    } catch(_) {}
+  }
+
   return (
     <div className="App">
       <BrowserRouter>
