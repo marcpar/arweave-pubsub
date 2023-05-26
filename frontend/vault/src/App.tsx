@@ -4,6 +4,7 @@ import ClaimNFT from './Routes/ClaimNFT';
 import VaultLayout from './Components/Layout/VaultLayout';
 import "./App.css";
 import Modal from 'react-modal';
+import Redirecting from './Routes/Redirecting';
 
 Modal.setAppElement('#root');
 
@@ -17,6 +18,7 @@ function App() {
       redirectURL.search = currentURL.search;
       window.location.replace(redirectURL);
     } catch(_) {}
+    return <Redirecting/>
   }
 
   return (

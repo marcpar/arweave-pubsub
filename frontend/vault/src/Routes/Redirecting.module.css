@@ -1,0 +1,15 @@
+.main {
+    text-align: center;
+    margin-top: 300px;
+}
+
+.message {
+    font-size: 2em;
+    color: rgb(43, 43, 185);
+    padding: 1em 2em;
+    font-weight: bold;
+}
+
+.loader_container {
+    margin-top: 1em;
+}
