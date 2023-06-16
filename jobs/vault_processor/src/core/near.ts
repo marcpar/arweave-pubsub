@@ -17,7 +17,7 @@ let _deposit: string;
 let _vault: Vault;
 let _vaultBaseUrl: string;
 let _vaultContractAddress: string;
-let _nftContract: {
+type NFTContract = {
     nft_token: (args: {
         token_id: string
     }) => Promise<{
@@ -60,7 +60,7 @@ class Vault extends Account {
         ];
 
         let result = await this.signAndSendTransaction({
-            receiverId: this.accountId,
+            receiverId: payload.SmartContractId ?? this.accountId,
             actions: actions
         });
 
@@ -72,7 +72,7 @@ class Vault extends Account {
             functionCall(
                 'renew_claimable',
                 {
-                    nft_account_id: this.accountId,
+                    nft_account_id: payload.SmartContractId ?? this.accountId,
                     token_id: payload.TokenId,
                     public_key: keypair.publicKey.toString()
                 },
@@ -154,13 +154,15 @@ async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
     _near = await connect(connectConfig);
     _account = await _near.account(_accountID);
     _vault = new Vault(_near.connection, _accountID);
-    _nftContract = new Contract(_account, _accountID, {
-        changeMethods: [],
-        viewMethods: ['nft_token']
-    }) as any;
+    
 }
 
 async function LockNFTtoVault(payload: Payload): Promise<LockNFTtoVaultResult> {
+    let _nftContract = new Contract(_account, payload.SmartContractId ?? _accountID, {
+        changeMethods: [],
+        viewMethods: ['nft_token']
+    }) as any as NFTContract;
+
     let token = await _nftContract.nft_token({
         token_id: payload.TokenId
     });

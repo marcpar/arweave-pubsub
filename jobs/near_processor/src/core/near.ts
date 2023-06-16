@@ -19,13 +19,10 @@ import { fileTypeFromBuffer } from 'file-type';
 const Logger = util.Logger;
 
 let _near: Near;
-let _account: Account;
 let _accountID: string;
 let _accountKey: string;
-let _contractID: string;
 let _explorerBaseURL: string;
 let _deposit: string;
-let _minter: Minter;
 
 class Minter extends Account {
 
@@ -138,19 +135,16 @@ type InitConfig = {
 async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
     _accountID = initConfig.accountID;
     _accountKey = initConfig.accountKey;
-    _contractID = initConfig.contractID;
     _explorerBaseURL = `https://explorer.${connectConfig.networkId}.near.org`;
     _deposit = initConfig.deposit;
 
     await connectConfig.keyStore?.setKey(connectConfig.networkId, _accountID, KeyPair.fromString(_accountKey))
 
     _near = await connect(connectConfig);
-    _account = await _near.account(_accountID);
-    _minter = new Minter(_near.connection, _accountID);
 }
 
 async function Mint(payload: Payload): Promise<MintResult> {
-    return await _minter.MintNFT(payload);
+    return await new Minter(_near.connection, payload.SmartContractId ?? _accountID).MintNFT(payload);
 }
 
 export {

@@ -1,6 +1,7 @@
 type Payload = {
     JobId: string,
     ArweaveTxnId: string,
+    SmartContractId?: string, 
     OwnerAddress?: string,
     Title?: string,
     Description?: string,

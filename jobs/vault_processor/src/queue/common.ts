@@ -1,5 +1,6 @@
 type Payload = {
     JobId: string,
+    SmartContractId?: string,
     TokenId: string
 }
 
