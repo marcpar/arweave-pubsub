@@ -15,6 +15,7 @@ import { util } from 'lib';
 import isValidUTF8 from 'utf-8-validate';
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { fileTypeFromBuffer } from 'file-type';
+import { KeyStore } from 'near-api-js/lib/key_stores/keystore.js';
 
 const Logger = util.Logger;
 
@@ -23,6 +24,8 @@ let _accountID: string;
 let _accountKey: string;
 let _explorerBaseURL: string;
 let _deposit: string;
+let _keyPair: KeyPair;
+let _keyStore: KeyStore;
 
 class Minter extends Account {
 
@@ -137,13 +140,17 @@ async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
     _accountKey = initConfig.accountKey;
     _explorerBaseURL = `https://explorer.${connectConfig.networkId}.near.org`;
     _deposit = initConfig.deposit;
-
-    await connectConfig.keyStore?.setKey(connectConfig.networkId, _accountID, KeyPair.fromString(_accountKey))
+    if (!connectConfig.keyStore) {
+        throw new Error(`invalid keystore ${connectConfig.keyStore}`);
+    }
+    _keyStore = connectConfig.keyStore;
+    _keyPair = KeyPair.fromString(_accountKey);
 
     _near = await connect(connectConfig);
 }
 
 async function Mint(payload: Payload): Promise<MintResult> {
+    await _keyStore.setKey(_near.connection.networkId, payload.SmartContractId ?? _accountID, _keyPair);
     return await new Minter(_near.connection, payload.SmartContractId ?? _accountID).MintNFT(payload);
 }
 
