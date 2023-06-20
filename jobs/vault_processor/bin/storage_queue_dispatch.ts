@@ -9,7 +9,8 @@ import {
 LoadConfig();
 
 let config = GetConfig();
-let tokenId = process.argv[2] ?? 'd1afef3e-f1ae-434f-85d9-3e367202244e';
+let smartContractId = process.argv[2] ?? "nft.world-triathlon.testnet";
+let tokenId = process.argv[3] ?? 'd1afef3e-f1ae-434f-85d9-3e367202244e';
 
 (async () => {
     let qsClient = new QueueServiceClient(`https://${config.AzureAccountName}.queue.core.windows.net`, new StorageSharedKeyCredential(config.AzureAccountName, config.AzureAccountKey));
@@ -20,6 +21,7 @@ let tokenId = process.argv[2] ?? 'd1afef3e-f1ae-434f-85d9-3e367202244e';
     //let uuid ='02bc722d-f790-4d1c-aab6-a3394921c638';
     let job = {
         JobId: "ff975cbd-32f4-4f09-9b9a-01964dd6eb90",
+        SmartContractId: smartContractId,
         TokenId: tokenId
     }
     let response = await qClient.sendMessage(JSON.stringify(job));

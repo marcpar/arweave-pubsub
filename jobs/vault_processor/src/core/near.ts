@@ -1,11 +1,12 @@
 import {
-    connect, ConnectConfig, Near, KeyPair, Account, DEFAULT_FUNCTION_CALL_GAS, Contract
+    connect, ConnectConfig, Near, KeyPair, Account, DEFAULT_FUNCTION_CALL_GAS, Contract, keyStores
 } from 'near-api-js';
 import { Payload } from '../queue/common.js';
 import { FinalExecutionOutcome, FinalExecutionStatus } from 'near-api-js/lib/providers/index.js'
 import { functionCall } from 'near-api-js/lib/transaction.js';
 import { KeyPairEd25519 } from 'near-api-js/lib/utils/key_pair.js';
 import { Logger } from 'lib/dist/util/logger.js';
+import { KeyStore } from 'near-api-js/lib/key_stores/keystore.js';
 
 let _near: Near;
 let _account: Account;
@@ -14,9 +15,11 @@ let _accountKey: string;
 let _contractID: string;
 let _explorerBaseURL: string;
 let _deposit: string;
-let _vault: Vault;
 let _vaultBaseUrl: string;
 let _vaultContractAddress: string;
+let _keyStore: KeyStore;
+let _keyPair: KeyPair;
+
 type NFTContract = {
     nft_token: (args: {
         token_id: string
@@ -60,7 +63,7 @@ class Vault extends Account {
         ];
 
         let result = await this.signAndSendTransaction({
-            receiverId: payload.SmartContractId ?? this.accountId,
+            receiverId: this.accountId,
             actions: actions
         });
 
@@ -98,7 +101,7 @@ class Vault extends Account {
         }
 
         let claimDetails = {
-            NFTContract: _accountID,
+            NFTContract: this.accountId,
             PrivateKey: keypair.secretKey,
             TokenId: payload.TokenId,
             VaultContract: _vaultContractAddress
@@ -149,15 +152,24 @@ async function Init(connectConfig: ConnectConfig, initConfig: InitConfig) {
     _vaultBaseUrl = initConfig.vaultBaseURL;
     _vaultContractAddress = initConfig.vaultContractAddress;
 
-    await connectConfig.keyStore?.setKey(connectConfig.networkId, _accountID, KeyPair.fromString(_accountKey))
+    _keyPair = KeyPair.fromString(_accountKey)
+    if (!connectConfig.keyStore) {
+        throw new Error(`Invalid keystore ${connectConfig.keyStore}`);
+    }
+    
+    _keyStore = connectConfig.keyStore;
+    //await connectConfig.keyStore?.setKey(connectConfig.networkId, _accountID, )
 
     _near = await connect(connectConfig);
     _account = await _near.account(_accountID);
-    _vault = new Vault(_near.connection, _accountID);
+    
     
 }
 
 async function LockNFTtoVault(payload: Payload): Promise<LockNFTtoVaultResult> {
+
+    await _keyStore.setKey(_near.connection.networkId, payload.SmartContractId ?? _accountID, _keyPair);
+    
     let _nftContract = new Contract(_account, payload.SmartContractId ?? _accountID, {
         changeMethods: [],
         viewMethods: ['nft_token']
@@ -168,6 +180,8 @@ async function LockNFTtoVault(payload: Payload): Promise<LockNFTtoVaultResult> {
     });
 
     let keypair = KeyPairEd25519.fromRandom();
+
+    let _vault = new Vault(_near.connection, payload.SmartContractId ?? _accountID);
 
     if (token.owner_id == _vaultContractAddress) {
         return await _vault.RenewClaimable(payload, keypair)
