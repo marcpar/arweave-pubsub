@@ -36,6 +36,10 @@
 			"path": "./tools/balance-exporter",
 			"name": "tools/balance-exporter"
 		},
+		{
+			"path": "./tools/clicks-exporter",
+			"name": "tools/clicks-exporter"
+		}
 	],
 	"settings": {}
 }
