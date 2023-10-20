@@ -2,22 +2,24 @@ const net = require('net');
 const koa = require('koa');
 const axios = require('axios');
 
-const ACTIVITY_REPORT_URL = process.env.ACTIVITY_REPORT_URL ?? 'https://testminter.azurewebsites.net/claim-activity';
+const ACTIVITY_REPORT_URL = process.env.ACTIVITY_REPORT_URL ?? 'https://testminter.azurewebsites.net';
 const GRAPHITE_HOST = process.env.GRAPHITE_HOST ?? 'localhost';
 const GRAPHITE_PORT = process.env.GRAPHITE_PORT ?? 2003;
 const SERVER_PORT = process.env.SERVER_PORT ?? 3000;
 
 let app = new koa();
 
-app.use(async (ctx) => {
+app.use((ctx) => {
     let url = ctx.request.url.substring(1);
-    let res = await axios.get(`${ACTIVITY_REPORT_URL}/${url}`);
-    if (res.status === 200) {
-        let urlSplit = url.split('/');
-        await writeMetrics(GRAPHITE_HOST, GRAPHITE_PORT, `claim-activity.count.${urlSplit[0]}.${urlSplit[1]}`, 1)
-        ctx.res.statusCode = 200;
-    }
 
+    ctx.res.statusCode = 200;
+    (async () => {
+        let res = await axios.get(`${ACTIVITY_REPORT_URL}/${url}`);
+        if (res.status === 200) {
+            await writeMetrics(GRAPHITE_HOST, GRAPHITE_PORT, `podium-labs.${url.replace("/", ".")}`, 1)
+
+        }
+    })();
 });
 
 app.listen(SERVER_PORT);
